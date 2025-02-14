@@ -41,4 +41,8 @@ writer.NewLine = "\n";
 	}
 }
 ```
-This will be the base line and with 10M rows (~1GB).
+This will be the base line with 10M rows (~950MB) for further improvements.
+
+|                      |Duration |
+|----------------------|---------|
+|StreamWriter.WriteLine|00:30:288|
