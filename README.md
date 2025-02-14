@@ -23,3 +23,22 @@ After the news of this challenge spread many people built their own solutions us
 - Line endings in the file are `\n` characters on all platforms.
 - Implementations must not rely on specifics of a given data set, e.g. any valid station name as per the constraints above and any data distribution (number of measurements per station) must be supported.
 - The rounding of output values must be done using the semantics of IEEE 754 rounding-direction "roundTowardPositive".
+
+## Setup
+Old notebook - specs later
+
+## File generation
+The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code first and test it with a smaller amount of rows.
+
+The first version uses a simple StreamWriter which writes one random line at a time.
+```csharp
+using (var writer = new StreamWriter(filePath, false, Encoding.UTF8)) {
+writer.NewLine = "\n";
+
+	for (var i = 0; i < rowCount; i++) {
+		var line = GetLine(names);
+		writer.WriteLine(line);
+	}
+}
+```
+This will be the base line and with 10M rows (~1GB).

@@ -4,32 +4,28 @@ using System.Text;
 
 namespace _1BRC.ConsoleRunner {
 	internal class MeasurementsGenerator {
+		private const int MaxNameCount = 10000;
 		private static readonly Random _random = new Random();
 
-		public static void CreateFile(string filePath, int rowCount, Action<int> progressCallback) {
-			const int maxNameCount = 10000;
-			const string newLine = "\n";
-			const string separator = ";";
+		public static void CreateFile(string filePath, int rowCount) {
+			var names = CreateRandomNames();
 
-			var validNameBytes = GetValidBytesForName();
-			var names = new string[maxNameCount];
-			for (var i = 0; i < maxNameCount; i++) {
-				var nameBytes = GetRandomNameBytes(validNameBytes);
-				names[i] = Encoding.UTF8.GetString(nameBytes);
-			}
+			using (var writer = new StreamWriter(filePath, false, Encoding.UTF8)) {
+				writer.NewLine = "\n";
 
-			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate)) {
-				using (var writer = new StreamWriter(stream, Encoding.UTF8)) {
-					writer.NewLine = newLine;
-
-					for (var i = 0; i < rowCount; i++) {
-						var name = names[_random.Next(maxNameCount)];
-						var temperature = GetRandomTemperature();
-						writer.WriteLine(string.Concat(name, separator, temperature));
-						progressCallback(i);
-					}
+				for (var i = 0; i < rowCount; i++) {
+					var line = GetLine(names);
+					writer.WriteLine(line);
 				}
 			}
+		}
+
+		private static string GetLine(string[] names) {
+			const string separator = ";";
+
+			var name = GetRandomName(names);
+			var temperature = GetRandomTemperature();
+			return string.Concat(name, separator, temperature);
 		}
 
 		private static double GetRandomTemperature() {
@@ -42,6 +38,19 @@ namespace _1BRC.ConsoleRunner {
 			const int digits = 1;
 
 			return Math.Round(_random.Next(randomMinIncluded, randomMaxExcluded) / divider - subtractedValue, digits);
+		}
+
+		private static string GetRandomName(string[] names) => names[_random.Next(MaxNameCount)];
+
+		private static string[] CreateRandomNames() {
+			var validNameBytes = GetValidBytesForName();
+			var names = new string[MaxNameCount];
+			for (var i = 0; i < MaxNameCount; i++) {
+				var nameBytes = GetRandomNameBytes(validNameBytes);
+				names[i] = Encoding.UTF8.GetString(nameBytes);
+			}
+
+			return names;
 		}
 
 		private static byte[] GetRandomNameBytes(byte[] validNameBytes) {
