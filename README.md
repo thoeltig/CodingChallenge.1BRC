@@ -43,6 +43,7 @@ writer.NewLine = "\n";
 ```
 This will be the base line with 10M rows (~950MB) for further improvements.
 
-|                      |Duration |
-|----------------------|---------|
-|StreamWriter.WriteLine|00:30:288|
+|                                | Duration  |(new-old)/old*100% | Commit |
+|--------------------------------|-----------|-------------------|--------|
+| StreamWriter.WriteLine(string) | 00:30:288 |        0,00%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
+| FileStream.Write(byte array)   | 00:23:201 |      -30,54%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
