@@ -3,25 +3,26 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace _1BRC.ConsoleRunner {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
-		private static readonly Random _random = new Random();
 
 		public static void CreateFile(string filePath, int rowCount) {
 			var names = CreateRandomNames();
 
-			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write)) {
+			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)) {
 				stream.SetLength(0);
 
-				const int rowBuffer = 1024;
+				const int rowBuffer = 1000;
 				var lines = new byte[rowBuffer][];
-				for (var i = 0; i < rowCount;) {
-					for (var j = 0; j < rowBuffer && i < rowCount; j++, i++) {
+				for (var i = 0; i < rowCount; i += rowBuffer) {
+					Parallel.For(0, rowBuffer, j => {
 						lines[j] = GetLine(names);
-					}
-
+					});
+					
 					var array = lines.SelectMany(x => x).ToArray();
 					stream.Write(array, 0, array.Length);
 				}
@@ -32,8 +33,9 @@ namespace _1BRC.ConsoleRunner {
 			const byte separator = 59; // ;
 			const byte newLine = 10; // \n
 
-			var name = GetRandomName(names);
+			var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
 			var temperature = GetRandomTemperature();
+
 			var result = new byte[name.Length + temperature.Length + 2];
 			Array.Copy(name, 0, result, 0, name.Length);
 			result[name.Length] = separator;
@@ -51,37 +53,32 @@ namespace _1BRC.ConsoleRunner {
 			const double subtractedValue = 100;
 			const int digits = 1;
 
-			var randomValue = _random.Next(randomMinIncluded, randomMaxExcluded);
+			var randomValue = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 			var temperature = Math.Round(randomValue / divider - subtractedValue, digits);
 			return Encoding.UTF8.GetBytes(temperature.ToString(CultureInfo.InvariantCulture));
 		}
 
-		private static byte[] GetRandomName(byte[][] names) => names[_random.Next(MaxNameCount)];
-
 		private static byte[][] CreateRandomNames() {
 			var validNameBytes = GetValidBytesForName();
 			var names = new byte[MaxNameCount][];
-			for (var i = 0; i < MaxNameCount; i++) {
-				names[i] = GetRandomNameBytes(validNameBytes);
-			}
+
+			Parallel.For(0, MaxNameCount, i => {
+				const int randomMinIncluded = 1; // Name needs at least 1 character
+				const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
+
+				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
+				var nameBytes = new byte[nameLength];
+				var idxMax = validNameBytes.Length;
+
+				for (var j = 0; j < nameLength; j++) {
+					var idx = ThreadSafeRandom.Instance.Next(idxMax);
+					nameBytes[j] = validNameBytes[idx];
+				}
+
+				names[i] = nameBytes;
+			});
 
 			return names;
-		}
-
-		private static byte[] GetRandomNameBytes(byte[] validNameBytes) {
-			const int randomMinIncluded = 1; // Name needs at least 1 character
-			const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
-
-			var nameLength = _random.Next(randomMinIncluded, randomMaxExcluded);
-			var nameBytes = new byte[nameLength];
-			var idxMax = validNameBytes.Length;
-
-			for (var i = 0; i < nameLength; i++) {
-				var idx = _random.Next(idxMax);
-				nameBytes[i] = validNameBytes[idx];
-			}
-
-			return nameBytes;
 		}
 
 		private static byte[] GetValidBytesForName() {
@@ -93,7 +90,7 @@ namespace _1BRC.ConsoleRunner {
 
 			var array = new byte[arraySize];
 			for (var i = 0; i < arraySize; i++) {
-				var nextByte = (byte)_random.Next(randomMaxExcluded);
+				var nextByte = (byte)ThreadSafeRandom.Instance.Next(randomMaxExcluded);
 				if (nextByte == firstIgnoreValue || nextByte == secondIgnoreValue || nextByte == thirdIgnoreValue) {
 					i--;
 				} else {
@@ -102,6 +99,20 @@ namespace _1BRC.ConsoleRunner {
 			}
 
 			return array;
+		}
+
+		private static class ThreadSafeRandom {
+			private static readonly Random _globalRandom = new Random();
+			private static readonly object _globalLock = new object();
+			private static readonly ThreadLocal<Random> _threadRandom = new ThreadLocal<Random>(NewRandom);
+
+			public static Random Instance => _threadRandom.Value;
+
+			private static Random NewRandom() {
+				lock (_globalLock) {
+					return new Random(_globalRandom.Next());
+				}
+			}
 		}
 	}
 }
