@@ -41,11 +41,11 @@ writer.NewLine = "\n";
 	}
 }
 ```
-This will be the base line with 10M rows (~550MB) for further improvements.
+This will be the base line with **10M rows (~550MB)** for further improvements.
 
 |                                             | Duration  |(new-old)/old*100% | Commit |
 |---------------------------------------------|-----------|-------------------|--------|
-| StreamWriter.WriteLine(line as string)      | 00:30:288 |        0,00%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
+| StreamWriter.WriteLine(line as string)      | 00:30:288 | base line	      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
 | FileStream.Write(line as byte array)        | 00:23:201 |      -23,40%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
 | FileStream.Write + 10 lines as byte array   | 00:21:569 |      -28,79%      ||
 | FileStream.Write + 100 lines as byte array  | 00:18:716 |      -38,21%      ||
@@ -61,18 +61,42 @@ After a bit of refactoring I was ready to run a test with a couple of combinatio
 
 | Buffer size + line count					  | Duration  |(new-old)/old*100% |
 |---------------------------------------------|-----------|-------------------|
-| 4096 + 500 								  | 00:00:000 |        0,00%      |
-| 4096 + 1000 								  | 00:00:000 |        0,00%      |
-| 4096 + 2000 								  | 00:00:000 |        0,00%      |
-| 8192 + 500 								  | 00:00:000 |        0,00%      |
-| 8192 + 1000 								  | 00:00:000 |        0,00%      |
-| 8192 + 2000 								  | 00:00:000 |        0,00%      |
-| 16384 + 500  								  | 00:00:000 |        0,00%      |
-| 16384 + 1000 								  | 00:00:000 |        0,00%      |
-| 16384 + 2000 								  | 00:00:000 |        0,00%      |
-| 32768 + 500  								  | 00:00:000 |        0,00%      |
-| 32768 + 1000 								  | 00:00:000 |        0,00%      |
-| 32768 + 2000 								  | 00:00:000 |        0,00%      |
-| 65536 + 500  								  | 00:00:000 |        0,00%      |
-| 65536 + 1000 								  | 00:00:000 |        0,00%      |
-| 65536 + 2000 								  | 00:00:000 |        0,00%      |
+| 4096  + 500 								  | 00:16:416 | base line      	  |
+| 8192  + 500 								  | 00:16:272 |       -0,88%      |
+| 16384 + 500  								  | 00:16:393 |       -0,14%      |
+| 32768 + 500  								  | 00:16:016 |       -2,44%      |
+| 65536 + 500  								  | 00:15:910 |       -3,08%      |
+| 4096  + 1000 								  | 00:15:147 |       -7,73%      |
+| 8192  + 1000 								  | 00:14:997 |       -8,64%      |
+| 16384 + 1000 								  | 00:15:019 |       -8,51%      |
+| 32768 + 1000 								  | 00:15:204 |       -7,38%      |
+| 65536 + 1000 								  | 00:15:001 |       -8,62%      |
+| 4096  + 2000 								  | 00:14:444 |      -12,01%      |
+| 8192  + 2000 								  | 00:14:523 |      -11,53%      |
+| 16384 + 2000 								  | 00:14:456 |      -11,94%      |
+| 32768 + 2000 								  | 00:14:493 |      -11,71%      |
+| 65536 + 2000 								  | 00:14:347 |      -12,60%      |
+| 4096  + 4000  							  | 00:14:011 |      -14,65%      |
+| 8192  + 4000  							  | 00:13:696 |      -16,57%      |
+| 16384 + 4000  							  | 00:13:659 |      -16,79%      |
+| **32768 + 4000**  						  |**00:13:616**|  **-17,06%**    |
+| 65536 + 4000  							  | 00:13:862 |      -15,56%      |
+| 4096  + 5000  							  | 00:14:084 |      -14,21%      |
+| 8192  + 5000  							  | 00:13:848 |      -15,64%      |
+| 16384 + 5000  							  | 00:13:825 |      -15,78%      |
+| 32768 + 5000  							  | 00:14:133 |      -13,91%      |
+| 65536 + 5000  							  | 00:13:906 |      -15,29%      |
+| 4096  + 8000  							  | 00:14:107 |      -14,06%      |
+| 8192  + 8000  							  | 00:14:133 |      -13,91%      |
+| 16384 + 8000  							  | 00:14:148 |      -13,82%      |
+| 32768 + 8000  							  | 00:14:064 |      -14,33%      |
+| 65536 + 8000  							  | 00:14:213 |      -13,42%      |
+| 4096  + 10000  							  | 00:14:805 |       -9,81%      |
+| 8192  + 10000  							  | 00:14:855 |       -9,51%      |
+| 16384 + 10000  							  | 00:14:991 |       -8,68%      |
+| 32768 + 10000  							  | 00:14:906 |       -9,20%      |
+| 65536 + 10000  							  | 00:14:901 |       -9,23%      |
+
+First of all I noticed that I screwed up the time measurements in the test before because the file delete was inside the time tracking code. This is not a big adjustment but it changed the measured time slightly and that is why the whole default buffer sizes needs to be tested again with the different line count.
+This took a while to write down but now it is clear that generating 4000 lines in parallel and writing them to file with a file buffer size of 32768 has the best performance (these values will differ depending on the hardware).
+The problem with this result is that it is only an approximation to the correct combination because the lines have a random sizes from 3 to 106 bytes which will result in 12000 to 424000 bytes writen to the file with a buffer of 32768. This is not optimal but the best I can do with the provided data limitations.

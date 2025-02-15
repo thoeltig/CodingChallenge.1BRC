@@ -101,15 +101,15 @@ namespace _1BRC.ConsoleRunner {
 		}
 
 		private static class ThreadSafeRandom {
-			private static readonly Random _globalRandom = new Random();
-			private static readonly object _globalLock = new object();
+			private static readonly Random _random = new Random();
+			private static readonly object _lock = new object();
 			private static readonly ThreadLocal<Random> _threadRandom = new ThreadLocal<Random>(NewRandom);
 
 			public static Random Instance => _threadRandom.Value;
 
 			private static Random NewRandom() {
-				lock (_globalLock) {
-					return new Random(_globalRandom.Next());
+				lock (_lock) {
+					return new Random(_random.Next());
 				}
 			}
 		}

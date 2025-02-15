@@ -6,6 +6,8 @@ using System.Linq;
 namespace _1BRC.ConsoleRunner {
 	internal class Program {
 		private const int RowSize = 10000000;
+		private const int RowBufferSize = 4000;
+		private const int FileBufferSize = 32768;
 		private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
@@ -14,23 +16,19 @@ namespace _1BRC.ConsoleRunner {
 			var sw = new Stopwatch();
 
 			Console.WriteLine($"Generating {RowSize:N0} rows");
-            Console.WriteLine();
+			Console.WriteLine();
 
-			foreach (var fileBufferSize in new[] { 4096, 8192, 16384, 32768, 65536 }) {
-				foreach (var rowBufferSize in new[] { 500, 1000, 2000}) {
-                    File.Delete(FileName);
+			File.Delete(FileName);
 
-			        Console.WriteLine($"File writer buffer size {fileBufferSize} and row buffer size {rowBufferSize}");
+			Console.WriteLine($"File writer buffer size {FileBufferSize} and row buffer size {RowBufferSize}");
 
-					for (var i = 0; i < count; i++) {
-						times[i] = CreateFile(sw, rowBufferSize, fileBufferSize);
-					}
-
-					var avg = new TimeSpan(times.Sum(x => x.Ticks) / count);
-					Console.WriteLine($"Avg: {avg:mm':'ss':'fff}");
-                    Console.WriteLine();
-				}	
+			for (var i = 0; i < count; i++) {
+				times[i] = CreateFile(sw, RowBufferSize, FileBufferSize);
 			}
+
+			var avg = new TimeSpan(times.Sum(x => x.Ticks) / count);
+			Console.WriteLine($"Avg: {avg:mm':'ss':'fff}");
+			Console.WriteLine();
 
 			Console.ReadKey();
 		}
