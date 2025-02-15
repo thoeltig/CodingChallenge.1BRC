@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace _1BRC.ConsoleRunner {
@@ -14,9 +15,15 @@ namespace _1BRC.ConsoleRunner {
 			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write)) {
 				stream.SetLength(0);
 
-				for (var i = 0; i < rowCount; i++) {
-					var line = GetLine(names);
-					stream.Write(line, 0, line.Length);
+				const int rowBuffer = 1024;
+				var lines = new byte[rowBuffer][];
+				for (var i = 0; i < rowCount;) {
+					for (var j = 0; j < rowBuffer && i < rowCount; j++, i++) {
+						lines[j] = GetLine(names);
+					}
+
+					var array = lines.SelectMany(x => x).ToArray();
+					stream.Write(array, 0, array.Length);
 				}
 			}
 		}
@@ -30,8 +37,8 @@ namespace _1BRC.ConsoleRunner {
 			var result = new byte[name.Length + temperature.Length + 2];
 			Array.Copy(name, 0, result, 0, name.Length);
 			result[name.Length] = separator;
-			Array.Copy(temperature, 0, result, name.Length+1, temperature.Length);
-			result[result.Length-1] = newLine;
+			Array.Copy(temperature, 0, result, name.Length + 1, temperature.Length);
+			result[result.Length - 1] = newLine;
 			return result;
 		}
 
@@ -44,7 +51,9 @@ namespace _1BRC.ConsoleRunner {
 			const double subtractedValue = 100;
 			const int digits = 1;
 
-			return Encoding.UTF8.GetBytes(Math.Round(_random.Next(randomMinIncluded, randomMaxExcluded) / divider - subtractedValue, digits).ToString(CultureInfo.InvariantCulture));
+			var randomValue = _random.Next(randomMinIncluded, randomMaxExcluded);
+			var temperature = Math.Round(randomValue / divider - subtractedValue, digits);
+			return Encoding.UTF8.GetBytes(temperature.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static byte[] GetRandomName(byte[][] names) => names[_random.Next(MaxNameCount)];
@@ -53,8 +62,7 @@ namespace _1BRC.ConsoleRunner {
 			var validNameBytes = GetValidBytesForName();
 			var names = new byte[MaxNameCount][];
 			for (var i = 0; i < MaxNameCount; i++) {
-				var nameBytes = GetRandomNameBytes(validNameBytes);
-				names[i] = nameBytes;
+				names[i] = GetRandomNameBytes(validNameBytes);
 			}
 
 			return names;

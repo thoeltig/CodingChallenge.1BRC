@@ -43,7 +43,18 @@ writer.NewLine = "\n";
 ```
 This will be the base line with 10M rows (~950MB) for further improvements.
 
-|                                | Duration  |(new-old)/old*100% | Commit |
-|--------------------------------|-----------|-------------------|--------|
-| StreamWriter.WriteLine(string) | 00:30:288 |        0,00%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
-| FileStream.Write(byte array)   | 00:23:201 |      -30,54%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
+|                                             | Duration  |(new-old)/old*100% | Commit |
+|---------------------------------------------|-----------|-------------------|--------|
+| StreamWriter.WriteLine(line as string)      | 00:30:288 |        0,00%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
+| FileStream.Write(line as byte array)        | 00:23:201 |      -23,40%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
+| FileStream.Write + 10 lines as byte array   | 00:21:569 |      -28,79%      | [Link] ()|
+| FileStream.Write + 100 lines as byte array  | 00:18:716 |      -38,21%      | [Link] ()|
+| FileStream.Write + 1k lines as byte array   | 00:16:937 |      -44,08%      | [Link] ()|
+| FileStream.Write + 1024 lines as byte array | 00:16:672 |      -44,95%      | [Link] ()|
+| FileStream.Write + 2k lines as byte array   | 00:17:426 |      -42,26%      | [Link] ()|
+| FileStream.Write + 2.5k lines as byte array | 00:18:244 |      -39,76%      | [Link] ()|
+
+From the results it is clear that writing a byte array of multiple lines to the FileStream has the best performance. 1024 lines with random line length seems to have a slightly faster performance but might only be on my device and the optimal number will vary from one device to the next depending on the IO bottleneck.
+
+Next up would be profiling and maybe parallel execution but after checking the resource monitor I noticed that IO utilization is close to the maximum through out the file generation. So I will only test if running the random name generation and creation of the lines in parallel will provide a beneifit.
+
