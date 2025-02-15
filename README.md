@@ -53,6 +53,26 @@ This will be the base line with 10M rows (~550MB) for further improvements.
 | FileStream.Write + 2k lines as byte array   | 00:17:426 |      -42,26%      ||
 | FileStream.Write + 2.5k lines as byte array | 00:18:244 |      -39,76%      ||
 
-From the results it is clear that writing a byte array of multiple lines to the FileStream has the best performance. 1000 lines with random line length seems to have a slightly faster performance but might only be on my device and the optimal number will vary from one device to the next depending on the IO bottleneck.
-After a bit of CPU and IO monitoring I noticed that IO utilization is close to the maximum through out the file generation process. Generating the random names and final lines in parallel didn't really make any difference but maybe it will be more obvious if a greater row size.
+From the results it is clear that writing a byte array of multiple lines to the FileStream has the best performance. 1000 lines with random line length seems to have a slightly faster performance but might only be on my device and the optimal number will vary from one device to the next depending on the IO bottleneck and the used buffer size.
+- The buffer size of the FileStream can also be adjusted. The default is 4096 and increasing it might help. 
+- FileStream doesn't support parallel file writes but the random names and final lines can be generated in parallel.
 
+After a bit of refactoring I was ready to run a test with a couple of combinations:
+
+| Buffer size + line count					  | Duration  |(new-old)/old*100% |
+|---------------------------------------------|-----------|-------------------|
+| 4096 + 500 								  | 00:00:000 |        0,00%      |
+| 4096 + 1000 								  | 00:00:000 |        0,00%      |
+| 4096 + 2000 								  | 00:00:000 |        0,00%      |
+| 8192 + 500 								  | 00:00:000 |        0,00%      |
+| 8192 + 1000 								  | 00:00:000 |        0,00%      |
+| 8192 + 2000 								  | 00:00:000 |        0,00%      |
+| 16384 + 500  								  | 00:00:000 |        0,00%      |
+| 16384 + 1000 								  | 00:00:000 |        0,00%      |
+| 16384 + 2000 								  | 00:00:000 |        0,00%      |
+| 32768 + 500  								  | 00:00:000 |        0,00%      |
+| 32768 + 1000 								  | 00:00:000 |        0,00%      |
+| 32768 + 2000 								  | 00:00:000 |        0,00%      |
+| 65536 + 500  								  | 00:00:000 |        0,00%      |
+| 65536 + 1000 								  | 00:00:000 |        0,00%      |
+| 65536 + 2000 								  | 00:00:000 |        0,00%      |

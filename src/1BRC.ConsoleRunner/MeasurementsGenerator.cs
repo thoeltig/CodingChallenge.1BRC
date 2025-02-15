@@ -10,16 +10,15 @@ namespace _1BRC.ConsoleRunner {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
-		public static void CreateFile(string filePath, int rowCount) {
+		public static void CreateFile(string filePath, int totalRowCount, int rowCreationBufferSize, int fileWriterBufferSize) {
 			var names = CreateRandomNames();
-
-			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)) {
+            
+			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, fileWriterBufferSize)) {
 				stream.SetLength(0);
 
-				const int rowBuffer = 1000;
-				var lines = new byte[rowBuffer][];
-				for (var i = 0; i < rowCount; i += rowBuffer) {
-					Parallel.For(0, rowBuffer, j => {
+				var lines = new byte[rowCreationBufferSize][];
+				for (var i = 0; i < totalRowCount; i += rowCreationBufferSize) {
+					Parallel.For(0, rowCreationBufferSize, j => {
 						lines[j] = GetLine(names);
 					});
 					
