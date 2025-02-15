@@ -49,7 +49,7 @@ This will be the base line with **10M rows (~550MB)** for further improvements.
 | FileStream.Write(line as byte array)        | 00:23:201 |      -23,40%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
 | FileStream.Write + 10 lines as byte array   | 00:21:569 |      -28,79%      ||
 | FileStream.Write + 100 lines as byte array  | 00:18:716 |      -38,21%      ||
-| FileStream.Write + 1k lines as byte array   | 00:16:937 |      -44,08%      | [Link] (https://github.com/thoeltig/CodingChallenge.1BRC/blob/c18ad89905c30196cdde95f5c5f4e0f97c86e32e/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs)|
+| FileStream.Write + 1k lines as byte array   | 00:16:937 |      -44,08%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/c18ad89905c30196cdde95f5c5f4e0f97c86e32e/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs)|
 | FileStream.Write + 2k lines as byte array   | 00:17:426 |      -42,26%      ||
 | FileStream.Write + 2.5k lines as byte array | 00:18:244 |      -39,76%      ||
 
