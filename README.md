@@ -57,11 +57,11 @@ From the results it is clear that writing a byte array of multiple lines to the 
 - The buffer size of the FileStream can also be adjusted. The default is 4096 and increasing it might help. 
 - FileStream doesn't support parallel file writes but the random names and final lines can be generated in parallel.
 
-After a bit of refactoring I was ready to run a test with a couple of combinations:
+After a bit of [refactoring](https://github.com/thoeltig/CodingChallenge.1BRC/blob/2ba8b8ee1a633fadb83977bb10ce99e2bd691250/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) I was ready to run a test with a couple of combinations:
 
 | Buffer size + line count					  | Duration  |(new-old)/old*100% |
 |---------------------------------------------|-----------|-------------------|
-| 4096  + 500 								  | 00:16:416 | base line      	  |
+| 4096  + 500 								  | 00:16:416 | new base line  	  |
 | 8192  + 500 								  | 00:16:272 |       -0,88%      |
 | 16384 + 500  								  | 00:16:393 |       -0,14%      |
 | 32768 + 500  								  | 00:16:016 |       -2,44%      |
@@ -97,6 +97,10 @@ After a bit of refactoring I was ready to run a test with a couple of combinatio
 | 32768 + 10000  							  | 00:14:906 |       -9,20%      |
 | 65536 + 10000  							  | 00:14:901 |       -9,23%      |
 
-First of all I noticed that I screwed up the time measurements in the test before because the file delete was inside the time tracking code. This is not a big adjustment but it changed the measured time slightly and that is why the whole default buffer sizes needs to be tested again with the different line count.
-This took a while to write down but now it is clear that generating 4000 lines in parallel and writing them to file with a file buffer size of 32768 has the best performance (these values will differ depending on the hardware).
-The problem with this result is that it is only an approximation to the correct combination because the lines have a random sizes from 3 to 106 bytes which will result in 12000 to 424000 bytes writen to the file with a buffer of 32768. This is not optimal but the best I can do with the provided data limitations.
+Test result:
+- First of all I noticed that I screwed up the time measurements in the test before because the file delete was inside the time tracking code. This is not a big adjustment but it changed the measured time slightly and that is why the whole default buffer sizes needs to be tested again with the different line count.
+- This took a while to write down but now it is clear that generating 4000 lines in parallel and writing them to file with a file buffer size of 32768 has the best performance (these values will differ depending on the hardware).
+- The problem with this result is that it is only an approximation to the correct combination because the lines have a random sizes from 3 to 106 bytes which will result in 12000 to 424000 bytes written to the file with a buffer of 32768. This is not really optimal but the best result which can be archieved with this version.
+
+
+**It took 23:13:214 to generate the final measurements file with 1B rows.**
