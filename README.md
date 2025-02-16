@@ -7,7 +7,7 @@ After the news of this challenge spread many people built their own solutions us
 
 1. Generate the measurements file with 1B rows (just once).
 	- **Attention:** This will take a few minutes and the generated file has a size of approx. **12 GB**, so make sure to have enough diskspace.
-2. Calculate the average measurement values from the measurements file.
+2. Calculate the min, max & average values from the measurements file.
 	- Measure the time needed for reading the file and calculating the average. Output of the result values is not part of the challenge. 
 3. Optimize the heck out of it to speed up your code!
 
@@ -27,7 +27,122 @@ After the news of this challenge spread many people built their own solutions us
 ## Setup
 Old notebook - specs later
 
-## File generation
+## Writing & reading the measurements file
+
+### Writing
+There are a couple of classes & methods that could be used to write the data to a file:
+- _File.CreateText_ & _FileInfo.CreateText_ will both create a file and return a _StreamWriter_ to write to it.
+- _File.Create_ will also create a file and return a _FileWriter_ to write to it.
+	- The stream buffer size can be overwritten (default 4096).
+- Alternatively _StreamWriter_ & _FileStream_ can be created directly to write to the file.
+	- _StreamWriter_ supports writing a string, a char array or a byte array.
+	- _FileStream_ supports only a byte array.
+	- Both allow an overwrite of the default stream buffer size of 4096.
+
+The test case will be writing 10000000 bytes to a file:
+- as a single string
+- as a char array
+- as a byte array
+- the privious three in multiple blocks of size
+	- 4096
+	- 8192
+	- 16384
+	- 32768
+	- 65536
+- also if possible the buffer size is set for each test with buffer sizes
+	- 4096
+	- 8192
+	- 16384
+	- 32768
+	- 65536
+- the elapsed time is the average of 12 tests as the fractional portion of a second
+
+Abbreviations:
+- File.CT = File.CreateText
+- File.C = File.Create
+- SW = StreamWriter
+- FS = FileStream
+
+|											|string		|%			|char array	|%		|
+|-------------------------------------------|-----------|-----------|-----------|-------|
+|File.CT + SW + 1 Write						|1293107	|base line	|1293548	|0.0%	|
+|File.CT + SW + 2442 Writes (Block 4096)	|1221823	|0.0%		|1121599	|0.0%	|
+|File.CT + SW + 1221 Writes (Block 8192)	|1202446	|0.0%		|1114435	|0.0%	|
+|File.CT + SW + 611 Writes (Block 16384)	|1250209	|0.0%		|1178940	|0.0%	|
+|File.CT + SW + 306 Writes (Block 32768)	|1256339	|0.0%		|1153100	|0.0%	|
+|File.CT + SW + 153 Writes (Block 65536)	|1217394	|0.0%		|1170953	|0.0%	|
+|FileInfo + SW + 1 Write					|1219227	|0.0%		|1182180	|0.0%	|
+|FileInfo + SW + 2442 Writes (Block 4096)	|1320695	|0.0%		|1116693	|0.0%	|
+|FileInfo + SW + 1221 Writes (Block 8192)	|1284690	|0.0%		|1158506	|0.0%	|
+|FileInfo + SW + 611 Writes (Block 16384)	|1238602	|0.0%		|1124409	|0.0%	|
+|FileInfo + SW + 306 Writes (Block 32768)	|1225385	|0.0%		|1127841	|0.0%	|
+|FileInfo + SW + 153 Writes (Block 65536)	|1205389	|0.0%		|1200050	|0.0%	|
+|SW + Buffer 4096 +1 Write					|1229701	|0.0%		|1236782	|0.0%	|
+|SW + Buffer 4096 + 2442 Writes (Block 4096)|1224911	|0.0%		|1123864	|0.0%	|
+|SW + Buffer 4096 + 1221 Writes (Block 8192)|1246995	|0.0%		|1111940	|0.0%	|
+|SW + Buffer 4096 + 611 Writes (Block 16384)|1225226	|0.0%		|1136849	|0.0%	|
+|SW + Buffer 4096 + 306 Writes (Block 32768)|1334478	|0.0%		|1185733	|0.0%	|
+|SW + Buffer 4096 + 153 Writes (Block 65536)|1289893	|0.0%		|1329354	|0.0%	|
+**INFO: StreamWriter only used with default buffer size of 4096 in all tests**
+
+|														|byte array	|%		|
+|-------------------------------------------------------|-----------|-------|
+|File.C + FS (Buffer 4096) + 2442 Writes (Block 4096) 	|0231060	|0.0%	|
+|File.C + FS (Buffer 4096) + 1221 Writes (Block 8192) 	|0114511	|0.0%	|
+|File.C + FS (Buffer 4096) + 611 Writes (Block 16384) 	|0078872	|0.0%	|
+|File.C + FS (Buffer 4096) + 306 Writes (Block 32768) 	|0073255	|0.0%	|
+|File.C + FS (Buffer 4096) + 153 Writes (Block 65536) 	|0065392	|0.0%	|
+|File.C + FS (Buffer 8192) + 2442 Writes (Block 4096) 	|0116835	|0.0%	|
+|File.C + FS (Buffer 8192) + 1221 Writes (Block 8192) 	|0102979	|0.0%	|
+|File.C + FS (Buffer 8192) + 611 Writes (Block 16384) 	|0072384	|0.0%	|
+|File.C + FS (Buffer 8192) + 306 Writes (Block 32768) 	|0069706	|0.0%	|
+|File.C + FS (Buffer 8192) + 153 Writes (Block 65536) 	|0058480	|0.0%	|
+|File.C + FS (Buffer 16384) + 2442 Writes (Block 4096)	|0078453	|0.0%	|
+|File.C + FS (Buffer 16384) + 1221 Writes (Block 8192)	|0076202	|0.0%	|
+|File.C + FS (Buffer 16384) + 611 Writes (Block 16384)	|0073298	|0.0%	|
+|File.C + FS (Buffer 16384) + 306 Writes (Block 32768)	|0071450	|0.0%	|
+|File.C + FS (Buffer 16384) + 153 Writes (Block 65536)	|0058735	|0.0%	|
+|File.C + FS (Buffer 32768) + 2442 Writes (Block 4096)	|0064887	|0.0%	|
+|File.C + FS (Buffer 32768) + 1221 Writes (Block 8192)	|0063793	|0.0%	|
+|File.C + FS (Buffer 32768) + 611 Writes (Block 16384)	|0062089	|0.0%	|
+|File.C + FS (Buffer 32768) + 306 Writes (Block 32768)	|0066671	|0.0%	|
+|File.C + FS (Buffer 32768) + 153 Writes (Block 65536)	|0052066	|0.0%	|
+|File.C + FS (Buffer 65536) + 2442 Writes (Block 4096)	|0057004	|0.0%	|
+|File.C + FS (Buffer 65536) + 1221 Writes (Block 8192)	|0054716	|0.0%	|
+|File.C + FS (Buffer 65536) + 611 Writes (Block 16384)	|0056519	|0.0%	|
+|File.C + FS (Buffer 65536) + 306 Writes (Block 32768)	|0065918	|0.0%	|
+|File.C + FS (Buffer 65536) + 153 Writes (Block 65536)	|0052638	|0.0%	|
+|Average of the above									|-			|-		|
+|FS (Buffer 4096) + 2442 Writes (Block 4096) 			|0217797	|0.0%	|
+|FS (Buffer 4096) + 1221 Writes (Block 8192) 			|0125412	|0.0%	|
+|FS (Buffer 4096) + 611 Writes (Block 16384) 			|0077692	|0.0%	|
+|FS (Buffer 4096) + 306 Writes (Block 32768) 			|0061831	|0.0%	|
+|FS (Buffer 4096) + 153 Writes (Block 65536) 			|0054321	|0.0%	|
+|FS (Buffer 8192) + 2442 Writes (Block 4096) 			|0118598	|0.0%	|
+|FS (Buffer 8192) + 1221 Writes (Block 8192) 			|0106295	|0.0%	|
+|FS (Buffer 8192) + 611 Writes (Block 16384) 			|0074605	|0.0%	|
+|FS (Buffer 8192) + 306 Writes (Block 32768) 			|0059227	|0.0%	|
+|FS (Buffer 8192) + 153 Writes (Block 65536) 			|0054556	|0.0%	|
+|FS (Buffer 16384) + 2442 Writes (Block 4096)			|0078896	|0.0%	|
+|FS (Buffer 16384) + 1221 Writes (Block 8192)			|0076517	|0.0%	|
+|FS (Buffer 16384) + 611 Writes (Block 16384)			|0069817	|0.0%	|
+|FS (Buffer 16384) + 306 Writes (Block 32768)			|0070845	|0.0%	|
+|FS (Buffer 16384) + 153 Writes (Block 65536)			|0051233	|0.0%	|
+|FS (Buffer 32768) + 2442 Writes (Block 4096)			|0064147	|0.0%	|
+|FS (Buffer 32768) + 1221 Writes (Block 8192)			|0060164	|0.0%	|
+|FS (Buffer 32768) + 611 Writes (Block 16384)			|0063628	|0.0%	|
+|FS (Buffer 32768) + 306 Writes (Block 32768)			|0067186	|0.0%	|
+|FS (Buffer 32768) + 153 Writes (Block 65536)			|0054407	|0.0%	|
+|FS (Buffer 65536) + 2442 Writes (Block 4096)			|0056377	|0.0%	|
+|FS (Buffer 65536) + 1221 Writes (Block 8192)			|0055779	|0.0%	|
+|FS (Buffer 65536) + 611 Writes (Block 16384)			|0053956	|0.0%	|
+|FS (Buffer 65536) + 306 Writes (Block 32768)			|0154740	|0.0%	|
+|FS (Buffer 65536) + 153 Writes (Block 65536)			|0064157	|0.0%	|
+|Average of the above									|-			|0.0%	|
+
+FileStream is clearly faster but finding the correct buffer & block size combinations seems rather tricky.
+
+## File generation V1
 The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code first and test it with a smaller amount of rows.
 
 The first version uses a simple StreamWriter which writes one random line at a time.

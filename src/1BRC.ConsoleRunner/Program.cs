@@ -11,24 +11,25 @@ namespace _1BRC.ConsoleRunner {
 		private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
-			const int count = 5;
-			var times = new TimeSpan[count];
-			var sw = new Stopwatch();
+            FileTests.Write();
+			//const int count = 5;
+			//var times = new TimeSpan[count];
+			//var sw = new Stopwatch();
 
-			Console.WriteLine($"Generating {RowSize:N0} rows");
-			Console.WriteLine();
+			//Console.WriteLine($"Generating {RowSize:N0} rows");
+			//Console.WriteLine();
 
-			File.Delete(FileName);
+			//File.Delete(FileName);
 
-			Console.WriteLine($"File writer buffer size {FileBufferSize} and row buffer size {RowBufferSize}");
+			//Console.WriteLine($"File writer buffer size {FileBufferSize} and row buffer size {RowBufferSize}");
 
-			for (var i = 0; i < count; i++) {
-				times[i] = CreateFile(sw, RowBufferSize, FileBufferSize);
-			}
+			//for (var i = 0; i < count; i++) {
+			//	times[i] = CreateFile(sw, RowBufferSize, FileBufferSize);
+			//}
 
-			var avg = new TimeSpan(times.Sum(x => x.Ticks) / count);
-			Console.WriteLine($"Avg: {avg:mm':'ss':'fff}");
-			Console.WriteLine();
+			//var avg = new TimeSpan(times.Sum(x => x.Ticks) / count);
+			//Console.WriteLine($"Avg: {avg:mm':'ss':'fff}");
+			//Console.WriteLine();
 
 			Console.ReadKey();
 		}
