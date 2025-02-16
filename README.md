@@ -83,6 +83,7 @@ Abbreviations:
 |SW + Buffer 4096 + 611 Writes (Block 16384)|1225226	|0.0%		|1136849	|0.0%	|
 |SW + Buffer 4096 + 306 Writes (Block 32768)|1334478	|0.0%		|1185733	|0.0%	|
 |SW + Buffer 4096 + 153 Writes (Block 65536)|1289893	|0.0%		|1329354	|0.0%	|
+
 **INFO: StreamWriter only used with default buffer size of 4096 in all tests**
 
 |														|byte array	|%		|

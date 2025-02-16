@@ -1,23 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace _1BRC.ConsoleRunner {
 	internal static class FileTests {
 		private const int TestRunCount = 12;
-		private const int FileSizeToWrite = 10000000;
+		private const int FileSizeToWrite = 15000000;
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
 
 		private static readonly int[] _writeSizes = {
 			4096,
-			8192,
-			16384,
-			32768,
-			65536
+			4096*2,
+			4096*2*2,
+			4096*2*2*2,
+			4096*2*2*2*2,
+			4096*2*2*2*2*2,
+			4096*2*2*2*2*2*2,
 		};
 
 		public static void Write() {
@@ -26,201 +26,165 @@ namespace _1BRC.ConsoleRunner {
 				var random = new Random();
 				random.NextBytes(fileContentBytes);
 
-				//File.CreateText
-				var fileContentAsString = Encoding.UTF8.GetString(fileContentBytes);
-				var testName = $"File.CreateText + StreamWriter.Write one giant string (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					using (var stream = File.CreateText(TestFile)) {
-						stream.Write(fileContentAsString);
-					}
-				}, DeleteFile, logWriter);
-
 				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoStrings(writeSize);
-					testName = $"File.CreateText + StreamWriter.Write {list.Count} strings (line length {writeSize})";
-					RunTest(testName, () => {
-						using (var stream = File.CreateText(TestFile)) {
-							foreach (var line in list) {
-								stream.Write(line);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
+					// Write bytes
+					var byteArrays = SplitIntoByteArrays(fileContentBytes, writeSize);
+					var splitCount = byteArrays.Length;
+					logWriter.WriteLine($"Content split into {splitCount} parts with a write size of {writeSize}");
+					WriteMultipleEmptyLines(logWriter);
+					logWriter.WriteLine("Write as byte arrays");
 
-				var charArray = fileContentAsString.ToArray();
-				testName = $"File.CreateText + StreamWriter.Write one giant char array (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					using (var stream = File.CreateText(TestFile)) {
-						stream.Write(charArray);
-					}
-				}, DeleteFile, logWriter);
-
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoCharArrays(writeSize);
-					testName = $"File.CreateText + StreamWriter.Write {list.Count} char arrays (length {writeSize})";
-					RunTest(testName, () => {
-						using (var stream = File.CreateText(TestFile)) {
-							foreach (var line in list) {
-								stream.Write(line);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
-
-				// FileInfo.CreateTexts
-				testName = $"FileInfo.CreateText + StreamWriter.Write one giant string (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					var info = new FileInfo(TestFile);
-					using (var stream = info.CreateText()) {
-						stream.Write(fileContentAsString);
-					}
-				}, DeleteFile, logWriter);
-
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoStrings(writeSize);
-					testName = $"FileInfo.CreateText + StreamWriter.Write {list.Count} strings (line length {writeSize})";
-					RunTest(testName, () => {
-						var info = new FileInfo(TestFile);
-						using (var stream = info.CreateText()) {
-							foreach (var line in list) {
-								stream.Write(line);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
-
-				testName = $"FileInfo.CreateText + StreamWriter.Write one giant char array (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					var info = new FileInfo(TestFile);
-					using (var stream = info.CreateText()) {
-						stream.Write(charArray);
-					}
-				}, DeleteFile, logWriter);
-
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoCharArrays(writeSize);
-					testName = $"FileInfo.CreateText + StreamWriter.Write {list.Count} char arrays (length {writeSize})";
-					RunTest(testName, () => {
-						var info = new FileInfo(TestFile);
-						using (var stream = info.CreateText()) {
-							foreach (var line in list) {
-								stream.Write(line);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
-
-				// StreamWriter
-				testName = $"StreamWriter.Write one giant string (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					using (var stream = new StreamWriter(TestFile)) {
-						stream.Write(fileContentAsString);
-					}
-				}, DeleteFile, logWriter);
-
-				testName = $"StreamWriter.Write one giant char array (length {FileSizeToWrite})";
-				RunTest(testName, () => {
-					using (var stream = new StreamWriter(TestFile)) {
-						stream.Write(charArray);
-					}
-				}, DeleteFile, logWriter);
-
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoStrings(writeSize);
-					testName = $"StreamWriter.Write {list.Count} strings (length {writeSize})";
-					RunTest(testName, () => {
-						using (var stream = new StreamWriter(TestFile)) {
-							foreach (var line in list) {
-								stream.Write(line);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
-
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoCharArrays(writeSize);
-					testName = $"StreamWriter.Write {list.Count} char arrays (length {writeSize})";
-					RunTest(testName, () => {
-						using (var stream = new StreamWriter(TestFile)) {
-							foreach (var line in list) {
-								stream.Write(line, 0, line.Length);
-							}
-						}
-					}, DeleteFile, logWriter);
-				}
-				
-				// File.Create
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoByteArrays(writeSize);
 					foreach (var bufferSize in _writeSizes) {
-						testName = $"File.Create + FileStream.Write with buffer size {bufferSize} a total of {list.Count} byte arrays (length {writeSize})";
-						RunTest(testName, () => {
+						WriteMultipleEmptyLines(logWriter);
+						logWriter.WriteLine($"Set buffer size to {bufferSize}");
+						WriteMultipleEmptyLines(logWriter);
+
+						RunTest("File.Create + FileStream.Write", () => {
 							using (var stream = File.Create(TestFile, bufferSize)) {
-								foreach (var line in list) {
+								foreach (var line in byteArrays) {
 									stream.Write(line, 0, line.Length);
 								}
 							}
-						}, DeleteFile, logWriter);
-					}
-				}
+						}, logWriter);
 
-				// FileStream
-				foreach (var writeSize in _writeSizes) {
-					var list = SplitFileContentIntoByteArrays(writeSize);
-					foreach (var bufferSize in _writeSizes) {
-						testName = $"FileStream.Write with buffer size {bufferSize} a total of {list.Count} byte arrays (length {writeSize})";
-						RunTest(testName, () => {
+						RunTest("FileStream.Write", () => {
 							using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize)) {
-								foreach (var line in list) {
+								foreach (var line in byteArrays) {
 									stream.Write(line, 0, line.Length);
 								}
 							}
-						}, DeleteFile, logWriter);
-					}
-				}
-
-                DeleteFile();
-				return;
-
-				List<string> SplitFileContentIntoStrings(int writeSize) {
-					var list = new List<string>();
-					for (var i = 0; i < FileSizeToWrite; i += writeSize) {
-						list.Add(Encoding.UTF8.GetString(fileContentBytes.Skip(i).Take(writeSize).ToArray()));
+						}, logWriter);
 					}
 
-					return list;
+					// Write chars
+					var charArrays = ConvertToCharArrays(byteArrays);
+
+					WriteMultipleEmptyLines(logWriter);
+					logWriter.WriteLine("Write as char arrays");
+					WriteMultipleEmptyLines(logWriter);
+
+					RunTest("File.CreateText + StreamWriter.Write", () => {
+						using (var stream = File.CreateText(TestFile)) {
+							foreach (var line in charArrays) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
+
+					RunTest("FileInfo.CreateText + StreamWriter.Write", () => {
+						var info = new FileInfo(TestFile);
+						using (var stream = info.CreateText()) {
+							foreach (var line in charArrays) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
+
+					RunTest("StreamWriter.Write", () => {
+						using (var stream = new StreamWriter(TestFile)) {
+							foreach (var line in charArrays) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
+
+					// Write strings
+					var strings = ConvertToStrings(charArrays);
+
+					WriteMultipleEmptyLines(logWriter);
+					logWriter.WriteLine("Write as strings");
+					WriteMultipleEmptyLines(logWriter);
+
+					RunTest("File.CreateText + StreamWriter.Write", () => {
+						using (var stream = File.CreateText(TestFile)) {
+							foreach (var line in strings) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
+
+					RunTest("FileInfo.CreateText + StreamWriter.Write", () => {
+						var info = new FileInfo(TestFile);
+						using (var stream = info.CreateText()) {
+							foreach (var line in strings) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
+
+					RunTest("StreamWriter.Write", () => {
+						using (var stream = new StreamWriter(TestFile)) {
+							foreach (var line in strings) {
+								stream.Write(line);
+							}
+						}
+					}, logWriter);
 				}
+			}
+			
+			DeleteFile();
+			return;
 
-				List<char[]> SplitFileContentIntoCharArrays(int writeSize) {
-					var list = new List<char[]>();
-					for (var i = 0; i < FileSizeToWrite; i += writeSize) {
-						list.Add(fileContentBytes.Skip(i).Take(writeSize).Select(x => (char)x).ToArray());
-					}
-
-					return list;
-				}
-
-				List<byte[]> SplitFileContentIntoByteArrays(int writeSize) {
-					var list = new List<byte[]>();
-					for (var i = 0; i < FileSizeToWrite; i += writeSize) {
-						list.Add(fileContentBytes.Skip(i).Take(writeSize).ToArray());
-					}
-
-					return list;
-				}
-
-				void DeleteFile() => File.Delete(TestFile);
+			void WriteMultipleEmptyLines(StreamWriter logWriter) {
+				logWriter.WriteLine();
+				logWriter.WriteLine();
 			}
 		}
 
-		private static void RunTest(string testName, Action testAction, Action cleanupAction, StreamWriter resultWriter) {
+		private static void DeleteFile() => File.Delete(TestFile);
+
+		private static byte[][] SplitIntoByteArrays(byte[] fileContentAsBytes, int chunkSize) {
+			var contentLength = fileContentAsBytes.Length;
+			var splitCount = (int)Math.Ceiling(contentLength / (double)chunkSize);
+			var output = new byte[splitCount][];
+			for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
+				var copyLength = contentLength - contentIdx;
+				if (copyLength > chunkSize) {
+					copyLength = chunkSize;
+				}
+
+				var array = new byte[copyLength];
+				Array.Copy(fileContentAsBytes, contentIdx, array, 0, copyLength);
+			}
+
+			return output;
+		}
+
+		private static char[][] ConvertToCharArrays(byte[][] input) {
+			var size = input.Length;
+			var output = new char[size][];
+			for (var i = 0; i < size; i++) {
+				var bytes = input[i];
+				var count = bytes.Length;
+				var chars = new char[count];
+				for (var j = 0; j < count; j++) {
+					chars[j] = (char)bytes[j];
+				}
+
+				output[i] = chars;
+			}
+
+			return output;
+		}
+
+		private static string[] ConvertToStrings(char[][] input) {
+			var size = input.Length;
+			var output = new string[size];
+			for (var i = 0; i < size; i++) {
+				output[i] = new string(input[i]);
+			}
+
+			return output;
+		}
+
+		private static void RunTest(string testName, Action testAction, StreamWriter resultWriter) {
 			var sw = new Stopwatch();
 			var times = new TimeSpan[TestRunCount];
 
 			resultWriter.WriteLine($"Test case: {testName}");
 
 			for (var i = 0; i < TestRunCount; i++) {
-				cleanupAction();
+				DeleteFile();
 
 				sw.Restart();
 				testAction();
