@@ -27,121 +27,197 @@ After the news of this challenge spread many people built their own solutions us
 ## Setup
 Old notebook - specs later
 
-## Writing & reading the measurements file
+## Writing & reading a file
+There are a couple of classes that could be used to read & write data to & from a file:
+- _File.Create_ returns a _FileStream_ with a buffer size of 4096 and _FileOptions.None_.
+- _File.CreateText_ & _FileInfo.CreateText_ returns a _StreamWriter_ with a buffer size of 1024 and _FileOptions.SequentialScan_.
+- _File.ReadAllText_ uses a _StreamReader_ with a buffer size of 1024 and _FileOptions.SequentialScan_.
+- _StreamWriter_ & _StreamReader_ are basically an additional buffer with default size 1024 added on top of an internal _FileStream_ with buffer size 4096.
+	- _StreamWriter_ is able to write objects, different value types, strings and char arrays to a file.
+	- Under the hood every input is converted to a string and then again converted to char array. 
+	- These char arrays fill the buffer and if it is full the buffer is converted to a byte array and written to the internal _FileStream_.
+	- _StreamReader_ reads all bytes from a file and converts them to a string.
+- Every way to access a file utilizes a _FileStream_ which can only read & write bytes.
 
-### Writing
-There are a couple of classes & methods that could be used to write the data to a file:
-- _File.CreateText_ & _FileInfo.CreateText_ will both create a file and return a _StreamWriter_ to write to it.
-- _File.Create_ will also create a file and return a _FileWriter_ to write to it.
-	- The stream buffer size can be overwritten (default 4096).
-- Alternatively _StreamWriter_ & _FileStream_ can be created directly to write to the file.
-	- _StreamWriter_ supports writing a string, a char array or a byte array.
-	- _FileStream_ supports only a byte array.
-	- Both allow an overwrite of the default stream buffer size of 4096.
+> [!NOTE]
+> Previously done performance measurements for the other classes can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/c61026cbed6723086e31529bdb0de293816e4264/README.md#writing).
 
-The test case will be writing 10000000 bytes to a file:
-- as a single string
-- as a char array
-- as a byte array
-- the privious three in multiple blocks of size
+Simple explanation of the internal logic of a _FileStream_:
+- Has an internal buffer which holds the bytes. If the buffer is full it is written to the file system cache.
+	- This can be forced by calling _FileStream.Flush_. This is also called when disposing the _FileStream_.
+- The file system writes the data lazily to disk depending on the hard disk write speed.
+- Reading the bytes is similiar. Depending on the access type more or less is cached by the file systen which in turn allows for faster sequential paging through the data or faster access at random positions.
+- Read & write have a couple of options which can be added when calling the methods. For this case the following are interesting:
+	- _FileOptions.None_ will pass no additional access flags to the file system. So it will try to guess the optimal cache size depending on the access pattern.
+	- _FileOptions.RandomAccess_ will cache less because it expects the file to be accessed at random positions by multiple applications.
+	- _FileOptions.SequentialScan_ will cache more because it expects the file to be accessed sequentially by a single application.
+	- _FileOptions.WriteThrough_ will write to file system cache but is flushed to disk without delay.
+	- If _FILE_FLAG_NO_BUFFERING_ is used in combination with _FileOptions.WriteThrough_ the file system cache is ignored and the data is immediately flushed to disk.
+		- This flag has a some of memory alignment requieremesnts and it isn't included in _FileOptions_ but can still be passed down.
+	
+> [!IMPORTANT]
+> Additional informations on the topic:
+> - [Win32.CreateFileA](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)
+> - [Win32.ReadFile](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile)
+> - [Caching behaviour](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#caching-behavior)
+> - [File buffering And _FILE_FLAG_NO_BUFFERING_ requierments](https://learn.microsoft.com/en-us/windows/win32/fileio/file-buffering)
+
+### Test
+The test will use the _FileStream_ to write & read 20000000 bytes to & from a file:
+- Buffer and block sizes
+	- 1024
+	- 2048
 	- 4096
 	- 8192
 	- 16384
 	- 32768
 	- 65536
-- also if possible the buffer size is set for each test with buffer sizes
-	- 4096
-	- 8192
-	- 16384
-	- 32768
-	- 65536
-- the elapsed time is the average of 12 tests as the fractional portion of a second
+	- 131072
+- Access types
+	1. _FileOptions.None_
+	2. _FileOptions.SequentialScan_
+	3. _FileOptions.WriteThrough_
+	4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
+- The elapsed time is the median of 12 tests as the fractional portion of a second.
+	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
 
-Abbreviations:
-- File.CT = File.CreateText
-- File.C = File.Create
-- SW = StreamWriter
-- FS = FileStream
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|	
+|**Write**									|1		|		|2		|		|3		|		|4		|		|
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|
+|Buffer 1024) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|
 
-|											|string		|%			|char array	|%		|
-|-------------------------------------------|-----------|-----------|-----------|-------|
-|File.CT + SW + 1 Write						|1293107	|base line	|1293548	|0.0%	|
-|File.CT + SW + 2442 Writes (Block 4096)	|1221823	|0.0%		|1121599	|0.0%	|
-|File.CT + SW + 1221 Writes (Block 8192)	|1202446	|0.0%		|1114435	|0.0%	|
-|File.CT + SW + 611 Writes (Block 16384)	|1250209	|0.0%		|1178940	|0.0%	|
-|File.CT + SW + 306 Writes (Block 32768)	|1256339	|0.0%		|1153100	|0.0%	|
-|File.CT + SW + 153 Writes (Block 65536)	|1217394	|0.0%		|1170953	|0.0%	|
-|FileInfo + SW + 1 Write					|1219227	|0.0%		|1182180	|0.0%	|
-|FileInfo + SW + 2442 Writes (Block 4096)	|1320695	|0.0%		|1116693	|0.0%	|
-|FileInfo + SW + 1221 Writes (Block 8192)	|1284690	|0.0%		|1158506	|0.0%	|
-|FileInfo + SW + 611 Writes (Block 16384)	|1238602	|0.0%		|1124409	|0.0%	|
-|FileInfo + SW + 306 Writes (Block 32768)	|1225385	|0.0%		|1127841	|0.0%	|
-|FileInfo + SW + 153 Writes (Block 65536)	|1205389	|0.0%		|1200050	|0.0%	|
-|SW + Buffer 4096 +1 Write					|1229701	|0.0%		|1236782	|0.0%	|
-|SW + Buffer 4096 + 2442 Writes (Block 4096)|1224911	|0.0%		|1123864	|0.0%	|
-|SW + Buffer 4096 + 1221 Writes (Block 8192)|1246995	|0.0%		|1111940	|0.0%	|
-|SW + Buffer 4096 + 611 Writes (Block 16384)|1225226	|0.0%		|1136849	|0.0%	|
-|SW + Buffer 4096 + 306 Writes (Block 32768)|1334478	|0.0%		|1185733	|0.0%	|
-|SW + Buffer 4096 + 153 Writes (Block 65536)|1289893	|0.0%		|1329354	|0.0%	|
-
-**INFO: StreamWriter only used with default buffer size of 4096 in all tests**
-
-|														|byte array	|%		|
-|-------------------------------------------------------|-----------|-------|
-|File.C + FS (Buffer 4096) + 2442 Writes (Block 4096) 	|0231060	|0.0%	|
-|File.C + FS (Buffer 4096) + 1221 Writes (Block 8192) 	|0114511	|0.0%	|
-|File.C + FS (Buffer 4096) + 611 Writes (Block 16384) 	|0078872	|0.0%	|
-|File.C + FS (Buffer 4096) + 306 Writes (Block 32768) 	|0073255	|0.0%	|
-|File.C + FS (Buffer 4096) + 153 Writes (Block 65536) 	|0065392	|0.0%	|
-|File.C + FS (Buffer 8192) + 2442 Writes (Block 4096) 	|0116835	|0.0%	|
-|File.C + FS (Buffer 8192) + 1221 Writes (Block 8192) 	|0102979	|0.0%	|
-|File.C + FS (Buffer 8192) + 611 Writes (Block 16384) 	|0072384	|0.0%	|
-|File.C + FS (Buffer 8192) + 306 Writes (Block 32768) 	|0069706	|0.0%	|
-|File.C + FS (Buffer 8192) + 153 Writes (Block 65536) 	|0058480	|0.0%	|
-|File.C + FS (Buffer 16384) + 2442 Writes (Block 4096)	|0078453	|0.0%	|
-|File.C + FS (Buffer 16384) + 1221 Writes (Block 8192)	|0076202	|0.0%	|
-|File.C + FS (Buffer 16384) + 611 Writes (Block 16384)	|0073298	|0.0%	|
-|File.C + FS (Buffer 16384) + 306 Writes (Block 32768)	|0071450	|0.0%	|
-|File.C + FS (Buffer 16384) + 153 Writes (Block 65536)	|0058735	|0.0%	|
-|File.C + FS (Buffer 32768) + 2442 Writes (Block 4096)	|0064887	|0.0%	|
-|File.C + FS (Buffer 32768) + 1221 Writes (Block 8192)	|0063793	|0.0%	|
-|File.C + FS (Buffer 32768) + 611 Writes (Block 16384)	|0062089	|0.0%	|
-|File.C + FS (Buffer 32768) + 306 Writes (Block 32768)	|0066671	|0.0%	|
-|File.C + FS (Buffer 32768) + 153 Writes (Block 65536)	|0052066	|0.0%	|
-|File.C + FS (Buffer 65536) + 2442 Writes (Block 4096)	|0057004	|0.0%	|
-|File.C + FS (Buffer 65536) + 1221 Writes (Block 8192)	|0054716	|0.0%	|
-|File.C + FS (Buffer 65536) + 611 Writes (Block 16384)	|0056519	|0.0%	|
-|File.C + FS (Buffer 65536) + 306 Writes (Block 32768)	|0065918	|0.0%	|
-|File.C + FS (Buffer 65536) + 153 Writes (Block 65536)	|0052638	|0.0%	|
-|Average of the above									|-			|-		|
-|FS (Buffer 4096) + 2442 Writes (Block 4096) 			|0217797	|0.0%	|
-|FS (Buffer 4096) + 1221 Writes (Block 8192) 			|0125412	|0.0%	|
-|FS (Buffer 4096) + 611 Writes (Block 16384) 			|0077692	|0.0%	|
-|FS (Buffer 4096) + 306 Writes (Block 32768) 			|0061831	|0.0%	|
-|FS (Buffer 4096) + 153 Writes (Block 65536) 			|0054321	|0.0%	|
-|FS (Buffer 8192) + 2442 Writes (Block 4096) 			|0118598	|0.0%	|
-|FS (Buffer 8192) + 1221 Writes (Block 8192) 			|0106295	|0.0%	|
-|FS (Buffer 8192) + 611 Writes (Block 16384) 			|0074605	|0.0%	|
-|FS (Buffer 8192) + 306 Writes (Block 32768) 			|0059227	|0.0%	|
-|FS (Buffer 8192) + 153 Writes (Block 65536) 			|0054556	|0.0%	|
-|FS (Buffer 16384) + 2442 Writes (Block 4096)			|0078896	|0.0%	|
-|FS (Buffer 16384) + 1221 Writes (Block 8192)			|0076517	|0.0%	|
-|FS (Buffer 16384) + 611 Writes (Block 16384)			|0069817	|0.0%	|
-|FS (Buffer 16384) + 306 Writes (Block 32768)			|0070845	|0.0%	|
-|FS (Buffer 16384) + 153 Writes (Block 65536)			|0051233	|0.0%	|
-|FS (Buffer 32768) + 2442 Writes (Block 4096)			|0064147	|0.0%	|
-|FS (Buffer 32768) + 1221 Writes (Block 8192)			|0060164	|0.0%	|
-|FS (Buffer 32768) + 611 Writes (Block 16384)			|0063628	|0.0%	|
-|FS (Buffer 32768) + 306 Writes (Block 32768)			|0067186	|0.0%	|
-|FS (Buffer 32768) + 153 Writes (Block 65536)			|0054407	|0.0%	|
-|FS (Buffer 65536) + 2442 Writes (Block 4096)			|0056377	|0.0%	|
-|FS (Buffer 65536) + 1221 Writes (Block 8192)			|0055779	|0.0%	|
-|FS (Buffer 65536) + 611 Writes (Block 16384)			|0053956	|0.0%	|
-|FS (Buffer 65536) + 306 Writes (Block 32768)			|0154740	|0.0%	|
-|FS (Buffer 65536) + 153 Writes (Block 65536)			|0064157	|0.0%	|
-|Average of the above									|-			|0.0%	|
-
-FileStream is clearly faster but finding the correct buffer & block size combinations seems rather tricky.
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|
+|**Read**									|1		|		|2		|		|3		|		|4		|		|
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|
+|Buffer 1024) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 1024) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 2048) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 4096) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 2442 Writes (Block 4096) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 1221 Writes (Block 8192) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 611 Writes (Block 16384) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 306 Writes (Block 32768) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 153 Writes (Block 65536) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 8192) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 16384) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 32768) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 65536) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 9768 Writes (Block 1024) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 4884 Writes (Block 2048) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 2442 Writes (Block 4096)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 1221 Writes (Block 8192)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 611 Writes (Block 16384)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 306 Writes (Block 32768)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 153 Writes (Block 65536)	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|Buffer 131072) + 77 Writes (Block 131072) 	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|0000000|0.0%	|
+|-------------------------------------------|-------|-------|-------|-------|-------|-------|-------|-------|
 
 ## File generation V1
 The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code first and test it with a smaller amount of rows.

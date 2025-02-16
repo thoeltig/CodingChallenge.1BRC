@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+//using System.Diagnostics;
+//using System.IO;
+//using System.Linq;
 
 namespace _1BRC.ConsoleRunner {
 	internal class Program {
-		private const int RowSize = 10000000;
-		private const int RowBufferSize = 4000;
-		private const int FileBufferSize = 32768;
-		private const string FileName = "measurements.txt";
+		//private const int RowSize = 10000000;
+		//private const int RowBufferSize = 4000;
+		//private const int FileBufferSize = 32768;
+		//private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
-            FileTests.Write();
+			Console.WriteLine("File write test started");
+            FileReadAndWrite.ExecuteTest();
+			Console.WriteLine("File write test done!");
 			//const int count = 5;
 			//var times = new TimeSpan[count];
 			//var sw = new Stopwatch();
@@ -30,17 +32,16 @@ namespace _1BRC.ConsoleRunner {
 			//var avg = new TimeSpan(times.Sum(x => x.Ticks) / count);
 			//Console.WriteLine($"Avg: {avg:mm':'ss':'fff}");
 			//Console.WriteLine();
-
 			Console.ReadKey();
 		}
 
-		private static TimeSpan CreateFile(Stopwatch sw, int rowBuffer, int fileBuffer) {
-			sw.Restart();
-			MeasurementsGenerator.CreateFile(FileName, RowSize, rowBuffer, fileBuffer);
-			sw.Stop();
+		//private static TimeSpan CreateFile(Stopwatch sw, int rowBuffer, int fileBuffer) {
+		//	sw.Restart();
+		//	MeasurementsGenerator.CreateFile(FileName, RowSize, rowBuffer, fileBuffer);
+		//	sw.Stop();
 
-			Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
-			return sw.Elapsed;
-		}
+		//	Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
+		//	return sw.Elapsed;
+		//}
 	}
 }
