@@ -32,7 +32,7 @@ namespace _1BRC.ConsoleRunner {
 			//FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
 		};
 
-		public static void ExecuteTest() {
+		public static void ExecuteTest(Action<string> progressCallback) {
 			using (var logWriter = new StreamWriter(ResultFile)) {
 				var fileContentBytes = new byte[FileSizeToWrite];
 				var random = new Random();
@@ -43,6 +43,7 @@ namespace _1BRC.ConsoleRunner {
 				foreach (var option in _options) {
 					WriteMultipleEmptyLines(logWriter);
 					logWriter.WriteLine($"File option {option}");
+					progressCallback($"Start file option {option}");
 
 					foreach (var chunkSize in _chunkSizes) {
 						WriteMultipleEmptyLines(logWriter);

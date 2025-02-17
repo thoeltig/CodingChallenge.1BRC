@@ -1,5 +1,5 @@
 ﻿using System;
-//using System.Diagnostics;
+using System.Diagnostics;
 //using System.IO;
 //using System.Linq;
 
@@ -12,12 +12,14 @@ namespace _1BRC.ConsoleRunner {
 
 		private static void Main(string[] args) {
 			Console.WriteLine("File write test started");
-            FileReadAndWrite.ExecuteTest();
-			Console.WriteLine("File write test done!");
+			var sw = new Stopwatch();
+            sw.Start();
+			FileReadAndWrite.ExecuteTest(Console.WriteLine);
+            sw.Stop();
+			Console.WriteLine($"File write test done! Took {sw.Elapsed:mm':'ss':'fff} to finish!");
+            
 			//const int count = 5;
 			//var times = new TimeSpan[count];
-			//var sw = new Stopwatch();
-
 			//Console.WriteLine($"Generating {RowSize:N0} rows");
 			//Console.WriteLine();
 
