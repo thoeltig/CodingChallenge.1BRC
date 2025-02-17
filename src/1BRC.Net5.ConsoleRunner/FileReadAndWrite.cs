@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace _1BRC.ConsoleRunner {
+namespace _1BRC.Net5.ConsoleRunner {
 	internal static class FileReadAndWrite {
 		private const int TestRunCount = 12;
 		private const int FileSizeToWrite = 20000000;
@@ -50,8 +50,7 @@ namespace _1BRC.ConsoleRunner {
 					foreach (var chunkSize in _chunkSizes) {
 						WriteMultipleEmptyLines(logWriter);
 
-						var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
-						var splitCount = byteArrays.Length;
+						var splitCount = (int)Math.Ceiling(FileSizeToWrite / (double)chunkSize);
 						logWriter.WriteLine($"Requires {splitCount} read & write operations which will each transfer {chunkSize} bytes");
 
 						WriteMultipleEmptyLines(logWriter);
@@ -61,21 +60,8 @@ namespace _1BRC.ConsoleRunner {
 							logWriter.WriteLine($"Set buffer size to {bufferSize}");
 							WriteMultipleEmptyLines(logWriter);
 
-							RunTest("FileStream.Write", () => {
-								using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
-									foreach (var line in byteArrays) {
-										stream.Write(line, 0, line.Length);
-									}
-								}
-							}, logWriter, DeleteFile);
-
-							RunTest("FileStream.Read", () => {
-								using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
-									var buffer = new byte[chunkSize];
-									while (stream.Read(buffer, 0, buffer.Length) != 0) {
-									}
-								}
-							}, logWriter);
+							RunTest("FileStream.Write", () => Write(bufferSize, option, splitCount, chunkSize, fileContentBytes.AsSpan()), logWriter, DeleteFile);
+							RunTest("FileStream.Read", () => Read(bufferSize, option, chunkSize), logWriter);
 						}
 					}
 				}
@@ -90,25 +76,31 @@ namespace _1BRC.ConsoleRunner {
 			}
 		}
 
-		private static void DeleteFile() => File.Delete(TestFile);
+		private static void Write(int bufferSize, FileOptions option, int splitCount, int chunkSize, ReadOnlySpan<byte> content) {
+			var contentLength = content.Length;
+			using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
+				for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
+					var copyLength = contentLength - contentIdx;
+					if (copyLength > chunkSize) {
+						copyLength = chunkSize;
+					}
 
-		private static byte[][] SplitIntoByteArrays(byte[] fileContentAsBytes, int chunkSize) {
-			var contentLength = fileContentAsBytes.Length;
-			var splitCount = (int)Math.Ceiling(contentLength / (double)chunkSize);
-			var output = new byte[splitCount][];
-			for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
-				var copyLength = contentLength - contentIdx;
-				if (copyLength > chunkSize) {
-					copyLength = chunkSize;
+					var slice = content.Slice(contentIdx, copyLength);
+					stream.Write(slice);
 				}
-
-				var array = new byte[copyLength];
-				Array.Copy(fileContentAsBytes, contentIdx, array, 0, copyLength);
-				output[outputIdx] = array;
 			}
-
-			return output;
 		}
+
+		private static void Read(int bufferSize, FileOptions option, int chunkSize) {
+			using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
+				var buffer = new Span<byte>(new byte[chunkSize]);
+				var readBytes = 0;
+				while ((readBytes = stream.Read(buffer)) != 0) {
+                }
+			}
+		}
+
+		private static void DeleteFile() => File.Delete(TestFile);
 
 		private static void RunTest(string testName, Action testAction, StreamWriter resultWriter, Action cleanupAction = null) {
 			var sw = new Stopwatch();
