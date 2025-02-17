@@ -101,6 +101,7 @@ namespace _1BRC.ConsoleRunner {
 
 				var array = new byte[copyLength];
 				Array.Copy(fileContentAsBytes, contentIdx, array, 0, copyLength);
+				output[outputIdx] = array;
 			}
 
 			return output;
