@@ -13,6 +13,7 @@ namespace _1BRC.Net5.ConsoleRunner
             FileReadAndWrite.ExecuteTest(Console.WriteLine);
             sw.Stop();
             Console.WriteLine($"File write test done! Took {sw.Elapsed:mm':'ss':'fff} to finish!");
+            Console.ReadKey();
         }
     }
 }

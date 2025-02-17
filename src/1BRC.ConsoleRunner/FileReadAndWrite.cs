@@ -19,8 +19,7 @@ namespace _1BRC.ConsoleRunner {
 			32768,
 			65536,
 			131072,
-			262144,
-			524288
+			262144
 		};
 
 		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
