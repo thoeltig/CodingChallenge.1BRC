@@ -18,18 +18,20 @@ namespace _1BRC.ConsoleRunner {
 			16384,
 			32768,
 			65536,
-			131072
+			131072,
+			262144,
+			524288
 		};
 
-		//private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,
 			FileOptions.SequentialScan,
 			FileOptions.WriteThrough,
 			FileOptions.SequentialScan | FileOptions.WriteThrough,
-			//FileOptions.WriteThrough | FileFlagNoBuffering,
-			//FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+			FileOptions.WriteThrough | FileFlagNoBuffering,
+			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {
@@ -114,23 +116,28 @@ namespace _1BRC.ConsoleRunner {
 
 			resultWriter.WriteLine($"Test case: {testName}");
 
-			for (var i = 0; i < TestRunCount; i++) {
-				cleanupAction?.Invoke();
+			try {
+				for (var i = 0; i < TestRunCount; i++) {
+					cleanupAction?.Invoke();
 
-				sw.Restart();
-				testAction();
-				sw.Stop();
+					sw.Restart();
+					testAction();
+					sw.Stop();
 
-				times[i] = sw.Elapsed;
+					times[i] = sw.Elapsed;
+				}
+
+				var avg = new TimeSpan(times.Sum(x => x.Ticks) / TestRunCount);
+				resultWriter.WriteLine($"Average: {avg:ss':'fffffff}");
+
+				var quartile = (int)Math.Round(TestRunCount * 0.25);
+				var half = (int)Math.Round(TestRunCount * 0.5);
+				var median = new TimeSpan(times.OrderBy(x => x).Skip(quartile).Take(half).Sum(x => x.Ticks) / half);
+				resultWriter.WriteLine($"Median: {median:ss':'fffffff}");
 			}
-
-			var avg = new TimeSpan(times.Sum(x => x.Ticks) / TestRunCount);
-			resultWriter.WriteLine($"Average: {avg:ss':'fffffff}");
-
-			var quartile = (int)Math.Round(TestRunCount * 0.25);
-			var half = (int)Math.Round(TestRunCount * 0.5);
-			var median = new TimeSpan(times.OrderBy(x => x).Skip(quartile).Take(half).Sum(x => x.Ticks) / half);
-			resultWriter.WriteLine($"Median: {median:ss':'fffffff}");
+			catch (Exception e) {
+				resultWriter.WriteLine("Test failed...");
+			}
 
 			resultWriter.WriteLine();
 		}
