@@ -10,7 +10,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 		#region
 
 		private readonly Dictionary<int, DataRow> _rows = new();
-		
+
 		#endregion
 
 		public void Add(FileOptions option, int chunkSize, int bufferSize, TimeSpan? elapsedTime) {
@@ -116,18 +116,26 @@ namespace _1BRC.Net5.ConsoleRunner {
 			return builder.ToString();
 		}
 
-		private record DataRow(int ChunkSize, int BufferSize) {
+		private class DataRow {
 			#region
 
-			private readonly Dictionary<FileOptions, TimeSpan?> _cells = new();
+			private readonly Dictionary<FileOptions, TimeSpan?> _cells;
 
 			#endregion
+
+			public DataRow(int chunkSize, int bufferSize) {
+				ChunkSize = chunkSize;
+				BufferSize = bufferSize;
+				_cells = new Dictionary<FileOptions, TimeSpan?>();
+			}
+
+			public int ChunkSize { get; }
+
+			public int BufferSize { get; }
 
 			public IReadOnlyDictionary<FileOptions, TimeSpan?> Cells => _cells;
 
 			public void Add(FileOptions option, TimeSpan? elapsedTime) => _cells[option] = elapsedTime;
 		}
-
-		private record DataCell(int ChunkSize, int BufferSize, TimeSpan? ElapsedTime);
 	}
 }

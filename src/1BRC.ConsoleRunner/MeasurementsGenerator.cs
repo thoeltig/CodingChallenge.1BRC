@@ -12,7 +12,7 @@ namespace _1BRC.ConsoleRunner {
 
 		public static void CreateFile(string filePath, int totalRowCount, int rowCreationBufferSize, int fileWriterBufferSize) {
 			var names = CreateRandomNames();
-            
+
 			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, fileWriterBufferSize)) {
 				stream.SetLength(0);
 
@@ -21,7 +21,7 @@ namespace _1BRC.ConsoleRunner {
 					Parallel.For(0, rowCreationBufferSize, j => {
 						lines[j] = GetLine(names);
 					});
-					
+
 					var array = lines.SelectMany(x => x).ToArray();
 					stream.Write(array, 0, array.Length);
 				}
