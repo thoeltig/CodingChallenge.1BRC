@@ -13,25 +13,25 @@ namespace _1BRC.Net5.ConsoleRunner {
 		private static readonly int[] _chunkSizes = {
 			1024,
 			2048,
-			4096,
-			8192,
-			16384,
-			32768,
-			65536,
-			131072,
-			262144
-		};
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            131072,
+            262144
+        };
 
-		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+        private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,
 			FileOptions.SequentialScan,
-			FileOptions.WriteThrough,
-			FileOptions.SequentialScan | FileOptions.WriteThrough,
-			FileOptions.WriteThrough | FileFlagNoBuffering,
-			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
-		};
+            FileOptions.WriteThrough,
+            FileOptions.SequentialScan | FileOptions.WriteThrough,
+            FileOptions.WriteThrough | FileFlagNoBuffering,
+            FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+        };
 		
 		public static void ExecuteTest(Action<string> progressCallback) {
 			var writeTableGenerator = new ResultTableGenerator();

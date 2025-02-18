@@ -46,7 +46,6 @@ namespace _1BRC.ConsoleRunner {
 
 				foreach (var chunkSize in _chunkSizes) {
 					var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
-					var splitCount = byteArrays.Length;
 
 					foreach (var bufferSize in _chunkSizes) {
 						var time = RunTest(() => {

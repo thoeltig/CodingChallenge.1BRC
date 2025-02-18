@@ -9,17 +9,18 @@ namespace _1BRC.Net5.ConsoleRunner {
 	internal class ResultTableGenerator {
 		#region
 
-		private readonly Dictionary<int, DataRow> _rows = new();
+		private readonly Dictionary<string, DataRow> _rows = new();
 
 		#endregion
 
 		public void Add(FileOptions option, int chunkSize, int bufferSize, TimeSpan? elapsedTime) {
-			var identifier = chunkSize.GetHashCode() ^ bufferSize.GetHashCode();
+			const string separator = "_";
+			var identifier = string.Concat(chunkSize, separator, bufferSize);
 
 			if (_rows.TryGetValue(identifier, out var row)) {
 				row.Add(option, elapsedTime);
 			} else {
-				_rows.Add(identifier, new DataRow(chunkSize, bufferSize));
+				_rows.Add(identifier, new DataRow(chunkSize, bufferSize, option, elapsedTime));
 			}
 		}
 
@@ -29,7 +30,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 				return string.Empty;
 			}
 
-			var firstRow = _rows[0];
+			var firstRow = _rows.Values.First();
 			var columnCount = firstRow.Cells.Count;
 			if (columnCount == 0) {
 				return string.Empty;
@@ -70,23 +71,23 @@ namespace _1BRC.Net5.ConsoleRunner {
 
 			// Write data rows
 			var firstTime = 0.0;
-			for (var i = 0; i < rowCount; i++) {
-				var row = _rows[i];
-
-				if (i == 0) {
+			var hasFirstTime = false;
+			foreach (var row in _rows.Values.OrderBy(x => x.BufferSize)) {
+				if (hasFirstTime == false) {
 					firstTime = row.Cells.Values.First().Value.TotalSeconds;
+					hasFirstTime = true;
 				}
 
 				// Description
 				const string bufferDesc = "Buffer ";
-				const string chunkDesc = "Chunk ";
-				const string openBracket = "(";
-				const string closeBracket = ")";
+				const string chunkDesc = " Chunk ";
+				const string openBracket = " (";
+				const string closeBracket = " times)";
 				builder.Append(separator);
 				builder.Append(bufferDesc);
-				builder.Append(separator);
+				builder.Append(row.BufferSize);
 				builder.Append(chunkDesc);
-				builder.Append(separator);
+				builder.Append(row.ChunkSize);
 				builder.Append(openBracket);
 				builder.Append((int)Math.Ceiling(totalFileSize / (double)row.ChunkSize));
 				builder.Append(closeBracket);
@@ -127,6 +128,11 @@ namespace _1BRC.Net5.ConsoleRunner {
 				ChunkSize = chunkSize;
 				BufferSize = bufferSize;
 				_cells = new Dictionary<FileOptions, TimeSpan?>();
+			}
+
+			public DataRow(int chunkSize, int bufferSize, FileOptions option, TimeSpan? elapsedTime)
+				: this(chunkSize, bufferSize) {
+				Add(option, elapsedTime);
 			}
 
 			public int ChunkSize { get; }
