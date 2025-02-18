@@ -107,7 +107,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 					var timeSpan = cell.Value.Value;
 					builder.Append(timeSpan.ToString(timeFormat));
 					builder.Append(separator);
-					builder.Append(Math.Round((timeSpan.TotalSeconds - firstTime) / firstTime, 2).ToString(CultureInfo.InvariantCulture));
+					builder.Append(Math.Round((timeSpan.TotalSeconds - firstTime) / firstTime * 100, 2).ToString(CultureInfo.InvariantCulture));
 					builder.Append(separator);
 				}
 
