@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using _1BRC.Net5.ConsoleRunner;
 
 namespace _1BRC.ConsoleRunner {
 	internal static class FileReadAndWrite {
@@ -9,6 +10,8 @@ namespace _1BRC.ConsoleRunner {
 		private const int FileSizeToWrite = 20000000;
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
+
+		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly int[] _chunkSizes = {
 			1024,
@@ -22,70 +25,57 @@ namespace _1BRC.ConsoleRunner {
 			262144
 		};
 
-		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
-
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,
 			FileOptions.SequentialScan,
 			FileOptions.WriteThrough,
 			FileOptions.SequentialScan | FileOptions.WriteThrough,
 			FileOptions.WriteThrough | FileFlagNoBuffering,
-			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {
-			using (var logWriter = new StreamWriter(ResultFile)) {
-				var fileContentBytes = new byte[FileSizeToWrite];
-				var random = new Random();
-				random.NextBytes(fileContentBytes);
+			var writeTableGenerator = new ResultTableGenerator();
+			var readTableGenerator = new ResultTableGenerator();
+			var fileContentBytes = new byte[FileSizeToWrite];
+			var random = new Random();
+			random.NextBytes(fileContentBytes);
 
-				logWriter.WriteLine($"Total content size: {FileSizeToWrite}");
+			foreach (var option in _options) {
+				progressCallback($"Start file option {option}");
 
-				foreach (var option in _options) {
-					WriteMultipleEmptyLines(logWriter);
-					logWriter.WriteLine($"File option {option}");
-					progressCallback($"Start file option {option}");
+				foreach (var chunkSize in _chunkSizes) {
+					var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
+					var splitCount = byteArrays.Length;
 
-					foreach (var chunkSize in _chunkSizes) {
-						WriteMultipleEmptyLines(logWriter);
-
-						var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
-						var splitCount = byteArrays.Length;
-						logWriter.WriteLine($"Requires {splitCount} read & write operations which will each transfer {chunkSize} bytes");
-
-						WriteMultipleEmptyLines(logWriter);
-
-						foreach (var bufferSize in _chunkSizes) {
-							WriteMultipleEmptyLines(logWriter);
-							logWriter.WriteLine($"Set buffer size to {bufferSize}");
-							WriteMultipleEmptyLines(logWriter);
-
-							RunTest("FileStream.Write", () => {
-								using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
-									foreach (var line in byteArrays) {
-										stream.Write(line, 0, line.Length);
-									}
+					foreach (var bufferSize in _chunkSizes) {
+						var time = RunTest(() => {
+							using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
+								foreach (var line in byteArrays) {
+									stream.Write(line, 0, line.Length);
 								}
-							}, logWriter, DeleteFile);
+							}
+						}, DeleteFile);
+						writeTableGenerator.Add(option, chunkSize, bufferSize, time);
 
-							RunTest("FileStream.Read", () => {
-								using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
-									var buffer = new byte[chunkSize];
-									while (stream.Read(buffer, 0, buffer.Length) != 0) {
-									}
+						time = RunTest(() => {
+							using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
+								var buffer = new byte[chunkSize];
+								while (stream.Read(buffer, 0, buffer.Length) != 0) {
 								}
-							}, logWriter);
-						}
+							}
+						});
+						readTableGenerator.Add(option, chunkSize, bufferSize, time);
 					}
 				}
 			}
 
 			DeleteFile();
-			return;
 
-			void WriteMultipleEmptyLines(StreamWriter logWriter) {
-				logWriter.WriteLine();
-				logWriter.WriteLine();
+			using (var writer = new StreamWriter(ResultFile)) {
+				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
+				writer.WriteLine(Environment.NewLine);
+				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite));
 			}
 		}
 
@@ -109,11 +99,9 @@ namespace _1BRC.ConsoleRunner {
 			return output;
 		}
 
-		private static void RunTest(string testName, Action testAction, StreamWriter resultWriter, Action cleanupAction = null) {
+		private static TimeSpan? RunTest(Action testAction, Action cleanupAction = null) {
 			var sw = new Stopwatch();
 			var times = new TimeSpan[TestRunCount];
-
-			resultWriter.WriteLine($"Test case: {testName}");
 
 			try {
 				for (var i = 0; i < TestRunCount; i++) {
@@ -126,19 +114,13 @@ namespace _1BRC.ConsoleRunner {
 					times[i] = sw.Elapsed;
 				}
 
-				var avg = new TimeSpan(times.Sum(x => x.Ticks) / TestRunCount);
-				resultWriter.WriteLine($"Average: {avg:ss':'fffffff}");
-
 				var quartile = (int)Math.Round(TestRunCount * 0.25);
 				var half = (int)Math.Round(TestRunCount * 0.5);
-				var median = new TimeSpan(times.OrderBy(x => x).Skip(quartile).Take(half).Sum(x => x.Ticks) / half);
-				resultWriter.WriteLine($"Median: {median:ss':'fffffff}");
+				return new TimeSpan(times.OrderBy(x => x).Skip(quartile).Take(half).Sum(x => x.Ticks) / half);
 			}
 			catch {
-				resultWriter.WriteLine("Test failed...");
+				return null;
 			}
-
-			resultWriter.WriteLine();
 		}
 	}
 }

@@ -38,6 +38,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\ResultTableGenerator.cs">
+      <Link>ResultTableGenerator.cs</Link>
+    </Compile>
     <Compile Include="FileReadAndWrite.cs" />
     <Compile Include="MeasurementsGenerator.cs" />
     <Compile Include="Program.cs" />
