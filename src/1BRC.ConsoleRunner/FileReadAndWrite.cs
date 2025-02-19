@@ -7,7 +7,7 @@ using _1BRC.Net5.ConsoleRunner;
 namespace _1BRC.ConsoleRunner {
 	internal static class FileReadAndWrite {
 		private const int TestRunCount = 12;
-		private const int FileSizeToWrite = 20000000;
+		private const int FileSizeToWrite = 30000000;
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
 
@@ -35,6 +35,8 @@ namespace _1BRC.ConsoleRunner {
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {
+			var sw = new Stopwatch();
+			sw.Start();
 			var writeTableGenerator = new ResultTableGenerator();
 			var readTableGenerator = new ResultTableGenerator();
 			var fileContentBytes = new byte[FileSizeToWrite];
@@ -48,6 +50,7 @@ namespace _1BRC.ConsoleRunner {
 					var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
 
 					foreach (var bufferSize in _chunkSizes) {
+						var memory = GC.GetTotalMemory(true);
 						var time = RunTest(() => {
 							using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
 								foreach (var line in byteArrays) {
@@ -55,8 +58,9 @@ namespace _1BRC.ConsoleRunner {
 								}
 							}
 						}, DeleteFile);
-						writeTableGenerator.Add(option, chunkSize, bufferSize, time);
+						writeTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
 
+						memory = GC.GetTotalMemory(true);
 						time = RunTest(() => {
 							using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
 								var buffer = new byte[chunkSize];
@@ -64,14 +68,19 @@ namespace _1BRC.ConsoleRunner {
 								}
 							}
 						});
-						readTableGenerator.Add(option, chunkSize, bufferSize, time);
+						readTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
 					}
 				}
 			}
 
 			DeleteFile();
+			sw.Stop();
 
 			using (var writer = new StreamWriter(ResultFile)) {
+				writer.WriteLine(".NET Framework 4.7.2");
+				writer.WriteLine($"File read & write test with {Math.Round(FileSizeToWrite / 1024.0 / 1024.0, 3)} MB done in {sw.Elapsed:hh':'mm':'ss':'fff}!");
+				writer.WriteLine(Environment.NewLine);
+				writer.WriteLine(Environment.NewLine);
 				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
 				writer.WriteLine(Environment.NewLine);
 				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite));

@@ -6,34 +6,36 @@ using System.Linq;
 namespace _1BRC.Net5.ConsoleRunner {
 	internal static class FileReadAndWrite {
 		private const int TestRunCount = 12;
-		private const int FileSizeToWrite = 20000000;
+		private const int FileSizeToWrite = 30000000;
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
 
 		private static readonly int[] _chunkSizes = {
 			1024,
 			2048,
-            4096,
-            8192,
-            16384,
-            32768,
-            65536,
-            131072,
-            262144
-        };
+			4096,
+			8192,
+			16384,
+			32768,
+			65536,
+			131072,
+			262144
+		};
 
-        private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,
 			FileOptions.SequentialScan,
-            FileOptions.WriteThrough,
-            FileOptions.SequentialScan | FileOptions.WriteThrough,
-            FileOptions.WriteThrough | FileFlagNoBuffering,
-            FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
-        };
-		
+			FileOptions.WriteThrough,
+			FileOptions.SequentialScan | FileOptions.WriteThrough,
+			FileOptions.WriteThrough | FileFlagNoBuffering,
+			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+		};
+
 		public static void ExecuteTest(Action<string> progressCallback) {
+			var sw = new Stopwatch();
+			sw.Start();
 			var writeTableGenerator = new ResultTableGenerator();
 			var readTableGenerator = new ResultTableGenerator();
 
@@ -52,19 +54,26 @@ namespace _1BRC.Net5.ConsoleRunner {
 					for (var k = 0; k < chunksCount; k++) {
 						var bufferSize = _chunkSizes[k];
 
+						var memory = GC.GetTotalMemory(true);
 						var time = RunTest(() => Write(bufferSize, option, splitCount, chunkSize, fileContentBytes.AsSpan()), DeleteFile);
-						writeTableGenerator.Add(option, chunkSize, bufferSize, time);
+						writeTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
 
+						memory = GC.GetTotalMemory(true);
 						time = RunTest(() => Read(bufferSize, option, chunkSize));
-						readTableGenerator.Add(option, chunkSize, bufferSize, time);
+						readTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
 					}
 				}
 			}
 
 			DeleteFile();
+			sw.Stop();
 
 			using (var writer = new StreamWriter(ResultFile)) {
-                writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
+				writer.WriteLine(".NET (Core) 5");
+				writer.WriteLine($"File read & write test with {Math.Round(FileSizeToWrite / 1024.0 / 1024.0, 3)} MB done in {sw.Elapsed:hh':'mm':'ss':'fff}!");
+				writer.WriteLine(Environment.NewLine);
+				writer.WriteLine(Environment.NewLine);
+				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
 				writer.WriteLine(Environment.NewLine);
 				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite));
 			}
