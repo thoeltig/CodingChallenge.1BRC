@@ -1,4 +1,4 @@
-## Writing & reading a file
+# Writing & reading a file
 There are a couple of classes that could be used to read & write data to & from a file:
 - _File.Create_ returns a _FileStream_ with a buffer size of 4096 and _FileOptions.None_.
 - _File.CreateText_ & _FileInfo.CreateText_ returns a _StreamWriter_ with a buffer size of 1024 and _FileOptions.SequentialScan_.
@@ -10,7 +10,7 @@ There are a couple of classes that could be used to read & write data to & from 
 	- _StreamReader_ reads all bytes from a file and converts them to a string.
 - Every way to access a file utilizes a _FileStream_ which can only read & write bytes.
 
-### First test: Comparison of the different classes
+## First test: Comparison of the different classes
 The test will write 10 MB to a file:
 - Inputs
 	- a single string
@@ -50,8 +50,10 @@ The test will write 10 MB to a file:
 |SW + Buffer 4096 + 306 Writes (Block 32768)|1334478	|0.0%		|1185733	|0.0%	|
 |SW + Buffer 4096 + 153 Writes (Block 65536)|1289893	|0.0%		|1329354	|0.0%	|
 
+
 > [!NOTE]
 > _StreamWriter_ was only tested with the default buffer size of 4096 after comparing it with the _FileStream_ default.
+
 
 |														|byte array	|%		|
 |-------------------------------------------------------|-----------|-------|
@@ -108,8 +110,10 @@ The test will write 10 MB to a file:
 |FS (Buffer 65536) + 153 Writes (Block 65536)			|0064157	|0.0%	|
 |Average of the above									|-			|0.0%	|
 
+
 > [!Note]
 > _FileStream_ is clearly faster but finding the correct buffer & block size combinations seems rather tricky.
+
 
 <ins>**Simple explanation of the internal logic of a _FileStream_:**</ins>
 - Has an internal buffer which holds the bytes. If the buffer is full it is written to the file system cache.
@@ -124,7 +128,8 @@ The test will write 10 MB to a file:
 	- If _FILE_FLAG_NO_BUFFERING_ is used in combination with _FileOptions.WriteThrough_ the file system cache is ignored and the data is immediately flushed to disk.
 		- This flag has a some of memory alignment requieremesnts and it isn't included in _FileOptions_ but can still be passed down.
 	
-### Second test: FileStream, buffer and block size
+	
+## Second test: FileStream, buffer and block size
 The test will use the _FileStream_ to write & read 30 MB to & from a file:
 - Buffer and block sizes
 	- 1024
@@ -149,8 +154,8 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- .NET Framework 4.7.2 Console with byte[]
 	- .NET 5 (Core) Console with Spans<byte>
 	
-#### .NET Framework 4.7.2 + byte[](Execution time 2h 23min)
-
+	
+### .NET Framework 4.7.2 + byte[](Execution time 2h 23min)
 |Write|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1299553|0|00:1405063|8.12|14:7803109|11273.38|13:3764260|10193.1|-|-|-|-|
@@ -321,8 +326,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 |Buffer 262144 Chunk 262144 (115 times)|00:0119025|-82.84|00:0097934|-85.88|00:0090140|-87|00:0099705|-85.62|00:4037865|482.22|00:4000316|476.81|
 
 
-#### .NET 5 (Core) + Spans<byte> (Execution time 2h 25min)
-
+### .NET 5 (Core) + Spans<byte> (Execution time 2h 25min)
 |Write|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1514422|0|00:1344081|-11.25|12:8214473|8366.23|14:5611195|9514.97|-|-|-|-|
@@ -491,6 +495,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 |Buffer 262144 Chunk 65536 (458 times)|00:0121530|-82.74|00:0126806|-82|00:0111311|-84.2|00:0111224|-84.21|00:4571349|549.06|00:4334495|515.43|
 |Buffer 262144 Chunk 131072 (229 times)|00:0121060|-82.81|00:0138147|-80.39|00:0114356|-83.76|00:0112076|-84.09|00:4735009|572.29|00:4555889|546.86|
 |Buffer 262144 Chunk 262144 (115 times)|00:0102353|-85.47|00:0097864|-86.1|00:0101514|-85.59|00:0089100|-87.35|00:4111868|483.82|00:4066960|477.44|
+
 
 
 > [!TIP]
