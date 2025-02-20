@@ -498,8 +498,8 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 <ins>**Conclusion:**</ins>
 - Write
 	- .NET Framework
-		|Position|Buffer|Chunk|Write calls|Time reduction in %|Time|
-		|-----------|------|-----|-----------|----|----|
+		|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+		|----|-----|-----|----|-----|----|----|
 		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
 		|1.|1024|262144|115|_FileOptions.SequentialScan_|-90.62|00:0121946|
 		|2.|131072|262144|115|_FileOptions.SequentialScan_|-90.55|00:0122786|
@@ -514,16 +514,16 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		
 		- The top 10 results all share about 90% time reduction (or 10x speed up) and the same chunk size of 262144. 
 		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 5x to 114x slow down. 
-			|Buffer|Chunk|Write calls|Time increase in %|Time|
-			|------|-----|-----------|----|----|
+			|Buffer|Chunk|Write calls|FileOption|Time increase in %|Time|
+			|----|-----|----|----|----|----|
 			|1024|262144|29297|_FileOptions.WriteThrough_|11273.38|14:7803109|
 			|32768|262144|115|_FileOptions.WriteThrough_|410.13|00:6629419|
 			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|10193.1|13:3764260|
 			|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|396.49|00:6452182|
 		- All tests with _FILE_FLAG_NO_BUFFERING_ (5. & 6.) failed.
 	- .NET 5
-		|Position|Buffer|Chunk|Write calls|Time reduction in %|Time|
-		|-----------|------|-----|-----------|----|----|
+		|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+		|----|-----|-----|----|-----|----|----|
 		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
 		|1.|4096|262144|115|_FileOptions.None_|-91.69|00:0125792|
 		|2.|32768|262144|115|_FileOptions.SequentialScan_|-91.69|00:0125872|
@@ -539,8 +539,8 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		- The top 10 results also all share about 91% time reduction (or 10x speed up) and the same chunk size of 262144. 
 			- There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the 
 		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 4x to 96x slow down. 
-			|Buffer|Chunk|Write calls|Time increase in %|Time|
-			|------|-----|-----------|----|----|
+			|Buffer|Chunk|Write calls|FileOption|Time increase in %|Time|
+			|----|----|----|----|----|----|
 			|1024|262144|29297|_FileOptions.WriteThrough_|8366.23|12:8214473|
 			|262144|262144|115|_FileOptions.WriteThrough_|251.46|00:5322563|
 			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|9514.97|14:5611195|
