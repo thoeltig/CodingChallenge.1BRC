@@ -29,86 +29,84 @@ The test will write 10 MB to a file:
 	- SW = StreamWriter
 	- FS = FileStream
 
-|											|string		|%			|char array	|%		|
-|-------------------------------------------|-----------|-----------|-----------|-------|
-|File.CT + SW + 1 Write						|1293107	|base line	|1293548	|0.0%	|
-|File.CT + SW + 2442 Writes (Block 4096)	|1221823	|0.0%		|1121599	|0.0%	|
-|File.CT + SW + 1221 Writes (Block 8192)	|1202446	|0.0%		|1114435	|0.0%	|
-|File.CT + SW + 611 Writes (Block 16384)	|1250209	|0.0%		|1178940	|0.0%	|
-|File.CT + SW + 306 Writes (Block 32768)	|1256339	|0.0%		|1153100	|0.0%	|
-|File.CT + SW + 153 Writes (Block 65536)	|1217394	|0.0%		|1170953	|0.0%	|
-|FileInfo + SW + 1 Write					|1219227	|0.0%		|1182180	|0.0%	|
-|FileInfo + SW + 2442 Writes (Block 4096)	|1320695	|0.0%		|1116693	|0.0%	|
-|FileInfo + SW + 1221 Writes (Block 8192)	|1284690	|0.0%		|1158506	|0.0%	|
-|FileInfo + SW + 611 Writes (Block 16384)	|1238602	|0.0%		|1124409	|0.0%	|
-|FileInfo + SW + 306 Writes (Block 32768)	|1225385	|0.0%		|1127841	|0.0%	|
-|FileInfo + SW + 153 Writes (Block 65536)	|1205389	|0.0%		|1200050	|0.0%	|
-|SW + Buffer 4096 +1 Write					|1229701	|0.0%		|1236782	|0.0%	|
-|SW + Buffer 4096 + 2442 Writes (Block 4096)|1224911	|0.0%		|1123864	|0.0%	|
-|SW + Buffer 4096 + 1221 Writes (Block 8192)|1246995	|0.0%		|1111940	|0.0%	|
-|SW + Buffer 4096 + 611 Writes (Block 16384)|1225226	|0.0%		|1136849	|0.0%	|
-|SW + Buffer 4096 + 306 Writes (Block 32768)|1334478	|0.0%		|1185733	|0.0%	|
-|SW + Buffer 4096 + 153 Writes (Block 65536)|1289893	|0.0%		|1329354	|0.0%	|
+||string|%|char array|%|
+|----|----|----|----|----|
+|File.CT + SW + 1 Write|1293107|base line|1293548|0.03|
+|File.CT + SW + 2442 Writes (Block 4096)|1221823|-5.51|1121599|-13.26|
+|File.CT + SW + 1221 Writes (Block 8192)|1202446|-7.01|1114435|-13.82|
+|File.CT + SW + 611 Writes (Block 16384)|1250209|-3.32|1178940|-8.83|
+|File.CT + SW + 306 Writes (Block 32768)|1256339|-2.84|1153100|-10.83|
+|File.CT + SW + 153 Writes (Block 65536)|1217394|-5.85|1170953|-9.45|
+|FileInfo + SW + 1 Write|1219227|-5.71|1182180|-8.58|
+|FileInfo + SW + 2442 Writes (Block 4096)|1320695|2.13|1116693|-13.64|
+|FileInfo + SW + 1221 Writes (Block 8192)|1284690|-0.65|1158506|-10.41|
+|FileInfo + SW + 611 Writes (Block 16384)|1238602|-4.21|1124409|-13.05|
+|FileInfo + SW + 306 Writes (Block 32768)|1225385|-5.23|1127841|-12.78|
+|FileInfo + SW + 153 Writes (Block 65536)|1205389|-6.78|1200050|-7.20|
+|SW + Buffer 4096 +1 Write|1229701|-4.90|1236782|-4.36|
+|SW + Buffer 4096 + 2442 Writes (Block 4096)|1224911|-5.27|1123864|-13.09|
+|SW + Buffer 4096 + 1221 Writes (Block 8192)|1246995|-3.56|1111940|-14.01|
+|SW + Buffer 4096 + 611 Writes (Block 16384)|1225226|-5.25|1136849|-12.08|
+|SW + Buffer 4096 + 306 Writes (Block 32768)|1334478|3.20|1185733|-8.30|
+|SW + Buffer 4096 + 153 Writes (Block 65536)|1289893|-0.25|1329354|2.80|
 
 
 > [!NOTE]
 > _StreamWriter_ was only tested with the default buffer size of 4096 after comparing it with the _FileStream_ default.
 
 
-|														|byte array	|%		|
-|-------------------------------------------------------|-----------|-------|
-|File.C + FS (Buffer 4096) + 2442 Writes (Block 4096) 	|0231060	|0.0%	|
-|File.C + FS (Buffer 4096) + 1221 Writes (Block 8192) 	|0114511	|0.0%	|
-|File.C + FS (Buffer 4096) + 611 Writes (Block 16384) 	|0078872	|0.0%	|
-|File.C + FS (Buffer 4096) + 306 Writes (Block 32768) 	|0073255	|0.0%	|
-|File.C + FS (Buffer 4096) + 153 Writes (Block 65536) 	|0065392	|0.0%	|
-|File.C + FS (Buffer 8192) + 2442 Writes (Block 4096) 	|0116835	|0.0%	|
-|File.C + FS (Buffer 8192) + 1221 Writes (Block 8192) 	|0102979	|0.0%	|
-|File.C + FS (Buffer 8192) + 611 Writes (Block 16384) 	|0072384	|0.0%	|
-|File.C + FS (Buffer 8192) + 306 Writes (Block 32768) 	|0069706	|0.0%	|
-|File.C + FS (Buffer 8192) + 153 Writes (Block 65536) 	|0058480	|0.0%	|
-|File.C + FS (Buffer 16384) + 2442 Writes (Block 4096)	|0078453	|0.0%	|
-|File.C + FS (Buffer 16384) + 1221 Writes (Block 8192)	|0076202	|0.0%	|
-|File.C + FS (Buffer 16384) + 611 Writes (Block 16384)	|0073298	|0.0%	|
-|File.C + FS (Buffer 16384) + 306 Writes (Block 32768)	|0071450	|0.0%	|
-|File.C + FS (Buffer 16384) + 153 Writes (Block 65536)	|0058735	|0.0%	|
-|File.C + FS (Buffer 32768) + 2442 Writes (Block 4096)	|0064887	|0.0%	|
-|File.C + FS (Buffer 32768) + 1221 Writes (Block 8192)	|0063793	|0.0%	|
-|File.C + FS (Buffer 32768) + 611 Writes (Block 16384)	|0062089	|0.0%	|
-|File.C + FS (Buffer 32768) + 306 Writes (Block 32768)	|0066671	|0.0%	|
-|File.C + FS (Buffer 32768) + 153 Writes (Block 65536)	|0052066	|0.0%	|
-|File.C + FS (Buffer 65536) + 2442 Writes (Block 4096)	|0057004	|0.0%	|
-|File.C + FS (Buffer 65536) + 1221 Writes (Block 8192)	|0054716	|0.0%	|
-|File.C + FS (Buffer 65536) + 611 Writes (Block 16384)	|0056519	|0.0%	|
-|File.C + FS (Buffer 65536) + 306 Writes (Block 32768)	|0065918	|0.0%	|
-|File.C + FS (Buffer 65536) + 153 Writes (Block 65536)	|0052638	|0.0%	|
-|Average of the above									|-			|-		|
-|FS (Buffer 4096) + 2442 Writes (Block 4096) 			|0217797	|0.0%	|
-|FS (Buffer 4096) + 1221 Writes (Block 8192) 			|0125412	|0.0%	|
-|FS (Buffer 4096) + 611 Writes (Block 16384) 			|0077692	|0.0%	|
-|FS (Buffer 4096) + 306 Writes (Block 32768) 			|0061831	|0.0%	|
-|FS (Buffer 4096) + 153 Writes (Block 65536) 			|0054321	|0.0%	|
-|FS (Buffer 8192) + 2442 Writes (Block 4096) 			|0118598	|0.0%	|
-|FS (Buffer 8192) + 1221 Writes (Block 8192) 			|0106295	|0.0%	|
-|FS (Buffer 8192) + 611 Writes (Block 16384) 			|0074605	|0.0%	|
-|FS (Buffer 8192) + 306 Writes (Block 32768) 			|0059227	|0.0%	|
-|FS (Buffer 8192) + 153 Writes (Block 65536) 			|0054556	|0.0%	|
-|FS (Buffer 16384) + 2442 Writes (Block 4096)			|0078896	|0.0%	|
-|FS (Buffer 16384) + 1221 Writes (Block 8192)			|0076517	|0.0%	|
-|FS (Buffer 16384) + 611 Writes (Block 16384)			|0069817	|0.0%	|
-|FS (Buffer 16384) + 306 Writes (Block 32768)			|0070845	|0.0%	|
-|FS (Buffer 16384) + 153 Writes (Block 65536)			|0051233	|0.0%	|
-|FS (Buffer 32768) + 2442 Writes (Block 4096)			|0064147	|0.0%	|
-|FS (Buffer 32768) + 1221 Writes (Block 8192)			|0060164	|0.0%	|
-|FS (Buffer 32768) + 611 Writes (Block 16384)			|0063628	|0.0%	|
-|FS (Buffer 32768) + 306 Writes (Block 32768)			|0067186	|0.0%	|
-|FS (Buffer 32768) + 153 Writes (Block 65536)			|0054407	|0.0%	|
-|FS (Buffer 65536) + 2442 Writes (Block 4096)			|0056377	|0.0%	|
-|FS (Buffer 65536) + 1221 Writes (Block 8192)			|0055779	|0.0%	|
-|FS (Buffer 65536) + 611 Writes (Block 16384)			|0053956	|0.0%	|
-|FS (Buffer 65536) + 306 Writes (Block 32768)			|0154740	|0.0%	|
-|FS (Buffer 65536) + 153 Writes (Block 65536)			|0064157	|0.0%	|
-|Average of the above									|-			|0.0%	|
+||byte array|%|
+|----|----|----|
+|File.C + FS (Buffer 4096) + 2442 Writes (Block 4096)|0231060|-82.13|
+|File.C + FS (Buffer 4096) + 1221 Writes (Block 8192)|0114511|-91.14|
+|File.C + FS (Buffer 4096) + 611 Writes (Block 16384)|0078872|-93.90|
+|File.C + FS (Buffer 4096) + 306 Writes (Block 32768)|0073255|-94.33|
+|File.C + FS (Buffer 4096) + 153 Writes (Block 65536)|0065392|-94.94|
+|File.C + FS (Buffer 8192) + 2442 Writes (Block 4096)|0116835|-90.96|
+|File.C + FS (Buffer 8192) + 1221 Writes (Block 8192)|0102979|-92.04|
+|File.C + FS (Buffer 8192) + 611 Writes (Block 16384)|0072384|-94.40|
+|File.C + FS (Buffer 8192) + 306 Writes (Block 32768)|0069706|-94.61|
+|File.C + FS (Buffer 8192) + 153 Writes (Block 65536)|0058480|-95.48|
+|File.C + FS (Buffer 16384) + 2442 Writes (Block 4096)|0078453|-93.93|
+|File.C + FS (Buffer 16384) + 1221 Writes (Block 8192)|0076202|-94.11|
+|File.C + FS (Buffer 16384) + 611 Writes (Block 16384)|0073298|-94.33|
+|File.C + FS (Buffer 16384) + 306 Writes (Block 32768)|0071450|-94.47|
+|File.C + FS (Buffer 16384) + 153 Writes (Block 65536)|0058735|-95.46|
+|File.C + FS (Buffer 32768) + 2442 Writes (Block 4096)|0064887|-94.98|
+|File.C + FS (Buffer 32768) + 1221 Writes (Block 8192)|0063793|-95.07|
+|File.C + FS (Buffer 32768) + 611 Writes (Block 16384)|0062089|-95.20|
+|File.C + FS (Buffer 32768) + 306 Writes (Block 32768)|0066671|-94.84|
+|File.C + FS (Buffer 32768) + 153 Writes (Block 65536)|0052066|-95.97|
+|File.C + FS (Buffer 65536) + 2442 Writes (Block 4096)|0057004|-95.59|
+|File.C + FS (Buffer 65536) + 1221 Writes (Block 8192)|0054716|-95.77|
+|File.C + FS (Buffer 65536) + 611 Writes (Block 16384)|0056519|-95.63|
+|File.C + FS (Buffer 65536) + 306 Writes (Block 32768)|0065918|-94.90|
+|File.C + FS (Buffer 65536) + 153 Writes (Block 65536)|0052638|-95.93|
+|FS (Buffer 4096) + 2442 Writes (Block 4096)|0217797||
+|FS (Buffer 4096) + 1221 Writes (Block 8192)|0125412||
+|FS (Buffer 4096) + 611 Writes (Block 16384)|0077692||
+|FS (Buffer 4096) + 306 Writes (Block 32768)|0061831||
+|FS (Buffer 4096) + 153 Writes (Block 65536)|0054321||
+|FS (Buffer 8192) + 2442 Writes (Block 4096)|0118598||
+|FS (Buffer 8192) + 1221 Writes (Block 8192)|0106295||
+|FS (Buffer 8192) + 611 Writes (Block 16384)|0074605||
+|FS (Buffer 8192) + 306 Writes (Block 32768)|0059227||
+|FS (Buffer 8192) + 153 Writes (Block 65536)|0054556||
+|FS (Buffer 16384) + 2442 Writes (Block 4096)|0078896||
+|FS (Buffer 16384) + 1221 Writes (Block 8192)|0076517||
+|FS (Buffer 16384) + 611 Writes (Block 16384)|0069817||
+|FS (Buffer 16384) + 306 Writes (Block 32768)|0070845||
+|FS (Buffer 16384) + 153 Writes (Block 65536)|0051233||
+|FS (Buffer 32768) + 2442 Writes (Block 4096)|0064147||
+|FS (Buffer 32768) + 1221 Writes (Block 8192)|0060164||
+|FS (Buffer 32768) + 611 Writes (Block 16384)|0063628||
+|FS (Buffer 32768) + 306 Writes (Block 32768)|0067186||
+|FS (Buffer 32768) + 153 Writes (Block 65536)|0054407||
+|FS (Buffer 65536) + 2442 Writes (Block 4096)|0056377||
+|FS (Buffer 65536) + 1221 Writes (Block 8192)|0055779||
+|FS (Buffer 65536) + 611 Writes (Block 16384)|0053956||
+|FS (Buffer 65536) + 306 Writes (Block 32768)|0154740||
+|FS (Buffer 65536) + 153 Writes (Block 65536)|0064157||
 
 
 > [!Note]
@@ -155,7 +153,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- .NET 5 (Core) Console with Spans<byte>
 	
 	
-### .NET Framework 4.7.2 + byte[](Execution time 2h 23min)
+### .NET Framework 4.7.2 + byte[] (Execution time 2h 23min)
 |Write|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1299553|0|00:1405063|8.12|14:7803109|11273.38|13:3764260|10193.1|-|-|-|-|
@@ -496,6 +494,90 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 |Buffer 262144 Chunk 131072 (229 times)|00:0121060|-82.81|00:0138147|-80.39|00:0114356|-83.76|00:0112076|-84.09|00:4735009|572.29|00:4555889|546.86|
 |Buffer 262144 Chunk 262144 (115 times)|00:0102353|-85.47|00:0097864|-86.1|00:0101514|-85.59|00:0089100|-87.35|00:4111868|483.82|00:4066960|477.44|
 
+
+<ins>**Conclusion:**</ins>
+- Write
+	- .NET Framework
+		|Position|Buffer|Chunk|Write calls|Time reduction in %|Time|
+		|-----------|------|-----|-----------|----|----|
+		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
+		|1.|1024|262144|115|_FileOptions.SequentialScan_|-90.62|00:0121946|
+		|2.|131072|262144|115|_FileOptions.SequentialScan_|-90.55|00:0122786|
+		|3.|32768|262144|115|_FileOptions.SequentialScan_|-90.49|00:0123639|
+		|4.|8192|262144|115|_FileOptions.None_|-90.43|00:0124345|
+		|5.|16384|262144|115|_FileOptions.SequentialScan_|-90.31|00:0125923|
+		|6.|65536|262144|115|_FileOptions.None_|-90.29|00:0126154|
+		|7.|2048|262144|115|_FileOptions.SequentialScan_|-90.24|00:0126871|
+		|8.|131072|262144|115|_FileOptions.None_|-90.11|00:0128578|
+		|9.|65536|262144|115|_FileOptions.SequentialScan_|-90.07|00:0129060|
+		|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
+		
+		- The top 10 results all share about 90% time reduction (or 10x speed up) and the same chunk size of 262144. 
+		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 5x to 114x slow down. 
+			|Buffer|Chunk|Write calls|Time increase in %|Time|
+			|------|-----|-----------|----|----|
+			|1024|262144|29297|_FileOptions.WriteThrough_|11273.38|14:7803109|
+			|32768|262144|115|_FileOptions.WriteThrough_|410.13|00:6629419|
+			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|10193.1|13:3764260|
+			|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|396.49|00:6452182|
+		- All tests with _FILE_FLAG_NO_BUFFERING_ (5. & 6.) failed.
+	- .NET 5
+		|Position|Buffer|Chunk|Write calls|Time reduction in %|Time|
+		|-----------|------|-----|-----------|----|----|
+		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
+		|1.|4096|262144|115|_FileOptions.None_|-91.69|00:0125792|
+		|2.|32768|262144|115|_FileOptions.SequentialScan_|-91.69|00:0125872|
+		|3.|262144|262144|115|_FileOptions.SequentialScan_|-91.61|00:0127124|
+		|4.|8192|262144|115|_FileOptions.SequentialScan_|-91.51|00:0128543|
+		|5.|4096|262144|115|_FileOptions.SequentialScan_|-91.46|00:0129328|
+		|6.|1024|262144|115|_FileOptions.SequentialScan_|-91.39|00:0130422|
+		|7.|32768|262144|115|_FileOptions.None_|-91.36|00:0130781|
+		|8.|16384|262144|115|_FileOptions.SequentialScan_|-91.12|00:0134531|
+		|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
+		|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
+		
+		- The top 10 results also all share about 91% time reduction (or 10x speed up) and the same chunk size of 262144. 
+			- There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the 
+		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 4x to 96x slow down. 
+			|Buffer|Chunk|Write calls|Time increase in %|Time|
+			|------|-----|-----------|----|----|
+			|1024|262144|29297|_FileOptions.WriteThrough_|8366.23|12:8214473|
+			|262144|262144|115|_FileOptions.WriteThrough_|251.46|00:5322563|
+			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|9514.97|14:5611195|
+			|131072|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|308.03|00:6179280|
+		- All tests with _FILE_FLAG_NO_BUFFERING_ (5. & 6.) failed.
+	- Summary
+		- There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the data from stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
+		- Test bigger chunk sizes to see if this is the maximum.
+		- _FileOptions.WriteThrough_ slows down the file write significantly with slow downs ranging from 5x to 114x with .NET Framework and 4x to 96x with .NET 5.
+		- Debugg why all tests with _FILE_FLAG_NO_BUFFERING_ threw an exception.		
+		
+- Read
+	- .NET Framework
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+	- .NET 5
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+		-
+
+
+<ins>**Conclussion:**</ins>
 
 
 > [!TIP]
