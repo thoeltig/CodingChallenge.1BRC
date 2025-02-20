@@ -1,8 +1,24 @@
-1. FileOptions.None
-2. FileOptions.SequentialScan
-3. FileOptions.WriteThrough
-4. FileOptions.SequentialScan + FileOptions.WriteThrough
+1. _FileOptions.None_
+2. _FileOptions.SequentialScan_
+3. _FileOptions.WriteThrough_
+4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
 
+<ins>**Top 10:**</ins>
+|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+|----|-----|-----|----|-----|----|----|
+|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
+|1.|1024|262144|115|_FileOptions.SequentialScan_|-90.62|00:0121946|
+|2.|131072|262144|115|_FileOptions.SequentialScan_|-90.55|00:0122786|
+|3.|32768|262144|115|_FileOptions.SequentialScan_|-90.49|00:0123639|
+|4.|8192|262144|115|_FileOptions.None_|-90.43|00:0124345|
+|5.|16384|262144|115|_FileOptions.SequentialScan_|-90.31|00:0125923|
+|6.|65536|262144|115|_FileOptions.None_|-90.29|00:0126154|
+|7.|2048|262144|115|_FileOptions.SequentialScan_|-90.24|00:0126871|
+|8.|131072|262144|115|_FileOptions.None_|-90.11|00:0128578|
+|9.|65536|262144|115|_FileOptions.SequentialScan_|-90.07|00:0129060|
+|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
+
+<ins>**All measurements:**</ins>
 |Write|1.|%|2.|%|3.|%|4.|%|
 |----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1299553|0|00:1405063|8.12|14:7803109|11273.38|13:3764260|10193.1|

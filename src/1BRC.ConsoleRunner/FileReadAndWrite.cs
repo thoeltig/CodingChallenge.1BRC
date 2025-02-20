@@ -20,18 +20,23 @@ namespace _1BRC.ConsoleRunner {
 			32768,
 			65536,
 			131072,
-			262144
-		};
+			262144,
+            524288,
+            1048576,
+            2097152,
+            4194304
+        };
 
-		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+		//private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
-			FileOptions.None,
-			FileOptions.SequentialScan,
-			FileOptions.WriteThrough,
-			FileOptions.SequentialScan | FileOptions.WriteThrough,
-			FileOptions.WriteThrough | FileFlagNoBuffering,
-			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering
+            FileOptions.None,
+            FileOptions.SequentialScan,
+            FileOptions.WriteThrough,
+            FileOptions.SequentialScan | FileOptions.WriteThrough,
+			//FileFlagNoBuffering,
+			//FileOptions.WriteThrough | FileFlagNoBuffering,
+			//FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {

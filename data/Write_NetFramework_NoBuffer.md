@@ -1,7 +1,13 @@
-1. FILE_FLAG_NO_BUFFERING
-2. FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING
-3. FileOptions.SequentialScan + FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING
+1. _FILE_FLAG_NO_BUFFERING_
+2. _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_
+3. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_
 
+<ins>**Top 10:**</ins>
+|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+|----|-----|-----|----|-----|----|----|
+|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|14:0765745|
+
+<ins>**All measurements:**</ins>
 |Write|1.|%|-2.|%|-3.|%|
 |----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|14:0765745|0|15:6665508|11.3|15:5723604|10.63|

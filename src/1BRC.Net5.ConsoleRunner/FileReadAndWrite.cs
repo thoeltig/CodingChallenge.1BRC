@@ -19,18 +19,23 @@ namespace _1BRC.Net5.ConsoleRunner {
 			32768,
 			65536,
 			131072,
-			262144
-		};
+		    262144,
+            524288,
+            1048576,
+            2097152,
+            4194304
+        };
 
-		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+		//private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,
 			FileOptions.SequentialScan,
 			FileOptions.WriteThrough,
 			FileOptions.SequentialScan | FileOptions.WriteThrough,
-			FileOptions.WriteThrough | FileFlagNoBuffering,
-			FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+			//FileFlagNoBuffering,
+			//FileOptions.WriteThrough | FileFlagNoBuffering,
+			//FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {
@@ -82,19 +87,19 @@ namespace _1BRC.Net5.ConsoleRunner {
 		private static void Write(int bufferSize, FileOptions option, int splitCount, int chunkSize, ReadOnlySpan<byte> content) {
 			var contentLength = content.Length;
 			using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
-				for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
-					var copyLength = contentLength - contentIdx;
-					if (copyLength > chunkSize) {
-						copyLength = chunkSize;
-					}
-
-					var slice = content.Slice(contentIdx, copyLength);
-					stream.Write(slice);
+			for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
+				var copyLength = contentLength - contentIdx;
+				if (copyLength > chunkSize) {
+					copyLength = chunkSize;
 				}
-			}
-		}
 
-		private static void Read(int bufferSize, FileOptions option, int chunkSize) {
+				var slice = content.Slice(contentIdx, copyLength);
+				stream.Write(slice);
+            }
+			}
+        }
+
+        private static void Read(int bufferSize, FileOptions option, int chunkSize) {
 			using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
 				var buffer = new Span<byte>(new byte[chunkSize]);
 				var readBytes = 0;
