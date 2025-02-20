@@ -7,11 +7,9 @@ using _1BRC.Net5.ConsoleRunner;
 namespace _1BRC.ConsoleRunner {
 	internal static class FileReadAndWrite {
 		private const int TestRunCount = 12;
-		private const int FileSizeToWrite = 30000000;
+		private const int FileSizeToWrite = 512 * 58594; // 30000128
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
-
-		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly int[] _chunkSizes = {
 			1024,
@@ -24,6 +22,8 @@ namespace _1BRC.ConsoleRunner {
 			131072,
 			262144
 		};
+
+		private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
 
 		private static readonly FileOptions[] _options = {
 			FileOptions.None,

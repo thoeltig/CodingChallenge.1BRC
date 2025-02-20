@@ -6,7 +6,7 @@ using System.Linq;
 namespace _1BRC.Net5.ConsoleRunner {
 	internal static class FileReadAndWrite {
 		private const int TestRunCount = 12;
-		private const int FileSizeToWrite = 30000000;
+		private const int FileSizeToWrite = 512 * 58594; // 30000128
 		private const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
 

@@ -123,9 +123,10 @@ The test will write 10 MB to a file:
 	- _FileOptions.RandomAccess_ will cache less because it expects the file to be accessed at random positions by multiple applications.
 	- _FileOptions.SequentialScan_ will cache more because it expects the file to be accessed sequentially by a single application.
 	- _FileOptions.WriteThrough_ will write to file system cache but is flushed to disk without delay.
+	- _FILE_FLAG_NO_BUFFERING_ will ignore the file system cache but has has special memory alignment requierements.
+		- It isn't included in _FileOptions_ but can still be passed down with 0x20000000.
+		- File, buffer & block size need to be an integer multiple of 512 bytes.	
 	- If _FILE_FLAG_NO_BUFFERING_ is used in combination with _FileOptions.WriteThrough_ the file system cache is ignored and the data is immediately flushed to disk.
-		- This flag has a some of memory alignment requieremesnts and it isn't included in _FileOptions_ but can still be passed down.
-	
 	
 ## Second test: FileStream, buffer and block size
 The test will use the _FileStream_ to write & read 30 MB to & from a file:
@@ -144,8 +145,9 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	2. _FileOptions.SequentialScan_
 	3. _FileOptions.WriteThrough_
 	4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
-	5. _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ 
-	6. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_
+	5. _FILE_FLAG_NO_BUFFERING_ 
+	6. _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ 
+	7. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_
 - The elapsed time is the median of 12 tests as the fractional portion of a second.
 	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
 - Executed code
@@ -154,7 +156,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	
 ### .NET Framework 4.7.2 + byte[] (Execution time 2h 23min)
-|Write|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
+|Write|1.|%|2.|%|3.|%|4.|%|6.|%|7.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1299553|0|00:1405063|8.12|14:7803109|11273.38|13:3764260|10193.1|-|-|-|-|
 |Buffer 1024 Chunk 2048 (14649 times)|00:0713338|-45.11|00:0731726|-43.69|09:4657205|7183.83|10:0605037|7641.51|-|-|-|-|
@@ -239,7 +241,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 |Buffer 262144 Chunk 262144 (115 times)|00:0132792|-89.78|00:0141784|-89.09|00:6641521|411.06|00:7761348|497.23|-|-|-|-|
 
 
-|Read|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
+|Read|1.|%|2.|%|3.|%|4.|%|6.|%|7.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:0693528|0|00:0710824|2.49|00:0669411|-3.48|00:0657125|-5.25|07:4468101|10637.58|07:6023792|10861.89|
 |Buffer 1024 Chunk 2048 (14649 times)|00:0413247|-40.41|00:0418607|-39.64|00:0378762|-45.39|00:0380645|-45.11|06:2801137|8955.31|06:1207828|8725.57|
@@ -325,7 +327,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 
 
 ### .NET 5 (Core) + Spans<byte> (Execution time 2h 25min)
-|Write|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
+|Write|1.|%|2.|%|3.|%|4.|%|6.|%|7.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:1514422|0|00:1344081|-11.25|12:8214473|8366.23|14:5611195|9514.97|-|-|-|-|
 |Buffer 1024 Chunk 2048 (14649 times)|00:0809042|-46.58|00:0850539|-43.84|09:5818163|6227.05|10:2449789|6664.94|-|-|-|-|
@@ -410,7 +412,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 |Buffer 262144 Chunk 262144 (115 times)|00:0139862|-90.76|00:0127124|-91.61|00:5322563|251.46|00:6952255|359.07|-|-|-|-|
 
 
-|Read|1.|%|2.|%|3.|%|4.|%|5.|%|6.|%|
+|Read|1.|%|2.|%|3.|%|4.|%|6.|%|7.|%|
 |----|----|----|----|----|----|----|----|----|----|----|----|----|
 |Buffer 1024 Chunk 1024 (29297 times)|00:0704307|0|00:0653704|-7.18|00:0593084|-15.79|00:0715753|1.63|07:5282130|10588.82|07:4692495|10505.1|
 |Buffer 1024 Chunk 2048 (14649 times)|00:0355848|-49.48|00:0358228|-49.14|00:0342497|-51.37|00:0346957|-50.74|06:3115287|8861.33|06:4190807|9014.04|
@@ -498,6 +500,8 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 <ins>**Conclusion:**</ins>
 - Write
 	- .NET Framework
+		- The top 10 results: 
+		
 		|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 		|----|-----|-----|----|-----|----|----|
 		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
@@ -511,17 +515,20 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		|8.|131072|262144|115|_FileOptions.None_|-90.11|00:0128578|
 		|9.|65536|262144|115|_FileOptions.SequentialScan_|-90.07|00:0129060|
 		|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
+	
+		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow. 
 		
-		- The top 10 results all share about 90% time reduction (or 10x speed up) and the same chunk size of 262144. 
-		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 5x to 114x slow down. 
 			|Buffer|Chunk|Write calls|FileOption|Time increase in %|Time|
 			|----|-----|----|----|----|----|
 			|1024|262144|29297|_FileOptions.WriteThrough_|11273.38|14:7803109|
 			|32768|262144|115|_FileOptions.WriteThrough_|410.13|00:6629419|
 			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|10193.1|13:3764260|
 			|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|396.49|00:6452182|
+			
 		- All tests with _FILE_FLAG_NO_BUFFERING_ (5. & 6.) failed.
 	- .NET 5
+		- The top 10 results: 
+		
 		|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 		|----|-----|-----|----|-----|----|----|
 		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
@@ -536,22 +543,24 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
 		|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
 		
-		- The top 10 results also all share about 91% time reduction (or 10x speed up) and the same chunk size of 262144. 
-			- There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the 
-		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow with combinations ranging from about 4x to 96x slow down. 
+		- All tests with _FileOptions.WriteThrough_ (3. & 4.) are extremly slow. 
+		
 			|Buffer|Chunk|Write calls|FileOption|Time increase in %|Time|
 			|----|----|----|----|----|----|
 			|1024|262144|29297|_FileOptions.WriteThrough_|8366.23|12:8214473|
 			|262144|262144|115|_FileOptions.WriteThrough_|251.46|00:5322563|
 			|1024|262144|29297|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|9514.97|14:5611195|
 			|131072|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|308.03|00:6179280|
+			
 		- All tests with _FILE_FLAG_NO_BUFFERING_ (5. & 6.) failed.
 	- Summary
-		- There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the data from stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
-		- Test bigger chunk sizes to see if this is the maximum.
+		- There seems to be no major difference in speed between using byte arrays & spans of bytes when writing the data to the stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
+			- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
+		- The biggest chunk sizes of 262144 had the best execution time reduction (about -90% / 10x speed up) but buffer size didn't make a noticable change.
+			- Run more tests with increased chunk & bigger sizes to see if this is the maximum.
 		- _FileOptions.WriteThrough_ slows down the file write significantly with slow downs ranging from 5x to 114x with .NET Framework and 4x to 96x with .NET 5.
-		- Debugg why all tests with _FILE_FLAG_NO_BUFFERING_ threw an exception.		
-		
+			- The warning that ignoring the file system cache and forcing an instant flush to disk would slow down the execution time becausewas correct.
+		- _FILE_FLAG_NO_BUFFERING_ failed because file size was not memory aligned.		
 - Read
 	- .NET Framework
 		-
