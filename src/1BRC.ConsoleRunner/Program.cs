@@ -15,7 +15,8 @@ namespace _1BRC.ConsoleRunner {
 			Console.WriteLine("File write test started");
 			var sw = new Stopwatch();
 			sw.Start();
-			FileReadAndWrite.ExecuteTest(Console.WriteLine);
+			var tester = new FileReadAndWrite();
+			tester.ExecuteTest(Console.WriteLine);
 			sw.Stop();
 			Console.WriteLine($"File write test done! Took {sw.Elapsed:mm':'ss':'fff} to finish!");
 

@@ -5,10 +5,10 @@ using System.Linq;
 
 namespace _1BRC.Net5.ConsoleRunner {
 	internal abstract class BaseFileReadWriteTest {
-		protected const int TestRunCount = 12;
+		private const int TestRunCount = 12;
 		protected const int FileSizeToWrite = 512 * 58594; // 30000128
 		protected const string TestFile = "FileWriteTests.txt";
-		protected const string ResultFile = "resultFile.txt";
+		private const string ResultFile = "resultFile.txt";
 
 		protected static readonly int[] ChunkSizes = {
 			131072,
