@@ -16,7 +16,8 @@ Old notebook
 - DDR3 - 8GB RAM - 1600 MHz
 - Toshiba MQ01ABF050 - Read 100 MB/s Write 96 MB/s
 
-## First test: Comparison of the different classes
+
+## First test: Comparison of the different classes 
 The test will write 10 MB to a file:
 - Inputs
 	- a single string
@@ -34,85 +35,30 @@ The test will write 10 MB to a file:
 	- File.C = File.Create
 	- SW = StreamWriter
 	- FS = FileStream
+- [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/first_test_classcomparison/Write_NetFramework.md)
 
-||string|%|char array|%|
-|----|----|----|----|----|
-|File.CT + SW + 1 Write|1293107|base line|1293548|0.03|
-|File.CT + SW + 2442 Writes (Block 4096)|1221823|-5.51|1121599|-13.26|
-|File.CT + SW + 1221 Writes (Block 8192)|1202446|-7.01|1114435|-13.82|
-|File.CT + SW + 611 Writes (Block 16384)|1250209|-3.32|1178940|-8.83|
-|File.CT + SW + 306 Writes (Block 32768)|1256339|-2.84|1153100|-10.83|
-|File.CT + SW + 153 Writes (Block 65536)|1217394|-5.85|1170953|-9.45|
-|FileInfo + SW + 1 Write|1219227|-5.71|1182180|-8.58|
-|FileInfo + SW + 2442 Writes (Block 4096)|1320695|2.13|1116693|-13.64|
-|FileInfo + SW + 1221 Writes (Block 8192)|1284690|-0.65|1158506|-10.41|
-|FileInfo + SW + 611 Writes (Block 16384)|1238602|-4.21|1124409|-13.05|
-|FileInfo + SW + 306 Writes (Block 32768)|1225385|-5.23|1127841|-12.78|
-|FileInfo + SW + 153 Writes (Block 65536)|1205389|-6.78|1200050|-7.20|
-|SW + Buffer 4096 +1 Write|1229701|-4.90|1236782|-4.36|
-|SW + Buffer 4096 + 2442 Writes (Block 4096)|1224911|-5.27|1123864|-13.09|
-|SW + Buffer 4096 + 1221 Writes (Block 8192)|1246995|-3.56|1111940|-14.01|
-|SW + Buffer 4096 + 611 Writes (Block 16384)|1225226|-5.25|1136849|-12.08|
-|SW + Buffer 4096 + 306 Writes (Block 32768)|1334478|3.20|1185733|-8.30|
-|SW + Buffer 4096 + 153 Writes (Block 65536)|1289893|-0.25|1329354|2.80|
+<ins>**_StreamWriter_:**</ins>
+
+|Position|Class|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+|----|-----|-----|----|-----|----|----|
+|Base line|File.CT + string|1024|1293107|1|_FileOptions.SequentialScan_|0.00|00:1293548|
+|1.|SW + char array|4096|1221|8192|_FileOptions.None_|-14.01|00:1111940|
+|2.|File.CT + char array|1024|1221|8192|_FileOptions.None_|-13.82|00:1114435|
+|3.|FileInfo + char array|32768|2442|4096|_FileOptions.SequentialScan_|-13.64|00:1116693|
 
 
 > [!NOTE]
 > _StreamWriter_ was only tested with the default buffer size of 4096 after comparing it with the _FileStream_ default.
 
 
-||byte array|%|
-|----|----|----|
-|File.C + FS (Buffer 4096) + 2442 Writes (Block 4096)|0231060|-82.13|
-|File.C + FS (Buffer 4096) + 1221 Writes (Block 8192)|0114511|-91.14|
-|File.C + FS (Buffer 4096) + 611 Writes (Block 16384)|0078872|-93.90|
-|File.C + FS (Buffer 4096) + 306 Writes (Block 32768)|0073255|-94.33|
-|File.C + FS (Buffer 4096) + 153 Writes (Block 65536)|0065392|-94.94|
-|File.C + FS (Buffer 8192) + 2442 Writes (Block 4096)|0116835|-90.96|
-|File.C + FS (Buffer 8192) + 1221 Writes (Block 8192)|0102979|-92.04|
-|File.C + FS (Buffer 8192) + 611 Writes (Block 16384)|0072384|-94.40|
-|File.C + FS (Buffer 8192) + 306 Writes (Block 32768)|0069706|-94.61|
-|File.C + FS (Buffer 8192) + 153 Writes (Block 65536)|0058480|-95.48|
-|File.C + FS (Buffer 16384) + 2442 Writes (Block 4096)|0078453|-93.93|
-|File.C + FS (Buffer 16384) + 1221 Writes (Block 8192)|0076202|-94.11|
-|File.C + FS (Buffer 16384) + 611 Writes (Block 16384)|0073298|-94.33|
-|File.C + FS (Buffer 16384) + 306 Writes (Block 32768)|0071450|-94.47|
-|File.C + FS (Buffer 16384) + 153 Writes (Block 65536)|0058735|-95.46|
-|File.C + FS (Buffer 32768) + 2442 Writes (Block 4096)|0064887|-94.98|
-|File.C + FS (Buffer 32768) + 1221 Writes (Block 8192)|0063793|-95.07|
-|File.C + FS (Buffer 32768) + 611 Writes (Block 16384)|0062089|-95.20|
-|File.C + FS (Buffer 32768) + 306 Writes (Block 32768)|0066671|-94.84|
-|File.C + FS (Buffer 32768) + 153 Writes (Block 65536)|0052066|-95.97|
-|File.C + FS (Buffer 65536) + 2442 Writes (Block 4096)|0057004|-95.59|
-|File.C + FS (Buffer 65536) + 1221 Writes (Block 8192)|0054716|-95.77|
-|File.C + FS (Buffer 65536) + 611 Writes (Block 16384)|0056519|-95.63|
-|File.C + FS (Buffer 65536) + 306 Writes (Block 32768)|0065918|-94.90|
-|File.C + FS (Buffer 65536) + 153 Writes (Block 65536)|0052638|-95.93|
-|FS (Buffer 4096) + 2442 Writes (Block 4096)|0217797|-83.16|
-|FS (Buffer 4096) + 1221 Writes (Block 8192)|0125412|-90.30|
-|FS (Buffer 4096) + 611 Writes (Block 16384)|0077692|-94.00|
-|FS (Buffer 4096) + 306 Writes (Block 32768)|0061831|-95.22|
-|FS (Buffer 4096) + 153 Writes (Block 65536)|0054321|-95.80|
-|FS (Buffer 8192) + 2442 Writes (Block 4096)|0118598|-90.83|
-|FS (Buffer 8192) + 1221 Writes (Block 8192)|0106295|-91.78|
-|FS (Buffer 8192) + 611 Writes (Block 16384)|0074605|-94.23|
-|FS (Buffer 8192) + 306 Writes (Block 32768)|0059227|-95.42|
-|FS (Buffer 8192) + 153 Writes (Block 65536)|0054556|-95.78|
-|FS (Buffer 16384) + 2442 Writes (Block 4096)|0078896|-93.90|
-|FS (Buffer 16384) + 1221 Writes (Block 8192)|0076517|-94.08|
-|FS (Buffer 16384) + 611 Writes (Block 16384)|0069817|-94.60|
-|FS (Buffer 16384) + 306 Writes (Block 32768)|0070845|-94.52|
-|FS (Buffer 16384) + 153 Writes (Block 65536)|0051233|-96.04|
-|FS (Buffer 32768) + 2442 Writes (Block 4096)|0064147|-95.04|
-|FS (Buffer 32768) + 1221 Writes (Block 8192)|0060164|-95.38|
-|FS (Buffer 32768) + 611 Writes (Block 16384)|0063628|-95.08|
-|FS (Buffer 32768) + 306 Writes (Block 32768)|0067186|-94.80|
-|FS (Buffer 32768) + 153 Writes (Block 65536)|0054407|-95.79|
-|FS (Buffer 65536) + 2442 Writes (Block 4096)|0056377|-95.64|
-|FS (Buffer 65536) + 1221 Writes (Block 8192)|0055779|-95.69|
-|FS (Buffer 65536) + 611 Writes (Block 16384)|0053956|-95.83|
-|FS (Buffer 65536) + 306 Writes (Block 32768)|0154740|-88.03|
-|FS (Buffer 65536) + 153 Writes (Block 65536)|0064157|-95.04|
+<ins>**_FileStream_:**</ins>
+
+|Position|Class|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+|----|-----|-----|----|-----|----|----|
+|Base line|File.C|4096|2442|4096|_FileOptions.None_|-82.13|00:0231060|
+|1.|FS|16384|153|65536|_FileOptions.None_|-96.04|00:0051233|
+|2.|File.C|32768|153|65536|_FileOptions.None_|-95.97|00:0052066|
+|3.|File.C|65536|153|65536|_FileOptions.None_|-95.93|00:0052638|
 
 
 > [!Note]
@@ -133,6 +79,7 @@ The test will write 10 MB to a file:
 		- It isn't included in _FileOptions_ but can still be passed down with 0x20000000.
 		- File, buffer & block size need to be an integer multiple of 512 bytes.	
 	- If _FILE_FLAG_NO_BUFFERING_ is used in combination with _FileOptions.WriteThrough_ the file system cache is ignored and the data is immediately flushed to disk.
+	
 	
 ## Second test: FileStream, buffer and block size
 The test will use the _FileStream_ to write & read 30 MB to & from a file:
@@ -163,7 +110,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 ### Write
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetFramework.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -179,7 +126,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|_FileOptions.SequentialScan_|-90.07|00:0129060|
 	|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetFramework_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -196,7 +143,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|262144|8192|3663|_FILE_FLAG_NO_BUFFERING_|-94.79|00:7328590|
 	
 - .NET 5 (Core) + byte spans 
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetCore.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -212,7 +159,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
 	|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetCore_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -239,7 +186,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 
 ### Read	
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetFramework.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -255,7 +202,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089314|
 	|10.|32768|262144|115|_FileOptions.WriteThrough_|-87.12|00:0089352|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetFramework_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -272,7 +219,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|2048|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.78|00:3889174|
 	
 - .NET 5 (Core) + byte spans 	
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetCore.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -288,7 +235,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|1024|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.43|00:0088549|
 	|10.|2048|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.41|00:0088656|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetCore_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -314,6 +261,77 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		- For the currently used versions access type 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
 
 
+## Third test: FileStream, bigger buffer and block size
+The test will use the _FileStream_ to write & read 30 MB to & from a file:
+- Buffer sizes
+	- 1024
+	- 2048
+	- 4096
+	- 8192
+	- 16384
+	- 32768
+	- 65536
+	- 131072
+	- 262144
+	- 524288
+	- 1048576
+	- 2097152
+	- 4194304
+- Block sizes
+	- 131072
+	- 262144
+	- 524288
+	- 1048576
+	- 2097152
+	- 4194304
+- Access types
+	- write
+		1. _FileOptions.None_
+		2. _FileOptions.SequentialScan_
+	- Read
+		1. _FileOptions.None_
+		2. _FileOptions.SequentialScan_
+		3. _FileOptions.WriteThrough_
+		4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
+- The elapsed time is the median of 12 tests as the fractional portion of a second.
+	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
+- Executed code
+	- .NET Framework 4.7.2 Console with byte[]
+	- .NET 5 (Core) Console with Spans<byte>
+	
+	
+### Write
+- .NET Framework 4.7.2 + byte array + Access types 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Write_NetFramework.md)
+	
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0137227|
+	
+- .NET 5 (Core) + byte spans + Access types 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Write_NetCore.md)
+
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0162021|
+
+- Conclusion
+
+### Read	
+- .NET Framework 4.7.2 + byte array + Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Read_NetFramework.md)
+	
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0099363|
+	
+- .NET 5 (Core) + byte spans + Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Read_NetCore.md)
+	
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0103228|
+
+- Conclusion	
+
+
+	
 > [!TIP]
 > Additional informations on the topic:
 > - [Win32.CreateFileA](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)
