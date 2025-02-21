@@ -40,7 +40,7 @@ The test will write 10 MB to a file:
 <ins>**_StreamWriter_:**</ins>
 
 |Position|Class|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
-|----|-----|-----|----|-----|----|----|
+|----|-----|-----|-----|----|-----|----|----|
 |Base line|File.CT + string|1024|1293107|1|_FileOptions.SequentialScan_|0.00|00:1293548|
 |1.|SW + char array|4096|1221|8192|_FileOptions.None_|-14.01|00:1111940|
 |2.|File.CT + char array|1024|1221|8192|_FileOptions.None_|-13.82|00:1114435|
@@ -54,7 +54,7 @@ The test will write 10 MB to a file:
 <ins>**_FileStream_:**</ins>
 
 |Position|Class|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
-|----|-----|-----|----|-----|----|----|
+|----|-----|-----|-----|----|-----|----|----|
 |Base line|File.C|4096|2442|4096|_FileOptions.None_|-82.13|00:0231060|
 |1.|FS|16384|153|65536|_FileOptions.None_|-96.04|00:0051233|
 |2.|File.C|32768|153|65536|_FileOptions.None_|-95.97|00:0052066|
