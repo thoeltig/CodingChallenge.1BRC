@@ -82,31 +82,31 @@ The test will write 10 MB to a file:
 |File.C + FS (Buffer 65536) + 611 Writes (Block 16384)|0056519|-95.63|
 |File.C + FS (Buffer 65536) + 306 Writes (Block 32768)|0065918|-94.90|
 |File.C + FS (Buffer 65536) + 153 Writes (Block 65536)|0052638|-95.93|
-|FS (Buffer 4096) + 2442 Writes (Block 4096)|0217797||
-|FS (Buffer 4096) + 1221 Writes (Block 8192)|0125412||
-|FS (Buffer 4096) + 611 Writes (Block 16384)|0077692||
-|FS (Buffer 4096) + 306 Writes (Block 32768)|0061831||
-|FS (Buffer 4096) + 153 Writes (Block 65536)|0054321||
-|FS (Buffer 8192) + 2442 Writes (Block 4096)|0118598||
-|FS (Buffer 8192) + 1221 Writes (Block 8192)|0106295||
-|FS (Buffer 8192) + 611 Writes (Block 16384)|0074605||
-|FS (Buffer 8192) + 306 Writes (Block 32768)|0059227||
-|FS (Buffer 8192) + 153 Writes (Block 65536)|0054556||
-|FS (Buffer 16384) + 2442 Writes (Block 4096)|0078896||
-|FS (Buffer 16384) + 1221 Writes (Block 8192)|0076517||
-|FS (Buffer 16384) + 611 Writes (Block 16384)|0069817||
-|FS (Buffer 16384) + 306 Writes (Block 32768)|0070845||
-|FS (Buffer 16384) + 153 Writes (Block 65536)|0051233||
-|FS (Buffer 32768) + 2442 Writes (Block 4096)|0064147||
-|FS (Buffer 32768) + 1221 Writes (Block 8192)|0060164||
-|FS (Buffer 32768) + 611 Writes (Block 16384)|0063628||
-|FS (Buffer 32768) + 306 Writes (Block 32768)|0067186||
-|FS (Buffer 32768) + 153 Writes (Block 65536)|0054407||
-|FS (Buffer 65536) + 2442 Writes (Block 4096)|0056377||
-|FS (Buffer 65536) + 1221 Writes (Block 8192)|0055779||
-|FS (Buffer 65536) + 611 Writes (Block 16384)|0053956||
-|FS (Buffer 65536) + 306 Writes (Block 32768)|0154740||
-|FS (Buffer 65536) + 153 Writes (Block 65536)|0064157||
+|FS (Buffer 4096) + 2442 Writes (Block 4096)|0217797|-83.16|
+|FS (Buffer 4096) + 1221 Writes (Block 8192)|0125412|-90.30|
+|FS (Buffer 4096) + 611 Writes (Block 16384)|0077692|-94.00|
+|FS (Buffer 4096) + 306 Writes (Block 32768)|0061831|-95.22|
+|FS (Buffer 4096) + 153 Writes (Block 65536)|0054321|-95.80|
+|FS (Buffer 8192) + 2442 Writes (Block 4096)|0118598|-90.83|
+|FS (Buffer 8192) + 1221 Writes (Block 8192)|0106295|-91.78|
+|FS (Buffer 8192) + 611 Writes (Block 16384)|0074605|-94.23|
+|FS (Buffer 8192) + 306 Writes (Block 32768)|0059227|-95.42|
+|FS (Buffer 8192) + 153 Writes (Block 65536)|0054556|-95.78|
+|FS (Buffer 16384) + 2442 Writes (Block 4096)|0078896|-93.90|
+|FS (Buffer 16384) + 1221 Writes (Block 8192)|0076517|-94.08|
+|FS (Buffer 16384) + 611 Writes (Block 16384)|0069817|-94.60|
+|FS (Buffer 16384) + 306 Writes (Block 32768)|0070845|-94.52|
+|FS (Buffer 16384) + 153 Writes (Block 65536)|0051233|-96.04|
+|FS (Buffer 32768) + 2442 Writes (Block 4096)|0064147|-95.04|
+|FS (Buffer 32768) + 1221 Writes (Block 8192)|0060164|-95.38|
+|FS (Buffer 32768) + 611 Writes (Block 16384)|0063628|-95.08|
+|FS (Buffer 32768) + 306 Writes (Block 32768)|0067186|-94.80|
+|FS (Buffer 32768) + 153 Writes (Block 65536)|0054407|-95.79|
+|FS (Buffer 65536) + 2442 Writes (Block 4096)|0056377|-95.64|
+|FS (Buffer 65536) + 1221 Writes (Block 8192)|0055779|-95.69|
+|FS (Buffer 65536) + 611 Writes (Block 16384)|0053956|-95.83|
+|FS (Buffer 65536) + 306 Writes (Block 32768)|0154740|-88.03|
+|FS (Buffer 65536) + 153 Writes (Block 65536)|0064157|-95.04|
 
 
 > [!Note]
@@ -155,10 +155,9 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- .NET 5 (Core) Console with Spans<byte>
 	
 	
-### .NET Framework 4.7.2 + byte array
-- Write
+### Write
+- .NET Framework 4.7.2 + byte array
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework.md)
-	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
@@ -174,46 +173,125 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework_NoBuffer.md)
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|14:0765745|
+	|1.|32768|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.46|00:6384932|
+	|2.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.46|00:6393680|
+	|3.|262144|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.35|00:6548806|
+	|4.|1024|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.16|00:6818550|
+	|5.|65536|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.04|00:6987442|
+	|6.|131072|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.01|00:7022802|
+	|7.|4096|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.99|00:7058127|
+	|8.|2048|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.95|00:7113264|
+	|9.|16384|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.83|00:7273666|
+	|10.|262144|8192|3663|_FILE_FLAG_NO_BUFFERING_|-94.79|00:7328590|
 	
-- Read	
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework.md)
-	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework_NoBuffer.md)
-
-### .NET 5 (Core) + byte spans 
-- Write
+- .NET 5 (Core) + byte spans 
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore.md)
-	
-		|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
-		|----|-----|-----|----|-----|----|----|
-		|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
-		|1.|4096|262144|115|_FileOptions.None_|-91.69|00:0125792|
-		|2.|32768|262144|115|_FileOptions.SequentialScan_|-91.69|00:0125872|
-		|3.|262144|262144|115|_FileOptions.SequentialScan_|-91.61|00:0127124|
-		|4.|8192|262144|115|_FileOptions.SequentialScan_|-91.51|00:0128543|
-		|5.|4096|262144|115|_FileOptions.SequentialScan_|-91.46|00:0129328|
-		|6.|1024|262144|115|_FileOptions.SequentialScan_|-91.39|00:0130422|
-		|7.|32768|262144|115|_FileOptions.None_|-91.36|00:0130781|
-		|8.|16384|262144|115|_FileOptions.SequentialScan_|-91.12|00:0134531|
-		|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
-		|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
+	|1.|4096|262144|115|_FileOptions.None_|-91.69|00:0125792|
+	|2.|32768|262144|115|_FileOptions.SequentialScan_|-91.69|00:0125872|
+	|3.|262144|262144|115|_FileOptions.SequentialScan_|-91.61|00:0127124|
+	|4.|8192|262144|115|_FileOptions.SequentialScan_|-91.51|00:0128543|
+	|5.|4096|262144|115|_FileOptions.SequentialScan_|-91.46|00:0129328|
+	|6.|1024|262144|115|_FileOptions.SequentialScan_|-91.39|00:0130422|
+	|7.|32768|262144|115|_FileOptions.None_|-91.36|00:0130781|
+	|8.|16384|262144|115|_FileOptions.SequentialScan_|-91.12|00:0134531|
+	|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
+	|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore_NoBuffer.md)
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|08:5941065|
+	|1.|262144|8192|3663|_FILE_FLAG_NO_BUFFERING_|-93.98|00:5170241|
+	|2.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.97|00:5183650|
+	|3.|131072|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.82|00:5312722|
+	|4.|2048|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.82|00:5315240|
+	|5.|131072|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-93.76|00:5358676|
+	|6.|262144|32768|916|_FILE_FLAG_NO_BUFFERING_|-93.71|00:5401459|
+	|7.|262144|2048|14649|_FILE_FLAG_NO_BUFFERING_|-93.69|00:5421775|
+	|8.|16384|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.67|00:5440487|
+	|9.|262144|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.67|00:5443361|
+	|10.|262144|65536|458|_FILE_FLAG_NO_BUFFERING_|-93.62|00:5487314|
+
+- Conclusion
+	- For access type 1. - 4. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when writing the data to the stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
+		- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
+		- Need to test larger block & chunk sizes.
+		- For the currently used versions access type 3. & 4. can be ignored for future tests. Might have better results in newer .NET versions.
+	- For access type 5. - 7. both .NET versions had the best results with block size 262144 & _FILE_FLAG_NO_BUFFERING but the buffer sizes is random.
+		- .NET 5 performed better than .NET Framework but in comparison with 1. & 2. access type they were really slow.
+		- For the currently used versions access type 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
+
+### Read	
+- .NET Framework 4.7.2 + byte array
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework.md)
+	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0693528|
+	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.30|00:0088072|
+	|2.|1024|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.22|00:0088628|
+	|3.|131072|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.18|00:0088898|
+	|4.|16384|262144|115|_FileOptions.WriteThrough_|-87.16|00:0089060|
+	|5.|131072|131072|229|_FileOptions.WriteThrough_|-87.14|00:0089171|
+	|6.|1024|262144|115|_FileOptions.WriteThrough_|-87.14|00:0089188|
+	|7.|65536|262144|115|_FileOptions.WriteThrough_|-87.14|00:0089192|
+	|8.|32768|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089313|
+	|9.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089314|
+	|10.|32768|262144|115|_FileOptions.WriteThrough_|-87.12|00:0089352|
 	
-- Read	
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework_NoBuffer.md)
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4466310|
+	|1.|8192|262144|115| _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.22|00:3555872|
+	|2.|65536|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.08|00:3666949|
+	|3.|262144|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.08|00:3666935|
+	|4.|262144|131072|229|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.08|00:3667076|
+	|5.|65536|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.08|00:3667002|
+	|6.|262144|32768|916|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.93|00:3778057|
+	|7.|1024|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.93|00:3778061|
+	|8.|16384|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.93|00:3778302|
+	|9.|131072|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.78|00:3889167|
+	|10.|2048|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.78|00:3889174|
+	
+- .NET 5 (Core) + byte spans 	
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore.md)
+	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0704307|
+	|1.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-88.12|00:0083699|
+	|2.|1024|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.61|00:0087258|
+	|3.|1024|262144|115|_FileOptions.WriteThrough_|-87.52|00:0087911|
+	|4.|2048|262144|115|_FileOptions.WriteThrough_|-87.48|00:0088184|
+	|5.|65536|131072|229|_FileOptions.WriteThrough_|-87.48|00:0088207|
+	|6.|4096|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.47|00:0088221|
+	|7.|32768|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.45|00:0088392|
+	|8.|32768|131072|229|_FileOptions.WriteThrough_|-87.44|00:0088446|
+	|9.|1024|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.43|00:0088549|
+	|10.|2048|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.41|00:0088656|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore_NoBuffer.md)
-
-
-<ins>**Conclusion:**</ins>
-	- Write
-		- There seems to be no major difference in speed between using byte arrays & spans of bytes when writing the data to the stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
-			- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
-		- The biggest chunk sizes of 262144 had the best execution time reduction (about -90% / 10x speed up) but buffer size didn't make a noticable change.
-			- Run more tests with increased chunk & bigger sizes to see if this is the maximum.
-		- _FileOptions.WriteThrough_ slows down the file write significantly with slow downs ranging from 5x to 114x with .NET Framework and 4x to 96x with .NET 5.
-			- The warning that ignoring the file system cache and forcing an instant flush to disk would slow down the execution time becausewas correct.
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4339171|
+	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.17|00:3593126|
+	|2.|16384|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.07|00:3667849|
+	|3.|131072|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.92|00:3777291|
+	|4.|65536|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.92|00:3778078|
+	|5.|262144|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.77|00:3889190|
+	|6.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889193|
+	|7.|16384|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889197|
+	|8.|262144|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.77|00:3889210|
+	|9.|1024|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889253|
+	|10.|262144|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889264|
+	
+- Conclusion
+	- For access type 1. - 4. both .NET versions had the best results with block size 262144 or 131072 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ or _FileOptions.WriteThrough_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the data from the stream but in total the .NET 5 version ran slightly faster looking at the actual execution times.
+		- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
+		- Need to test larger block & chunk sizes.
+		- For the currently used versions access type 1. & 2. can be ignored for future tests. Might have better results in newer .NET versions.
+	- For access type 5. - 7. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ for .NET Framework or _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ for .NET 5 but the buffer sizes is random.
+		- Both versions performed similiar but in comparison with 3. & 4. access type they were really slow.
+		- For the currently used versions access type 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
 
 
 > [!TIP]

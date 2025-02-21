@@ -6,6 +6,16 @@
 |Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 |----|-----|-----|----|-----|----|----|
 |Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4339171|
+|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.17|00:3593126|
+|2.|16384|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.07|00:3667849|
+|3.|131072|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.92|00:3777291|
+|4.|65536|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.92|00:3778078|
+|5.|262144|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.77|00:3889190|
+|6.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889193|
+|7.|16384|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889197|
+|8.|262144|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.77|00:3889210|
+|9.|1024|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889253|
+|10.|262144|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.77|00:3889264|
 
 <ins>**All measurements:**</ins>
 |Read|1.|%|-2.|%|-3.|%|
