@@ -10,6 +10,12 @@ There are a couple of classes that could be used to read & write data to & from 
 	- _StreamReader_ reads all bytes from a file and converts them to a string.
 - Every way to access a file utilizes a _FileStream_ which can only read & write bytes.
 
+## Setup
+Old notebook
+- Intel Core i5-4200U - 2.3 GHz
+- DDR3 - 8GB RAM - 1600 MHz
+- Toshiba MQ01ABF050 - Read 100 MB/s Write 96 MB/s
+
 ## First test: Comparison of the different classes
 The test will write 10 MB to a file:
 - Inputs
@@ -157,7 +163,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 ### Write
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetFramework.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -173,7 +179,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|_FileOptions.SequentialScan_|-90.07|00:0129060|
 	|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetFramework_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -190,7 +196,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|262144|8192|3663|_FILE_FLAG_NO_BUFFERING_|-94.79|00:7328590|
 	
 - .NET 5 (Core) + byte spans 
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetCore.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -206,7 +212,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|_FileOptions.SequentialScan_|-91.10|00:0134734|
 	|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Write_NetCore_NoBuffer.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -233,7 +239,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 
 ### Read	
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetFramework.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -249,7 +255,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089314|
 	|10.|32768|262144|115|_FileOptions.WriteThrough_|-87.12|00:0089352|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetFramework_NoBuffer.md)
 	
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4466310|
 	|1.|8192|262144|115| _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.22|00:3555872|
@@ -264,7 +270,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|2048|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-94.78|00:3889174|
 	
 - .NET 5 (Core) + byte spans 	
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore.md)
+	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetCore.md)
 	
 	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0704307|
 	|1.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-88.12|00:0083699|
@@ -278,7 +284,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|1024|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.43|00:0088549|
 	|10.|2048|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.41|00:0088656|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore_NoBuffer.md)
+	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/Read_NetCore_NoBuffer.md)
 	
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4339171|
 	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.17|00:3593126|
