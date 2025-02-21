@@ -12,6 +12,15 @@ namespace _1BRC.ConsoleRunner {
 		private const string ResultFile = "resultFile.txt";
 
 		private static readonly int[] _chunkSizes = {
+			131072,
+			262144,
+			524288,
+			1048576,
+			2097152,
+			4194304
+		};
+
+		private static readonly int[] _bufferSizes = {
 			1024,
 			2048,
 			4096,
@@ -21,22 +30,22 @@ namespace _1BRC.ConsoleRunner {
 			65536,
 			131072,
 			262144,
-            524288,
-            1048576,
-            2097152,
-            4194304
-        };
+			524288,
+			1048576,
+			2097152,
+			4194304
+		};
 
-		//private const FileOptions FileFlagNoBuffering = (FileOptions)0x20000000;
+		private static readonly FileOptions[] _readOptions = {
+			FileOptions.None,
+			FileOptions.SequentialScan,
+			FileOptions.WriteThrough,
+			FileOptions.SequentialScan | FileOptions.WriteThrough,
+		};
 
-		private static readonly FileOptions[] _options = {
-            FileOptions.None,
-            FileOptions.SequentialScan,
-            FileOptions.WriteThrough,
-            FileOptions.SequentialScan | FileOptions.WriteThrough,
-			//FileFlagNoBuffering,
-			//FileOptions.WriteThrough | FileFlagNoBuffering,
-			//FileOptions.SequentialScan | FileOptions.WriteThrough | FileFlagNoBuffering,
+		private static readonly FileOptions[] _writeOptions = {
+			FileOptions.None,
+			FileOptions.SequentialScan,
 		};
 
 		public static void ExecuteTest(Action<string> progressCallback) {
@@ -48,14 +57,12 @@ namespace _1BRC.ConsoleRunner {
 			var random = new Random();
 			random.NextBytes(fileContentBytes);
 
-			foreach (var option in _options) {
-				progressCallback($"Start file option {option}");
+			foreach (var chunkSize in _chunkSizes) {
+				progressCallback($"Chunk size {chunkSize}");
+				var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
 
-				foreach (var chunkSize in _chunkSizes) {
-					var byteArrays = SplitIntoByteArrays(fileContentBytes, chunkSize);
-
-					foreach (var bufferSize in _chunkSizes) {
-						var memory = GC.GetTotalMemory(true);
+				foreach (var bufferSize in _bufferSizes) {
+					foreach (var option in _writeOptions) {
 						var time = RunTest(() => {
 							using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
 								foreach (var line in byteArrays) {
@@ -63,17 +70,18 @@ namespace _1BRC.ConsoleRunner {
 								}
 							}
 						}, DeleteFile);
-						writeTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
+						writeTableGenerator.Add(option, chunkSize, bufferSize, time);
+					}
 
-						memory = GC.GetTotalMemory(true);
-						time = RunTest(() => {
+					foreach (var option in _readOptions) {
+						var time = RunTest(() => {
 							using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
 								var buffer = new byte[chunkSize];
 								while (stream.Read(buffer, 0, buffer.Length) != 0) {
 								}
 							}
 						});
-						readTableGenerator.Add(option, chunkSize, bufferSize, time, GC.GetTotalMemory(true) - memory);
+						readTableGenerator.Add(option, chunkSize, bufferSize, time);
 					}
 				}
 			}
