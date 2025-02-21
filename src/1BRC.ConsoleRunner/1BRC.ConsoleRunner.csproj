@@ -40,6 +40,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\BaseFileReadWriteTest.cs">
+      <Link>BaseFileReadWriteTest.cs</Link>
+    </Compile>
     <Compile Include="..\1BRC.Net5.ConsoleRunner\ResultTableGenerator.cs">
       <Link>ResultTableGenerator.cs</Link>
     </Compile>
