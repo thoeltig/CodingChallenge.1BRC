@@ -158,6 +158,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 ### Write
 - .NET Framework 4.7.2 + byte array
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework.md)
+	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
@@ -173,6 +174,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|4096|262144|115|_FileOptions.None_|-89.86|00:0131826|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetFramework_NoBuffer.md)
+	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|14:0765745|
@@ -189,6 +191,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 - .NET 5 (Core) + byte spans 
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore.md)
+	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
@@ -204,6 +207,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|16384|262144|115|_FileOptions.None_|-91.09|00:0134885|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Write_NetCore_NoBuffer.md)
+	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|08:5941065|
@@ -230,6 +234,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 ### Read	
 - .NET Framework 4.7.2 + byte array
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework.md)
+	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
 	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0693528|
@@ -245,6 +250,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|32768|262144|115|_FileOptions.WriteThrough_|-87.12|00:0089352|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetFramework_NoBuffer.md)
+	
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4466310|
 	|1.|8192|262144|115| _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.22|00:3555872|
 	|2.|65536|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.08|00:3666949|
@@ -259,6 +265,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 - .NET 5 (Core) + byte spans 	
 	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore.md)
+	
 	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0704307|
 	|1.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-88.12|00:0083699|
 	|2.|1024|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.61|00:0087258|
@@ -272,6 +279,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|2048|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.41|00:0088656|
 	
 	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/62be9e53b757663c16c37f566d2708c4447d2a4a/data/Read_NetCore_NoBuffer.md)
+	
 	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4339171|
 	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.17|00:3593126|
 	|2.|16384|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.07|00:3667849|

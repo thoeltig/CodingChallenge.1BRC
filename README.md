@@ -36,7 +36,7 @@ There are a couple of classes that could be used to read & write data to & from 
 
 After an initial test with reduced data the _FileStream_ with default settings was the clear winner. 
 Because I wanted to understand why that was the case I took a deep dive in the documentation, code and performance tests for a couple of days.
-The collected informations and results can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/8d52697fe21f28c2765e80b1cc0d958811eeb886/FileReadAndWritePerformanceTests.md). 
+The collected informations and results can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/cec294b6ca42d1ad2978b415c675d86936201a3c/FileReadAndWritePerformanceTests.md). 
 
 ## File generation V1
 The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code first and test it with a smaller amount of rows.
