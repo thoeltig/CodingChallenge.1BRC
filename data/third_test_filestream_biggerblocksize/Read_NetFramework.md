@@ -4,14 +4,25 @@
 4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
 
 <ins>**Top 10:**</ins>
-|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
-|----|-----|-----|----|-----|----|----|
-|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0099363|
+|Position|Buffer|Chunk|Write calls|FileOption|This time reduction (%)|Previous time reduction (%)|Time|
+|----|-----|-----|----|-----|----|----|----|
+|Base line from this|1024|131072|229|_FileOptions.None_|||00:0099363|
+|Base line from previous|1024|1024|29297|_FileOptions.None_|||00:0693528|
+|1.|16384|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-10.55|-87.18|00:0088885|
+|2.|524288|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-9.44|-87.02|00:0089982|
+|3.|131072|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-8.92|-86.95|00:0090500|
+|4.|8192|524288|58|_FileOptions.WriteThrough_|-5.06|-86.40|00:0094338|
+|5.|8192|524288|58|_FileOptions.None_|-4.88|-86.37|00:0094512|
+|6.|4096|524288|58|_FileOptions.None_|-3.61|-86.19|00:0095777|
+|7.|16384|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-3.76|-86.21|00:0095626|
+|8.|16384|524288|58|_FileOptions.SequentialScan_|-3.73|-86.21|00:0095653|
+|9.|8192|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-3.54|-86.18|00:0095845|
+|10.|32768|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-3.36|-86.15|00:0096021|
 
 <ins>**All measurements:**</ins>
 |Read|1.|%|2.|%|3.|%|4.|%|
 |----|----|----|----|----|----|----|----|----|
-|Buffer 1024 Chunk 131072 (229 times)|00:0099363|0.00|00:0102851|3.51|00:0099233|-0.13|00:0106425|7.11|
+|Buffer 1024 Chunk 131072 (229 times)|00:0099363||00:0102851|3.51|00:0099233|-0.13|00:0106425|7.11|
 |Buffer 1024 Chunk 262144 (115 times)|00:0101412|2.06|00:0100170|0.81|00:0105616|6.29|00:0105406|6.08|
 |Buffer 1024 Chunk 524288 (58 times)|00:0105777|6.46|00:0100805|1.45|00:0101978|2.63|00:0109561|10.26|
 |Buffer 1024 Chunk 1048576 (29 times)|00:0106636|7.32|00:0101986|2.64|00:0114388|15.12|00:0124220|25.02|
@@ -51,7 +62,7 @@
 |Buffer 65536 Chunk 262144 (115 times)|00:0098663|-0.70|00:0099854|0.49|00:0120585|21.36|00:0120578|21.35|
 |Buffer 65536 Chunk 524288 (58 times)|00:0116820|17.57|00:0100019|0.66|00:0097311|-2.07|00:0097282|-2.09|
 |Buffer 65536 Chunk 1048576 (29 times)|00:0115588|16.33|00:0119820|20.59|00:0107049|7.74|00:0102979|3.64|
-|Buffer 65536 Chunk 2097152 (15 times)|00:0121894|22.68|00:0122945|23.73|00:0116057|16.8|00:0134412|35.27|
+|Buffer 65536 Chunk 2097152 (15 times)|00:0121894|22.68|00:0122945|23.73|00:0116057|16.80|00:0134412|35.27|
 |Buffer 65536 Chunk 4194304 (8 times)|00:0125534|26.34|00:0123892|24.69|00:0147314|48.26|00:0140383|41.28|
 |Buffer 131072 Chunk 131072 (229 times)|00:0105537|6.21|00:0122086|22.87|00:0115175|15.91|00:0108711|9.41|
 |Buffer 131072 Chunk 262144 (115 times)|00:0116578|17.33|00:0101752|2.40|00:0100850|1.50|00:0102131|2.79|

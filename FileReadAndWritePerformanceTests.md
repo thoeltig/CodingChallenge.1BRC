@@ -114,7 +114,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1299553|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:1299553|
 	|1.|1024|262144|115|_FileOptions.SequentialScan_|-90.62|00:0121946|
 	|2.|131072|262144|115|_FileOptions.SequentialScan_|-90.55|00:0122786|
 	|3.|32768|262144|115|_FileOptions.SequentialScan_|-90.49|00:0123639|
@@ -130,7 +130,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|14:0765745|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_||14:0765745|
 	|1.|32768|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.46|00:6384932|
 	|2.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.46|00:6393680|
 	|3.|262144|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.35|00:6548806|
@@ -147,7 +147,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FileOptions.None_|0|00:1514422|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:1514422|
 	|1.|4096|262144|115|_FileOptions.None_|-91.69|00:0125792|
 	|2.|32768|262144|115|_FileOptions.SequentialScan_|-91.69|00:0125872|
 	|3.|262144|262144|115|_FileOptions.SequentialScan_|-91.61|00:0127124|
@@ -163,7 +163,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|08:5941065|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_||08:5941065|
 	|1.|262144|8192|3663|_FILE_FLAG_NO_BUFFERING_|-93.98|00:5170241|
 	|2.|8192|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.97|00:5183650|
 	|3.|131072|262144|115|_FILE_FLAG_NO_BUFFERING_|-93.82|00:5312722|
@@ -190,7 +190,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0693528|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:0693528|
 	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.30|00:0088072|
 	|2.|1024|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.22|00:0088628|
 	|3.|131072|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.18|00:0088898|
@@ -206,7 +206,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4466310|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_||07:4466310|
 	|1.|8192|262144|115| _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.22|00:3555872|
 	|2.|65536|262144|115|_FILE_FLAG_NO_BUFFERING_|-95.08|00:3666949|
 	|3.|262144|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.08|00:3666935|
@@ -223,7 +223,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FileOptions.None_|0.00|00:0704307|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:0704307|
 	|1.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-88.12|00:0083699|
 	|2.|1024|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.61|00:0087258|
 	|3.|1024|262144|115|_FileOptions.WriteThrough_|-87.52|00:0087911|
@@ -239,7 +239,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_|0.00|07:4339171|
+	|Base line|1024|1024|29297|_FILE_FLAG_NO_BUFFERING_||07:4339171|
 	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.17|00:3593126|
 	|2.|16384|262144|115|_FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_|-95.07|00:3667849|
 	|3.|131072|262144|115|_FILE_FLAG_NO_BUFFERING_|-94.92|00:3777291|
@@ -305,13 +305,33 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0137227|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:1299553|
+	|1.|262144|2097152|15|_FileOptions.SequentialScan_|-90.91|00:0118064|
+	|2.|2048|4194304|8|_FileOptions.None_|-90.87|00:0118581|
+	|3.|8192|4194304|8|_FileOptions.None_|-90.87|00:0118671|
+	|4.|1024|2097152|15|_FileOptions.None_|-90.82|00:0119351|
+	|5.|4096|4194304|8|_FileOptions.SequentialScan_|-90.79|00:0119689|
+	|6.|65536|1048576|29|_FileOptions.SequentialScan_|-90.69|00:0120976|
+	|7.|524288|2097152|15|_FileOptions.None_|-90.68|00:0121058|
+	|8.|32768|4194304|8|_FileOptions.SequentialScan_|-90.65|00:0121478|
+	|9.|4096|2097152|15|_FileOptions.SequentialScan_|-90.63|00:0121732|
+	|10.|65536|4194304|8|_FileOptions.SequentialScan_|-90.63|00:0121789|
 	
 - .NET 5 (Core) + byte spans + Access types 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Write_NetCore.md)
 
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0162021|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:1514422|
+	|1.|16384|1048576|29|_FileOptions.SequentialScan_|-92.11|00:0119449|
+	|2.|1024|4194304|8|_FileOptions.SequentialScan_|-92.08|00:0119917|
+	|3.|32768|4194304|8|_FileOptions.SequentialScan_|-92.04|00:0120543|
+	|4.|524288|4194304|8|_FileOptions.None_|-92.02|00:0120794|
+	|5.|2048|2097152|15|_FileOptions.None_|-91.98|00:0121445|
+	|6.|16384|1048576|29|_FileOptions.None_|-91.97|00:0121616|
+	|7.|16384|4194304|8|_FileOptions.None_|-91.97|00:0121617|
+	|8.|4096|1048576|29|_FileOptions.SequentialScan_|-91.95|00:0121827|
+	|9.|65536|2097152|15|_FileOptions.SequentialScan_|-91.95|00:0121834|
+	|10.|262144|4194304|8|_FileOptions.None_|-91.95|00:0121958|
 
 - Conclusion
 
@@ -320,14 +340,34 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0099363|
-	
+	|Base line|1024|1024|29297|_FileOptions.None_||00:0693528|
+	|1.|8192|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.30|00:0088072|
+	|2.|1024|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.22|00:0088628|
+	|3.|16384|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.18|00:0088885|
+	|4.|131072|131072|229|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.18|00:0088898|
+	|5.|16384|262144|115|_FileOptions.WriteThrough_|-87.16|00:0089060|
+	|6.|131072|131072|229|_FileOptions.WriteThrough_|-87.14|00:0089171|
+	|7.|1024|262144|115|_FileOptions.WriteThrough_|-87.14|00:0089188|
+	|8.|65536|262144|115|_FileOptions.WriteThrough_|-87.14|00:0089192|
+	|9.|32768|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089313|
+	|10.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.12|00:0089314|
+		
 - .NET 5 (Core) + byte spans + Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Read_NetCore.md)
 	
 	|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0103228|
-
+	|Base line|1024|1024|29297|_FileOptions.None_||00:0704307|
+	|1.|2048|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-88.12|00:0083699|
+	|2.|1024|262144|115|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.61|00:0087258|
+	|3.|1024|262144|115|_FileOptions.WriteThrough_|-87.52|00:0087911|
+	|4.|2048|262144|115|_FileOptions.WriteThrough_|-87.48|00:0088184|
+	|5.|65536|131072|229|_FileOptions.WriteThrough_|-87.48|00:0088207|
+	|6.|4096|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.47|00:0088221|
+	|7.|32768|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.45|00:0088392|
+	|8.|32768|131072|229|_FileOptions.WriteThrough_|-87.44|00:0088446|
+	|9.|1024|65536|458|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.43|00:0088549|
+	|10.|4096|524288|58|_FileOptions.SequentialScan_ + _FileOptions.WriteThrough_|-87.42|00:0088577|
+	
 - Conclusion	
 
 

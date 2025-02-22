@@ -2,14 +2,25 @@
 2. _FileOptions.SequentialScan_
 
 <ins>**Top 10:**</ins>
-|Position|Buffer|Chunk|Write calls|FileOption|Time reduction in %|Time|
-|----|-----|-----|----|-----|----|----|
-|Base line|1024|131072|229|_FileOptions.None_|0.00|00:0137227|
+|Position|Buffer|Chunk|Write calls|FileOption|This time reduction (%)|Previous time reduction (%)|Time|
+|----|-----|-----|----|-----|----|----|----|
+|This base line|1024|131072|229|_FileOptions.None_|||00:0137227|
+|Previous base line|1024|1024|29297|_FileOptions.None_|||00:1299553|
+|1.|262144|2097152|15|_FileOptions.SequentialScan_|-13.96|-90.91|00:0118064|
+|2.|2048|4194304|8|_FileOptions.None_|-13.59|-90.87|00:0118581|
+|3.|8192|4194304|8|_FileOptions.None_|-13.52|-90.87|00:0118671|
+|4.|1024|2097152|15|_FileOptions.None_|-13.03|-90.82|00:0119351|
+|5.|4096|4194304|8|_FileOptions.SequentialScan_|-12.78|-90.79|00:0119689|
+|6.|65536|1048576|29|_FileOptions.SequentialScan_|-11.84|-90.69|00:0120976|
+|7.|524288|2097152|15|_FileOptions.None_|-11.78|-90.68|00:0121058|
+|8.|32768|4194304|8|_FileOptions.SequentialScan_|-11.48|-90.65|00:0121478|
+|9.|4096|2097152|15|_FileOptions.SequentialScan_|-11.29|-90.63|00:0121732|
+|10.|65536|4194304|8|_FileOptions.SequentialScan_|-11.25|-90.63|00:0121789|
 
 <ins>**All measurements:**</ins>
 |Write|1.|%|2.|%|
 |----|----|----|----|----|
-|Buffer 1024 Chunk 131072 (229 times)|00:0137227|0.00|00:0138002|0.56|
+|Buffer 1024 Chunk 131072 (229 times)|00:0137227||00:0138002|0.56|
 |Buffer 1024 Chunk 262144 (115 times)|00:0124004|-9.64|00:0125917|-8.24|
 |Buffer 1024 Chunk 524288 (58 times)|00:0122496|-10.73|00:0125268|-8.71|
 |Buffer 1024 Chunk 1048576 (29 times)|00:0134229|-2.18|00:0127992|-6.73|
