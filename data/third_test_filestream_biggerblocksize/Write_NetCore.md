@@ -6,7 +6,7 @@
 |----|-----|-----|----|-----|----|----|----|
 |This base line|1024|131072|229|_FileOptions.None_|||00:0162021|
 |Previous base line|1024|1024|29297|_FileOptions.None_|||00:1514422|
-|1.|16384|1048576|29|_FileOptions.SequentialScan_|-26.28|-92.11|-92.1100:0119449|
+|1.|16384|1048576|29|_FileOptions.SequentialScan_|-26.28|-92.11|00:0119449|
 |2.|1024|4194304|8|_FileOptions.SequentialScan_|-25.99|-92.08|00:0119917|
 |3.|32768|4194304|8|_FileOptions.SequentialScan_|-25.60|-92.04|00:0120543|
 |4.|524288|4194304|8|_FileOptions.None_|-25.45|-92.02|00:0120794|
