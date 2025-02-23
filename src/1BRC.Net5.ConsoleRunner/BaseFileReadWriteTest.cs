@@ -44,15 +44,11 @@ namespace _1BRC.Net5.ConsoleRunner {
 		#region
 
 		private readonly string _netVersion;
-		private readonly double _writeComparisonSeconds;
-		private readonly double _readComparisonSeconds;
 
 		#endregion
 
-		protected BaseFileReadWriteTest(string netVersion, double writeComparisonSeconds, double readComparisonSeconds) {
+		protected BaseFileReadWriteTest(string netVersion) {
 			_netVersion = netVersion;
-			_writeComparisonSeconds = writeComparisonSeconds;
-			_readComparisonSeconds = readComparisonSeconds;
 		}
 
 		public void ExecuteTest(Action<string> progressCallback) {
@@ -74,9 +70,9 @@ namespace _1BRC.Net5.ConsoleRunner {
 				writer.WriteLine($"File read & write test with {Math.Round(FileSizeToWrite / 1000.0 / 1000.0, 3)} MB done in {sw.Elapsed:hh':'mm':'ss':'fff}!");
 				writer.WriteLine(Environment.NewLine);
 				writer.WriteLine(Environment.NewLine);
-				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite, _writeComparisonSeconds));
+				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
 				writer.WriteLine(Environment.NewLine);
-				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite, _readComparisonSeconds));
+				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite));
 			}
 		}
 

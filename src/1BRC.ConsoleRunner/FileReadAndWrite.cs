@@ -5,7 +5,7 @@ using _1BRC.Net5.ConsoleRunner;
 namespace _1BRC.ConsoleRunner {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {
 		public FileReadAndWrite()
-			: base(".NET Framework 4.7.2", 0.1299553, 0.0693528) {
+			: base(".NET Framework 4.7.2") {
 		}
 
 		protected override void InternalExecuteTest(Action<string> progressCallback, byte[] fileContentBytes, ResultTableGenerator writeTableGenerator, ResultTableGenerator readTableGenerator) {
@@ -25,21 +25,17 @@ namespace _1BRC.ConsoleRunner {
 						writeTableGenerator.Add(option, chunkSize, bufferSize, time);
 					}
 
-                    foreach (var option in ReadOptions)
-                    {
-                        var time = RunTest(() =>
-                        {
-                            using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option))
-                            {
-                                var buffer = new byte[chunkSize];
-                                while (stream.Read(buffer, 0, buffer.Length) != 0)
-                                {
-                                }
-                            }
-                        });
-                        readTableGenerator.Add(option, chunkSize, bufferSize, time);
-                    }
-                }
+					foreach (var option in ReadOptions) {
+						var time = RunTest(() => {
+							using (var stream = new FileStream(TestFile, FileMode.Open, FileAccess.Read, FileShare.None, bufferSize, option)) {
+								var buffer = new byte[chunkSize];
+								while (stream.Read(buffer, 0, buffer.Length) != 0) {
+								}
+							}
+						});
+						readTableGenerator.Add(option, chunkSize, bufferSize, time);
+					}
+				}
 			}
 		}
 

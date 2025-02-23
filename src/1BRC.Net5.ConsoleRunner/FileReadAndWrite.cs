@@ -4,7 +4,7 @@ using System.IO;
 namespace _1BRC.Net5.ConsoleRunner {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {
 		public FileReadAndWrite()
-			: base(".NET 5", 0.1514422, 0.0704307) {
+			: base(".NET 5") {
 		}
 
 		protected override void InternalExecuteTest(Action<string> progressCallback, byte[] fileContentBytes, ResultTableGenerator writeTableGenerator, ResultTableGenerator readTableGenerator) {
