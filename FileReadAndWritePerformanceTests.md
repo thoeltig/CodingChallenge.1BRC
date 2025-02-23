@@ -334,7 +334,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 
 - Conclusion	
 	- The top ten in both versions were completely replaced by using a bigger block size than the previous test used. 
-		- The difference is in the nanoseconds but this is an improvement applied to each time writing 30 MB. This would lead to a theoretical time reduction of 0.15528s in .NET Framework and 0.25372s in .NET Core version when writing 12GB. This doesn't look like much but this whole point of this project is optimization.
+		- The difference is in the nanoseconds but this is an improvement applied to each time writing 30 MB. This would lead to a theoretical time reduction of 0.15528s in .NET Framework and 0.25372s in .NET Core version when writing 12GB. This doesn't look like much but the whole point of this project is optimization.
 	- Needs further tests for _FileStream.Write_.
 
 ### Read	
@@ -432,6 +432,21 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 
 - Conclusion	
 
+
+### Read	
+- .NET Framework 4.7.2 + byte array + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Read_NetFramework.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|FileOptions.None||00:0693528|
+	
+- .NET 5 (Core) + byte spans + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Read_NetCore.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|FileOptions.None||00:0704307|
+	
+- Conclusion	
 
 
 > [!TIP]
