@@ -4,15 +4,15 @@ using System.IO;
 namespace _1BRC.Net5.ConsoleRunner {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {
 		public FileReadAndWrite()
-			: base(".NET 5") {
+			: base(".NET 5", 0.1514422, 0.0704307) {
 		}
 
 		protected override void InternalExecuteTest(Action<string> progressCallback, byte[] fileContentBytes, ResultTableGenerator writeTableGenerator, ResultTableGenerator readTableGenerator) {
-			foreach (var chunkSize in ChunkSizes) {
+			foreach (var chunkSize in ChunkAndBufferSizes) {
 				progressCallback($"Chunk size {chunkSize}");
 				var splitCount = (int)Math.Ceiling(FileSizeToWrite / (double)chunkSize);
 
-				foreach (var bufferSize in BufferSizes) {
+				foreach (var bufferSize in ChunkAndBufferSizes) {
 					foreach (var option in WriteOptions) {
 						var time = RunTest(() => Write(bufferSize, option, splitCount, chunkSize, fileContentBytes.AsSpan()), DeleteFile);
 						writeTableGenerator.Add(option, chunkSize, bufferSize, time);

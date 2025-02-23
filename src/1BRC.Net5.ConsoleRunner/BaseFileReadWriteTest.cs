@@ -10,16 +10,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 		protected const string TestFile = "FileWriteTests.txt";
 		private const string ResultFile = "resultFile.txt";
 
-		protected static readonly int[] ChunkSizes = {
-			131072,
-			262144,
-			524288,
-			1048576,
-			2097152,
-			4194304
-		};
-
-		protected static readonly int[] BufferSizes = {
+		protected static readonly int[] ChunkAndBufferSizes = {
 			1024,
 			2048,
 			4096,
@@ -32,7 +23,10 @@ namespace _1BRC.Net5.ConsoleRunner {
 			524288,
 			1048576,
 			2097152,
-			4194304
+			4194304,
+			8388608,
+			16777216,
+			33554432
 		};
 
 		protected static readonly FileOptions[] ReadOptions = {
@@ -50,11 +44,15 @@ namespace _1BRC.Net5.ConsoleRunner {
 		#region
 
 		private readonly string _netVersion;
+		private readonly double _writeComparisonSeconds;
+		private readonly double _readComparisonSeconds;
 
 		#endregion
 
-		protected BaseFileReadWriteTest(string netVersion) {
+		protected BaseFileReadWriteTest(string netVersion, double writeComparisonSeconds, double readComparisonSeconds) {
 			_netVersion = netVersion;
+			_writeComparisonSeconds = writeComparisonSeconds;
+			_readComparisonSeconds = readComparisonSeconds;
 		}
 
 		public void ExecuteTest(Action<string> progressCallback) {
@@ -73,12 +71,12 @@ namespace _1BRC.Net5.ConsoleRunner {
 
 			using (var writer = new StreamWriter(ResultFile)) {
 				writer.WriteLine(_netVersion);
-				writer.WriteLine($"File read & write test with {Math.Round(FileSizeToWrite / 1024.0 / 1024.0, 3)} MB done in {sw.Elapsed:hh':'mm':'ss':'fff}!");
+				writer.WriteLine($"File read & write test with {Math.Round(FileSizeToWrite / 1000.0 / 1000.0, 3)} MB done in {sw.Elapsed:hh':'mm':'ss':'fff}!");
 				writer.WriteLine(Environment.NewLine);
 				writer.WriteLine(Environment.NewLine);
-				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite));
+				writer.WriteLine(writeTableGenerator.PrintTable("Write", FileSizeToWrite, _writeComparisonSeconds));
 				writer.WriteLine(Environment.NewLine);
-				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite));
+				writer.WriteLine(readTableGenerator.PrintTable("Read", FileSizeToWrite, _readComparisonSeconds));
 			}
 		}
 

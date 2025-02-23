@@ -68,7 +68,7 @@ The test will write 10 MB to a file:
 - Has an internal buffer which holds the bytes. If the buffer is full it is written to the file system cache.
 	- This can be forced by calling _FileStream.Flush_. This is also called when disposing the _FileStream_.
 - The file system writes the data lazily to disk depending on the hard disk write speed.
-- Reading the bytes is similiar. Depending on the access type more or less is cached by the file systen which in turn allows for faster sequential paging through the data or faster access at random positions.
+- Reading the bytes is similiar. Depending on the _FileOption_ more or less is cached by the file systen which in turn allows for faster sequential paging through the data or faster access at random positions.
 - Read & write have a couple of options which can be added when calling the methods. For this case the following are interesting:
 	- _FileOptions.None_ will pass no additional access flags to the file system. So it will try to guess the optimal cache size depending on the access pattern.
 	- _FileOptions.RandomAccess_ will cache less because it expects the file to be accessed at random positions by multiple applications.
@@ -92,7 +92,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- 65536
 	- 131072
 	- 262144
-- Access types
+- _FileOption_
 	1. _FileOptions.None_
 	2. _FileOptions.SequentialScan_
 	3. _FileOptions.WriteThrough_
@@ -109,7 +109,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	
 ### Write
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework.md)
+	- _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -125,7 +125,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|FileOptions.SequentialScan|-90.07|00:0129060|
 	|10.|4096|262144|115|FileOptions.None|-89.86|00:0131826|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework_NoBuffer.md)
+	- _FileOption_ 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetFramework_NoBuffer.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -142,7 +142,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|262144|8192|3663|File_FLAG_NO_BUFFERING|-94.79|00:7328590|
 	
 - .NET 5 (Core) + byte spans 
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore.md)
+	- _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -158,7 +158,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|65536|262144|115|FileOptions.SequentialScan|-91.10|00:0134734|
 	|10.|16384|262144|115|FileOptions.None|-91.09|00:0134885|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore_NoBuffer.md)
+	- _FileOption_ 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Write_NetCore_NoBuffer.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -175,17 +175,17 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|262144|65536|458|File_FLAG_NO_BUFFERING|-93.62|00:5487314|
 
 - Conclusion
-	- For access type 1. - 4. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when writing the data to the stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
+	- For _FileOption_ 1. - 4. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when writing the data to the stream but in total the .NET Framework version ran slightly faster looking at the actual execution times.
 		- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
 		- Need to test larger buffer & block sizes.
-		- For the currently used versions access type 3. & 4. can be ignored for future tests. Might have better results in newer .NET versions.
-	- For access type 5. - 7. both .NET versions had the best results with block size 262144 & _FILE_FLAG_NO_BUFFERING_ but the buffer sizes is random.
-		- .NET 5 performed better than .NET Framework but in comparison with 1. & 2. access type they were really slow.
-		- For the currently used versions access type 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
+		- For the currently used versions _FileOption_ 3. & 4. can be ignored for future tests. Might have better results in newer .NET versions.
+	- For _FileOption_ 5. - 7. both .NET versions had the best results with block size 262144 & _FILE_FLAG_NO_BUFFERING_ but the buffer sizes is random.
+		- .NET 5 performed better than .NET Framework but in comparison with 1. & 2. _FileOption_ they were really slow.
+		- For the currently used versions _FileOption_ 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
 
 ### Read	
 - .NET Framework 4.7.2 + byte array
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework.md)
+	- _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -201,7 +201,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|2048|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.12|00:0089314|
 	|10.|32768|262144|115|FileOptions.WriteThrough|-87.12|00:0089352|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework_NoBuffer.md)
+	- _FileOption_ 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetFramework_NoBuffer.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -218,7 +218,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|2048|262144|115|FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING|-94.78|00:3889174|
 	
 - .NET 5 (Core) + byte spans 	
-	- Access types 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore.md)
+	- _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -234,7 +234,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|9.|1024|65536|458|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.43|00:0088549|
 	|10.|2048|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.41|00:0088656|
 	
-	- Access types 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore_NoBuffer.md)
+	- _FileOption_ 5. - 7. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/second_test_filestream/Read_NetCore_NoBuffer.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
@@ -251,13 +251,13 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	|10.|262144|262144|115|File_FLAG_NO_BUFFERING|-94.77|00:3889264|
 	
 - Conclusion
-	- For access type 1. - 4. both .NET versions had the best results with block size 262144 or 131072 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ or _FileOptions.WriteThrough_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the data from the stream but in total the .NET 5 version ran slightly faster looking at the actual execution times.
+	- For _FileOption_ 1. - 4. both .NET versions had the best results with block size 262144 or 131072 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ or _FileOptions.WriteThrough_ but the buffer sizes is random. There seems to be no major difference in speed between using byte arrays & spans of bytes when reading the data from the stream but in total the .NET 5 version ran slightly faster looking at the actual execution times.
 		- The benefit of spans is less memory allocation, faster access & modification of the underlying memory. A difference between byte array & spans might show later in the finished code.
 		- Need to test larger block & Block sizes.
-		- For the currently used versions access type 1. & 2. can be ignored for future tests. Might have better results in newer .NET versions.
-	- For access type 5. - 7. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ for .NET Framework or _FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING_ for .NET 5 but the buffer sizes is random.
-		- Both versions performed similiar but in comparison with 3. & 4. access type they were really slow.
-		- For the currently used versions access type 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
+		- For the currently used versions _FileOption_ 1. & 2. can be ignored for future tests. Might have better results in newer .NET versions.
+	- For _FileOption_ 5. - 7. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ for .NET Framework or _FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING_ for .NET 5 but the buffer sizes is random.
+		- Both versions performed similiar but in comparison with 3. & 4. _FileOption_ they were really slow.
+		- For the currently used versions _FileOption_ 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
 
 
 ## Third test: FileStream, bigger buffer and block size
@@ -283,7 +283,7 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- 1048576
 	- 2097152
 	- 4194304
-- Access types
+- _FileOption_
 	- write
 		1. _FileOptions.None_
 		2. _FileOptions.SequentialScan_
@@ -381,6 +381,54 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- No further tests for _FileStream.Read_ needed.
 
 	
+
+## Fourth test: FileStream.Write, bigger buffer and block size
+The test will use the _FileStream_ to write & read 30 MB to & from a file:
+- Buffer & block sizes
+	- 1024
+	- 2048
+	- 4096
+	- 8192
+	- 16384
+	- 32768
+	- 65536
+	- 131072
+	- 262144
+	- 524288
+	- 1048576
+	- 2097152
+	- 4194304
+	- 8388608
+	- 16777216
+	- 33554432
+- _FileOption_
+	- write
+		1. _FileOptions.None_
+		2. _FileOptions.SequentialScan_
+	- Read
+		1. _FileOptions.None_
+		2. _FileOptions.SequentialScan_
+		3. _FileOptions.WriteThrough_
+		4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
+- The elapsed time is the median of 12 tests as the fractional portion of a second.
+	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
+- Executed code
+	- .NET Framework 4.7.2 Console with byte[]
+	- .NET 5 (Core) Console with Spans<byte>
+	
+	
+### Write
+- .NET Framework 4.7.2 + byte array + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Write_NetFramework.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|FileOptions.None||00:1299553|
+	
+- .NET 5 (Core) + byte spans + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Write_NetCore.md)
+
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|1024|1024|29297|FileOptions.None||00:1514422|
 
 - Conclusion	
 

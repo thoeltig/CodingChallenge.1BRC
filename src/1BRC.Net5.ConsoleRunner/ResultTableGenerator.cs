@@ -24,7 +24,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 			}
 		}
 
-		public string PrintTable(string tableName, int totalFileSize) {
+		public string PrintTable(string tableName, int totalFileSize, double? comparisonTime) {
 			var rowCount = _rows.Count;
 			if (rowCount == 0) {
 				return string.Empty;
@@ -72,6 +72,12 @@ namespace _1BRC.Net5.ConsoleRunner {
 			// Write data rows
 			var firstTime = 0.0;
 			var hasFirstTime = false;
+
+			if (comparisonTime.HasValue) {
+				firstTime = comparisonTime.Value;
+				hasFirstTime = true;
+			}
+
 			foreach (var row in _rows.Values.OrderBy(x => x.BufferSize)) {
 				if (hasFirstTime == false) {
 					var firstCell = row.Cells.Values.FirstOrDefault(x => x.HasValue);

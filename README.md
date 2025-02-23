@@ -23,7 +23,7 @@ After the news of this challenge spread many people built their own solutions us
 **Attention:**
 - The original generation used a [list of weather station names](https://github.com/gunnarmorling/1brc/blob/main/data/weather_stations.csv) and selected 10k random names from it. The shortest name I found is 3 bytes and the longest is 24 bytes long.
 	- This results in a line range of 3-24 bytes name + 1 byte separator + 1-5 bytes for the decimal + 1 byte new line = 6-31 bytes per line. Total file size is 6-31 GB, average 18,5 GB.
-	- The original post contained a warning that the generated file will be approx. 12 GB in size which would mean that most names are about 12 bytes long.
+	- The original post contained a warning that the generated file will be approximately 12 GB in size which would mean that most names are 5-9 bytes long.
 - The extended challenge added the generic weather station names with 1-100 bytes in length.
 	- This results in a line range of 1-100 bytes name + 1 byte separator + 1-5 bytes for the decimal + 1 byte new line = 3-106 bytes per line. Total file size is 3-106 GB, average 54,5 GB.
 
