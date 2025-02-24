@@ -40,13 +40,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\1BRC.Net5.ConsoleRunner\BaseFileReadWriteTest.cs">
-      <Link>BaseFileReadWriteTest.cs</Link>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\Test\BaseFileReadWriteTest.cs">
+      <Link>Test\BaseFileReadWriteTest.cs</Link>
     </Compile>
-    <Compile Include="..\1BRC.Net5.ConsoleRunner\ResultTableGenerator.cs">
-      <Link>ResultTableGenerator.cs</Link>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\Test\ResultTableGenerator.cs">
+      <Link>Test\ResultTableGenerator.cs</Link>
     </Compile>
-    <Compile Include="FileReadAndWrite.cs" />
+    <Compile Include="Test\FileReadAndWrite.cs" />
     <Compile Include="MeasurementsGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -54,5 +54,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace _1BRC.Net5.ConsoleRunner {
+namespace _1BRC.Net5.ConsoleRunner.Test {
 	internal abstract class BaseFileReadWriteTest {
 		private const int TestRunCount = 12;
 		protected const int FileSizeToWrite = 512 * 58594; // 30000128
@@ -11,7 +11,7 @@ namespace _1BRC.Net5.ConsoleRunner {
 		private const string ResultFile = "resultFile.txt";
 
 		protected static readonly int[] ChunkAndBufferSizes = {
-			6400 ,
+			6400,
 			12800,
 			19200,
 			25600,

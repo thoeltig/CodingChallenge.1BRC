@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using _1BRC.Net5.ConsoleRunner.Test;
 
 namespace _1BRC.Net5.ConsoleRunner {
 	internal class Program {

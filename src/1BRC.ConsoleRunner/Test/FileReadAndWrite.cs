@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using _1BRC.Net5.ConsoleRunner;
 
-namespace _1BRC.ConsoleRunner {
+namespace _1BRC.ConsoleRunner.Test {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {
 		public FileReadAndWrite()
 			: base(".NET Framework 4.7.2") {

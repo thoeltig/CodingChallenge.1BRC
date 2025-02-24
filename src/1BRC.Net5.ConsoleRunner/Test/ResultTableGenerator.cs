@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace _1BRC.Net5.ConsoleRunner {
+namespace _1BRC.Net5.ConsoleRunner.Test {
 	internal class ResultTableGenerator {
 		#region
 

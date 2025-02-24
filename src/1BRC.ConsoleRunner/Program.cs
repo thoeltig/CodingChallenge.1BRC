@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using _1BRC.ConsoleRunner.Test;
 
 //using System.IO;
 //using System.Linq;
