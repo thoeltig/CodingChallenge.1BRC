@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using _1BRC.Net5.ConsoleRunner.Test;
 
 namespace _1BRC.ConsoleRunner.Test {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {

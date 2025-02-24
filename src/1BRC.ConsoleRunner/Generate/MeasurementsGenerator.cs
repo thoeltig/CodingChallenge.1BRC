@@ -3,10 +3,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
-namespace _1BRC.ConsoleRunner {
+namespace _1BRC.ConsoleRunner.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
@@ -90,7 +89,7 @@ namespace _1BRC.ConsoleRunner {
 			var array = new byte[arraySize];
 			for (var i = 0; i < arraySize; i++) {
 				var nextByte = (byte)ThreadSafeRandom.Instance.Next(randomMaxExcluded);
-				if (nextByte == firstIgnoreValue || nextByte == secondIgnoreValue || nextByte == thirdIgnoreValue) {
+				if (nextByte is firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue) {
 					i--;
 				} else {
 					array[i] = nextByte;
@@ -98,20 +97,6 @@ namespace _1BRC.ConsoleRunner {
 			}
 
 			return array;
-		}
-
-		private static class ThreadSafeRandom {
-			private static readonly Random _random = new();
-			private static readonly object _lock = new();
-			private static readonly ThreadLocal<Random> _threadRandom = new(NewRandom);
-
-			public static Random Instance => _threadRandom.Value;
-
-			private static Random NewRandom() {
-				lock (_lock) {
-					return new Random(_random.Next());
-				}
-			}
 		}
 	}
 }
