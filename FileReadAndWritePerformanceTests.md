@@ -383,7 +383,117 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 		- Buffer size 2048 or 8192
 		- Block size 262144 or 131072
 		- _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
+		
 
+## Fifth test: FileStream.Write, buffer and block size between 5-100% L1 cache size
+The test will use the _FileStream_ to write & read 30 MB to & from a file:
+- Buffer & block sizes (5% steps of L1 cache size)
+	- 6400
+	- 12800 
+	- 19200 
+	- 25600 
+	- 32000 
+	- 38400 
+	- 44800 
+	- 51200 
+	- 57600 
+	- 64000 
+	- 70400 
+	- 76800 
+	- 83200 
+	- 89600 
+	- 96000 
+	- 102400
+	- 108800
+	- 115200
+	- 121600
+	- 128000
+- _FileOption_
+	- write
+	  	1. _FileOptions.None_
+	  	2. _FileOptions.SequentialScan_
+	- Read
+		1. _FileOptions.None_
+		2. _FileOptions.SequentialScan_
+		3. _FileOptions.WriteThrough_
+		4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
+- The elapsed time is the median of 12 tests as the fractional portion of a second.
+	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
+- Executed code
+	- .NET Framework 4.7.2 Console with byte[]
+	- .NET 5 (Core) Console with Spans<byte>
+	
+### Write
+- .NET Framework 4.7.2 + byte array + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fifth_test_cache_size/Write_NetFramework.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|6400|6400|4688|_FileOptions.None_||00:0542895|
+	|1.|19200|102400|293|FileOptions.None|-74.78|00:0136921|
+	|2.|44800|102400|293|FileOptions.None|-74.53|00:0138276|
+	|3.|70400|108800|276|FileOptions.None|-74.36|00:0139213|
+	|4.|128000|128000|235|FileOptions.None|-74.34|00:0139311|
+	|5.|115200|121600|247|FileOptions.SequentialScan|-74.23|00:0139888|
+	|6.|19200|102400|293|FileOptions.SequentialScan|-74.20|00:0140078|
+	|7.|64000|102400|293|FileOptions.SequentialScan|-74.15|00:0140361|
+	|8.|44800|102400|293|FileOptions.SequentialScan|-74.06|00:0140812|
+	|9.|57600|121600|247|FileOptions.None|74.00|00:0141161|
+	|10.|25600|115200|261|FileOptions.SequentialScan|-73.90|00:0141719|
+	
+- .NET 5 (Core) + byte spans + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fifth_test_cache_size/Write_NetCore.md)
+
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|6400|6400|4688|FileOptions.None||00:0551297|
+	|1.|19200|102400|293|FileOptions.SequentialScan|-74.60|00:0140005|
+	|2.|12800|102400|293|FileOptions.None|-74.58|00:0140133|
+	|3.|44800|102400|293|FileOptions.None|-74.34|00:0141486|
+	|4.|51200|121600|247|FileOptions.SequentialScan|-74.07|00:0142970|
+	|5.|70400|102400|293|FileOptions.None|-74.01|00:0143256|
+	|6.|6400|115200|261|FileOptions.None|-73.92|00:0143784|
+	|7.|51200|128000|235|FileOptions.None|-73.91|00:0143812|
+	|8.|64000|102400|293|FileOptions.SequentialScan|-73.84|00:0144239|
+	|9.|44800|102400|293|FileOptions.SequentialScan|-73.79|00:0144521|
+	|10.|96000|102400|293|FileOptions.None|-73.69|00:0145029|
+		
+### Read	
+- .NET Framework 4.7.2 + byte array + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fifth_test_cache_size/Read_NetFramework.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|6400|6400|4688|FileOptions.None||00:0184818|
+	|1.|57600|83200|361|FileOptions.SequentialScan + FileOptions.WriteThrough|-53.39|00:0086139|
+	|2.|38400|89600|335|FileOptions.SequentialScan + FileOptions.WriteThrough|-53.10|00:0086677|
+	|3.|83200|128000|235|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.83|00:0087186|
+	|4.|38400|89600|335|FileOptions.WriteThrough|-52.81|00:0087207|
+	|5.|83200|128000|235|FileOptions.SequentialScan|-52.77|00:0087290|
+	|6.|64000|83200|361|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.61|00:0087578|
+	|7.|83200|128000|235|FileOptions.WriteThrough|-52.61|00:0087594|
+	|8.|76800|128000|235|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.59|00:0087623|
+	|9.|6400|57600|521|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.47|00:0087839|	
+	|10.|51200|83200|361|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.45|00:0087884|
+	
+- .NET 5 (Core) + byte spans + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fifth_test_cache_size/Read_NetCore.md)
+	
+	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
+	|----|-----|-----|----|-----|----|----|
+	|Base line|6400|6400|4688|FileOptions.None||00:0182918|
+	|1.|38400|83200|361|FileOptions.SequentialScan + FileOptions.WriteThrough|-53.75|00:0084599|
+	|2.|38400|83200|361|FileOptions.WriteThrough|-53.37|00:0085303|
+	|3.|44800|70400|427|FileOptions.WriteThrough|-53.34|00:0085350|
+	|4.|38400|57600|521|FileOptions.WriteThrough|-52.74|00:0086455|
+	|5.|51200|64000|469|FileOptions.SequentialScan|-52.61|00:0086676|
+	|6.|38400|57600|521|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.61|00:0086688|
+	|7.|51200|83200|361|FileOptions.SequentialScan + FileOptions.WriteThrough|-52.15|00:0087524|
+	|8.|12800|64000|469|FileOptions.SequentialScan + FileOptions.WriteThrough|-51.86|00:0088060|
+	|9.|44800|70400|427|FileOptions.SequentialScan + FileOptions.WriteThrough|-51.86|00:0088065|
+	|10.|76800|115200|261|FileOptions.WriteThrough|-51.74|00:0088285|
+		
+
+> [!NOTE]
+> The process to find the optimal combination is extremly time consuming and it is not realistic to run this on every device the read / write code should run on.
+> A quick test with 5-100% of the L1 cache size showed that a result close to the optimal can be archieved if a buffer size of 25-50% and a block size of 60-80% of the L1 cache size is choosen.
+> The _FileOptions_ are still _FileOptions.SequentialScan_ for write and _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ for read.
 
 > [!TIP]
 > Additional informations on the topic:

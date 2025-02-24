@@ -11,22 +11,26 @@ namespace _1BRC.Net5.ConsoleRunner {
 		private const string ResultFile = "resultFile.txt";
 
 		protected static readonly int[] ChunkAndBufferSizes = {
-			1024,
-			2048,
-			4096,
-			8192,
-			16384,
-			32768,
-			65536,
-			131072,
-			262144,
-			524288,
-			1048576,
-			2097152,
-			4194304,
-			8388608,
-			16777216,
-			33554432
+			(int)(128000*0.05),
+			(int)(128000*0.10),
+			(int)(128000*0.15),
+			(int)(128000*0.20),
+			(int)(128000*0.25),
+			(int)(128000*0.30),
+			(int)(128000*0.35),
+			(int)(128000*0.40),
+			(int)(128000*0.45),
+			(int)(128000*0.50),
+			(int)(128000*0.55),
+			(int)(128000*0.60),
+			(int)(128000*0.65),
+			(int)(128000*0.70),
+			(int)(128000*0.75),
+			(int)(128000*0.80),
+			(int)(128000*0.85),
+			(int)(128000*0.90),
+			(int)(128000*0.95),
+			128000,
 		};
 
 		protected static readonly FileOptions[] ReadOptions = {
