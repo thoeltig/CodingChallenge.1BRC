@@ -1,48 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace _1BRC.ConsoleRunner.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
-		public static void CreateFile(string filePath, int totalRowCount, int rowCreationBufferSize, int fileWriterBufferSize) {
+		public static void CreateFile(string filePath, int totalRowCount) {
 			var names = CreateRandomNames();
 
-			using (var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, fileWriterBufferSize)) {
-				stream.SetLength(0);
+			using (var writer = new StreamWriter(filePath, false, Encoding.UTF8)) {
+				writer.NewLine = "\n";
 
-				var lines = new byte[rowCreationBufferSize][];
-				for (var i = 0; i < totalRowCount; i += rowCreationBufferSize) {
-					Parallel.For(0, rowCreationBufferSize, j => {
-						lines[j] = GetLine(names);
-					});
-
-					var array = lines.SelectMany(x => x).ToArray();
-					stream.Write(array, 0, array.Length);
+				for (var i = 0; i < totalRowCount; i++) {
+					var line = GetLine(names);
+					writer.WriteLine(line);
 				}
 			}
 		}
 
-		private static byte[] GetLine(byte[][] names) {
-			const byte separator = 59; // ;
-			const byte newLine = 10; // \n
+		private static string GetLine(IReadOnlyList<string> names) {
+			const string separator = ";";
 
 			var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
 			var temperature = GetRandomTemperature();
-
-			var result = new byte[name.Length + temperature.Length + 2];
-			Array.Copy(name, 0, result, 0, name.Length);
-			result[name.Length] = separator;
-			Array.Copy(temperature, 0, result, name.Length + 1, temperature.Length);
-			result[result.Length - 1] = newLine;
-			return result;
+			return string.Concat(name, separator, temperature);
 		}
 
-		private static byte[] GetRandomTemperature() {
+		private static string GetRandomTemperature() {
 			// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
 			// which will result in the new value range from -99.9 to 99.9
 			const int randomMinIncluded = 1;
@@ -53,50 +40,42 @@ namespace _1BRC.ConsoleRunner.Generate {
 
 			var randomValue = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 			var temperature = Math.Round(randomValue / divider - subtractedValue, digits);
-			return Encoding.UTF8.GetBytes(temperature.ToString(CultureInfo.InvariantCulture));
+			return temperature.ToString(CultureInfo.InvariantCulture);
 		}
 
-		private static byte[][] CreateRandomNames() {
-			var validNameBytes = GetValidBytesForName();
-			var names = new byte[MaxNameCount][];
-
-			Parallel.For(0, MaxNameCount, i => {
-				const int randomMinIncluded = 1; // Name needs at least 1 character
-				const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
-
-				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
-				var nameBytes = new byte[nameLength];
-				var idxMax = validNameBytes.Length;
-
-				for (var j = 0; j < nameLength; j++) {
-					var idx = ThreadSafeRandom.Instance.Next(idxMax);
-					nameBytes[j] = validNameBytes[idx];
-				}
-
-				names[i] = nameBytes;
-			});
-
-			return names;
-		}
-
-		private static byte[] GetValidBytesForName() {
-			const int randomMaxExcluded = byte.MaxValue + 1;
-			const int arraySize = 253; // 3 bytes will be ignored
+		private static IReadOnlyList<string> CreateRandomNames() {
+			const byte arraySize = 253; // 3 bytes will be ignored
 			const byte firstIgnoreValue = 10; // \n
 			const byte secondIgnoreValue = 13; // \r
 			const byte thirdIgnoreValue = 59; // ;
 
-			var array = new byte[arraySize];
-			for (var i = 0; i < arraySize; i++) {
-				var nextByte = (byte)ThreadSafeRandom.Instance.Next(randomMaxExcluded);
+			var validNameChars = new char[arraySize];
+			for (byte i = 0; i < arraySize; i++) {
+				var nextByte = i;
 				if (nextByte is firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue) {
 					i--;
 				} else {
-					array[i] = nextByte;
+					validNameChars[i] = (char)nextByte;
 				}
 			}
 
-			return array;
+			var names = new string[MaxNameCount];
+
+			for (var i = 0; i < MaxNameCount; i++) {
+				const int randomMinIncluded = 1; // Name needs at least 1 character
+				const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
+
+				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
+				var chars = new char[nameLength];
+
+				for (var j = 0; j < nameLength; j++) {
+					chars[j] = validNameChars[ThreadSafeRandom.Instance.Next(arraySize)];
+				}
+
+				names[i] = new string(chars);
+			}
+
+			return names;
 		}
 	}
 }

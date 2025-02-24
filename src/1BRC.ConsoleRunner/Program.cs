@@ -5,7 +5,7 @@ using _1BRC.ConsoleRunner.Generate;
 
 namespace _1BRC.ConsoleRunner {
 	internal class Program {
-		private const int RowCount = 10000;
+		private const int RowCount = 1000000000;
 		private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
@@ -15,7 +15,7 @@ namespace _1BRC.ConsoleRunner {
 
 			var sw = new Stopwatch();
 			sw.Restart();
-			MeasurementsGeneratorV1.CreateFile(FileName, RowCount);
+			MeasurementsGenerator.CreateFile(FileName, RowCount);
 			sw.Stop();
 
 			Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
