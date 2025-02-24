@@ -29,7 +29,8 @@ namespace _1BRC.Net5.ConsoleRunner {
 		private static void Write(int bufferSize, FileOptions option, int splitCount, int chunkSize, ReadOnlySpan<byte> content) {
 			var contentLength = content.Length;
 			using (var stream = new FileStream(TestFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize, option)) {
-				for (int contentIdx = 0, outputIdx = 0; contentIdx < contentLength && outputIdx < splitCount; contentIdx += chunkSize, outputIdx++) {
+				for (var i = 0; i < splitCount; i++) {
+					var contentIdx = i * chunkSize;
 					var copyLength = contentLength - contentIdx;
 					if (copyLength > chunkSize) {
 						copyLength = chunkSize;
