@@ -50,20 +50,19 @@ namespace _1BRC.ConsoleRunner.Generate {
 			const byte thirdIgnoreValue = 59; // ;
 
 			var validNameChars = new char[arraySize];
-			for (byte i = 0; i < arraySize; i++) {
-				var nextByte = i;
-				if (nextByte is firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue) {
-					i--;
-				} else {
-					validNameChars[i] = (char)nextByte;
+			for (int i = 0, j = 0; i <= byte.MaxValue && j < arraySize; i++) {
+				var nextByte = (byte)i;
+				if (nextByte is not (firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue)) {
+					validNameChars[j] = (char)nextByte;
+					j++;
 				}
 			}
 
 			var names = new string[MaxNameCount];
 
 			for (var i = 0; i < MaxNameCount; i++) {
-				const int randomMinIncluded = 1; // Name needs at least 1 character
-				const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
+				const int randomMinIncluded = 5; // Name needs at least 1 character
+				const int randomMaxExcluded = 9 + 1; // Name can have up to 100 characters
 
 				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 				var chars = new char[nameLength];
