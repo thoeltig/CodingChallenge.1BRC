@@ -258,131 +258,9 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- For _FileOption_ 5. - 7. both .NET versions had the best results with block size 262144 & _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ + _FILE_FLAG_NO_BUFFERING_ for .NET Framework or _FileOptions.WriteThrough + FILE_FLAG_NO_BUFFERING_ for .NET 5 but the buffer sizes is random.
 		- Both versions performed similiar but in comparison with 3. & 4. _FileOption_ they were really slow.
 		- For the currently used versions _FileOption_ 5. - 7. can be ignored for future tests. Might have better results in newer .NET versions.
-
-
-## Third test: FileStream, bigger buffer and block size
-The test will use the _FileStream_ to write & read 30 MB to & from a file:
-- Buffer sizes
-	- 1024
-	- 2048
-	- 4096
-	- 8192
-	- 16384
-	- 32768
-	- 65536
-	- 131072
-	- 262144
-	- 524288
-	- 1048576
-	- 2097152
-	- 4194304
-- Block sizes
-	- 131072
-	- 262144
-	- 524288
-	- 1048576
-	- 2097152
-	- 4194304
-- _FileOption_
-	- write
-		1. _FileOptions.None_
-		2. _FileOptions.SequentialScan_
-	- Read
-		1. _FileOptions.None_
-		2. _FileOptions.SequentialScan_
-		3. _FileOptions.WriteThrough_
-		4. _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
-- The elapsed time is the median of 12 tests as the fractional portion of a second.
-	- The elapsed times of each test are sorted, first and last quarter is ignored to avoid using the extrem values and then the average is calcualted from the remaining half. 
-- Executed code
-	- .NET Framework 4.7.2 Console with byte[]
-	- .NET 5 (Core) Console with Spans<byte>
-	
-	
-### Write
-- .NET Framework 4.7.2 + byte array + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Write_NetFramework.md)
-	
-	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
-	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:1299553|
-	|1.|262144|2097152|15|FileOptions.SequentialScan|-90.91|00:0118064|
-	|2.|2048|4194304|8|FileOptions.None|-90.87|00:0118581|
-	|3.|8192|4194304|8|FileOptions.None|-90.87|00:0118671|
-	|4.|1024|2097152|15|FileOptions.None|-90.82|00:0119351|
-	|5.|4096|4194304|8|FileOptions.SequentialScan|-90.79|00:0119689|
-	|6.|65536|1048576|29|FileOptions.SequentialScan|-90.69|00:0120976|
-	|7.|524288|2097152|15|FileOptions.None|-90.68|00:0121058|
-	|8.|32768|4194304|8|FileOptions.SequentialScan|-90.65|00:0121478|
-	|9.|4096|2097152|15|FileOptions.SequentialScan|-90.63|00:0121732|
-	|10.|65536|4194304|8|FileOptions.SequentialScan|-90.63|00:0121789|
-	
-- .NET 5 (Core) + byte spans + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Write_NetCore.md)
-
-	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
-	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:1514422|
-	|1.|16384|1048576|29|FileOptions.SequentialScan|-92.11|00:0119449|
-	|2.|1024|4194304|8|FileOptions.SequentialScan|-92.08|00:0119917|
-	|3.|32768|4194304|8|FileOptions.SequentialScan|-92.04|00:0120543|
-	|4.|524288|4194304|8|FileOptions.None|-92.02|00:0120794|
-	|5.|2048|2097152|15|FileOptions.None|-91.98|00:0121445|
-	|6.|16384|1048576|29|FileOptions.None|-91.97|00:0121616|
-	|7.|16384|4194304|8|FileOptions.None|-91.97|00:0121617|
-	|8.|4096|1048576|29|FileOptions.SequentialScan|-91.95|00:0121827|
-	|9.|65536|2097152|15|FileOptions.SequentialScan|-91.95|00:0121834|
-	|10.|262144|4194304|8|FileOptions.None|-91.95|00:0121958|
-
-- Conclusion	
-	- The top ten in both versions were completely replaced by using a bigger block size than the previous test used. 
-		- The difference is in the nanoseconds but this is an improvement applied to each time writing 30 MB. This would lead to a theoretical time reduction of 0.15528s in .NET Framework and 0.25372s in .NET Core version when writing 12GB. This doesn't look like much but the whole point of this project is optimization.
-	- Needs further tests for _FileStream.Write_.
-
-### Read	
-- .NET Framework 4.7.2 + byte array + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Read_NetFramework.md)
-	
-	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
-	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:0693528|
-	|1.|8192|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.30|00:0088072|
-	|2.|1024|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.22|00:0088628|
-	|3.|16384|524288|58|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.18|00:0088885|
-	|4.|131072|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.18|00:0088898|
-	|5.|16384|262144|115|FileOptions.WriteThrough|-87.16|00:0089060|
-	|6.|131072|131072|229|FileOptions.WriteThrough|-87.14|00:0089171|
-	|7.|1024|262144|115|FileOptions.WriteThrough|-87.14|00:0089188|
-	|8.|65536|262144|115|FileOptions.WriteThrough|-87.14|00:0089192|
-	|9.|32768|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.12|00:0089313|
-	|10.|2048|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.12|00:0089314|
-		
-- .NET 5 (Core) + byte spans + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/third_test_filestream_biggerblocksize/Read_NetCore.md)
-	
-	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
-	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:0704307|
-	|1.|2048|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-88.12|00:0083699|
-	|2.|1024|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.61|00:0087258|
-	|3.|1024|262144|115|FileOptions.WriteThrough|-87.52|00:0087911|
-	|4.|2048|262144|115|FileOptions.WriteThrough|-87.48|00:0088184|
-	|5.|65536|131072|229|FileOptions.WriteThrough|-87.48|00:0088207|
-	|6.|4096|65536|458|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.47|00:0088221|
-	|7.|32768|65536|458|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.45|00:0088392|
-	|8.|32768|131072|229|FileOptions.WriteThrough|-87.44|00:0088446|
-	|9.|1024|65536|458|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.43|00:0088549|
-	|10.|4096|524288|58|FileOptions.SequentialScan + FileOptions.WriteThrough|-87.42|00:0088577|
-	
-- Conclusion	
-	- Both versions have the same top ten as before except for a single new entry each.
-		- In the .NET Framework version the entry at position 3 is new and pushed all others one position down. 
-		- In the .NET Core version the position 10 is new.
-	- The most occurring values are:
-		- Buffer size 1024
-		- Block size 262144
-		- _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
-	- No further tests for _FileStream.Read_ needed.
-
 	
 
-## Fourth test: FileStream.Write, bigger buffer and block size
+## Third &  fourth test: FileStream.Write, bigger buffer and block size
 The test will use the _FileStream_ to write & read 30 MB to & from a file:
 - Buffer & block sizes
 	- 1024
@@ -417,36 +295,94 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 	- .NET 5 (Core) Console with Spans<byte>
 	
 	
+> [!Note]
+> The third test was executed with a bigger block size than the second but still didn't provide a clear result. So the fourth test was executed with an even bigger block & buffer sizes.
+> The results from the third test can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/94c822269e6f3b3df18174e6e7eab2e5af3e4c27/FileReadAndWritePerformanceTests.md#third-test-filestream-bigger-buffer-and-block-size).
+
+	
 ### Write
 - .NET Framework 4.7.2 + byte array + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Write_NetFramework.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:1299553|
+	|Base line|1024|1024|29297|_FileOptions.None_||00:1278846|
+	|1.|4194304|16777216|2|FileOptions.None|-90.76|00:0118136|
+	|2.|524288|16777216|2|FileOptions.None|-90.70|00:0118953|
+	|3.|32768|16777216|2|FileOptions.None|-90.60|00:0120170|
+	|4.|16384|4194304|8|FileOptions.SequentialScan|-90.60|00:0120193|
+	|5.|1024|2097152|15|FileOptions.SequentialScan|-90.58|00:0120462|
+	|6.|524288|16777216|2|FileOptions.SequentialScan|-90.55|00:0120898|
+	|7.|2048|16777216|2|FileOptions.SequentialScan|-90.54|00:0120928|
+	|8.|262144|2097152|15|FileOptions.SequentialScan|-90.52|00:0121239|
+	|9.|2048|4194304|8|FileOptions.None|-90.51|00:0121376|
+	|10.|262144|2097152|15|FileOptions.None|-90.49|00:0121654|
 	
 - .NET 5 (Core) + byte spans + _FileOption_ 1. + 2. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Write_NetCore.md)
 
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:1514422|
-
+	|Base line|1024|1024|29297|FileOptions.None||00:1283446|
+	|1.|32768|2097152|15|FileOptions.SequentialScan|-90.57|00:0120974|
+	|2.|262144|16777216|2|FileOptions.SequentialScan|-90.52|00:0121641|
+	|3.|2097152|16777216|2|FileOptions.None|-90.50|00:0121873|
+	|4.|8192|2097152|15|FileOptions.None|-90.46|00:0122399|
+	|5.|131072|4194304|8|FileOptions.None|-90.40|00:0123180|
+	|6.|262144|16777216|2|FileOptions.None|-90.37|00:0123553|
+	|7.|1024|2097152|15|FileOptions.SequentialScan|-90.37|00:0123637|
+	|8.|1048576|4194304|8|FileOptions.None|-90.37|00:0123639|
+	|9.|2048|524288|58|FileOptions.SequentialScan|-90.35|00:0123818|
+	|10.|1048576|1048576|29|FileOptions.SequentialScan|-90.35|00:0123835|
+	
 - Conclusion	
-
-
+	- Buffer size is a bit random but 262144 occurred 4 times. The values mostly have a block size which is 4 - 32 times the buffer size.
+	- Previous block size was 262144 but now the most occuring values are 8 times 16777216, 6 times 2097152 and 4 times 4194304. These values are 64, 8 and 16 times the previous value.
+	- Previous _FileOption_ was _FileOptions.SequentialScan_ but now split between _FileOptions.None_ and _FileOptions.SequentialScan_.
+	- After this test the best combination would be:
+		- Buffer size 262144
+		- Block size 16777216 
+		- _FileOptions.SequentialScan_
+	
 ### Read	
 - .NET Framework 4.7.2 + byte array + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Read_NetFramework.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:0693528|
+	|Base line|1024|1024|29297|FileOptions.None||00:0677960|
+	|1.|262144|262144|115|FileOptions.SequentialScan|-86.53|00:0091300|
+	|2.|262144|262144|115|FileOptions.SequentialScan + FileOptions.WriteThrough|-86.46|00:0091799|
+	|3.|2048|262144|115|FileOptions.WriteThrough|-86.15|00:0093867|
+	|4.|262144|262144|115|FileOptions.WriteThrough|-86.14|00:0093975|
+	|5.|2048|524288|58|FileOptions.WriteThrough|-86.10|00:0094265|
+	|6.|4096|65536|458|FileOptions.None|-86.03|00:0094686|
+	|7.|1024|262144|115|FileOptions.None|-86.02|00:0094799|
+	|8.|2048|262144|115|FileOptions.SequentialScan|-85.99|00:0094968|
+	|9.|131072|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-85.95|00:0095231|
+	|10.|2048|524288|58|FileOptions.SequentialScan + FileOptions.WriteThrough|-85.94|00:0095298|
 	
 - .NET 5 (Core) + byte spans + _FileOption_ 1. - 4. [(Complete results)](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/data/fourth_test_filestream_write_biggerblocksize/Read_NetCore.md)
 	
 	|Position|Buffer|Block|Write calls|FileOption|Time reduction in %|Time|
 	|----|-----|-----|----|-----|----|----|
-	|Base line|1024|1024|29297|FileOptions.None||00:0704307|
-	
+	|Base line|1024|1024|29297|FileOptions.None||00:0633799|
+	|1.|8192|131072|229|FileOptions.SequentialScan|-86.56|00:0085192|
+	|2.|2048|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-86.34|00:0086548|
+	|3.|8192|4194304|58|FileOptions.SequentialScan|-86.20|00:0087436|
+	|4.|4096|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-86.13|00:0087930|
+	|5.|4096|4194304|58|FileOptions.SequentialScan + FileOptions.WriteThrough|-86.12|00:0087960|
+	|6.|8192|131072|229|FileOptions.SequentialScan + FileOptions.WriteThrough|-86.12|00:0087976|
+	|7.|4096|2097152|58|FileOptions.SequentialScan|-86.08|00:0088203|
+	|8.|16384|131072|229|FileOptions.WriteThrough|-85.95|00:0089049|
+	|9.|8192|131072|229|FileOptions.WriteThrough|-85.57|00:0091463|
+	|10.|16384|131072|229|FileOptions.None|-85.53|00:0091731|
+		
 - Conclusion	
+	- Buffer size is a bit random but 2048 on .NET Framework and 8192 on .NET Core occured the most.
+	- Previous block size was 262144 but now the most occuring values are 6 times 262144 on .NET Framework and 7 times 131072 on .NET Core.
+	- _FileOption_ remained mostly _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_.
+	- After this test the best combination would be:
+		- Buffer size 2048 or 8192
+		- Block size 262144 or 131072
+		- _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_
 
 
 > [!TIP]
