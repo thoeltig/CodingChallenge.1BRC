@@ -20,72 +20,77 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 					56, // 8
 					57 // 9
 				};
-
-				const int blockSize = 102400;
-				var block = new byte[blockSize];
-				var blockIndex = 0;
+				
+					const int blockSize = 102400;
+					var block = new byte[blockSize];
+					var blockIndex = 0;
 
 				for (var i = 0; i < totalRowCount; i++) {
 					var random = ThreadSafeRandom.Instance;
+					var localWriter = writer;
+                    
+						// Pick name
+						var name = names[random.Next(MaxNameCount)];
 
-					// Pick name
-					var name = names[random.Next(MaxNameCount)];
-                    
-					// Write name to block
-					var nameLength = name.Length;
-					Array.Copy(name, 0, block, blockIndex, nameLength);
-					blockIndex += nameLength;
-                    
-					const byte lineSeparator = 59; // ;
-					block[blockIndex] = lineSeparator;
-					blockIndex++;
+						// Write name to block
+						var nameLength = name.Length;
+						Array.Copy(name, 0, block, blockIndex, nameLength);
+						blockIndex += nameLength;
 
-					// Create temperature
-					// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
-					// which will result in the new value range from -99.9 to 99.9
-					const byte zeroByte = 48; // 0
-					var fractionValue = numberBytesForTemperature[random.Next(10)];
-					var singleDigit = numberBytesForTemperature[random.Next(10)];
-					var doubleDigit = numberBytesForTemperature[random.Next(10)];
-					var useDoubleDigit = doubleDigit != zeroByte;
-                    
-					// Write temperature to block
-					if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
-						const byte signedSymbol = 45; // -
-						block[blockIndex] = signedSymbol;
+						const byte lineSeparator = 59; // ;
+						block[blockIndex] = lineSeparator;
 						blockIndex++;
+
+						// Create temperature
+						// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
+						// which will result in the new value range from -99.9 to 99.9
+						const byte zeroByte = 48; // 0
+						var fractionValue = numberBytesForTemperature[random.Next(10)];
+						var singleDigit = numberBytesForTemperature[random.Next(10)];
+						var doubleDigit = numberBytesForTemperature[random.Next(10)];
+						var useDoubleDigit = doubleDigit != zeroByte;
+
+						// Write temperature to block
+						if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
+							const byte signedSymbol = 45; // -
+							block[blockIndex] = signedSymbol;
+							blockIndex++;
+						}
+
+						if (useDoubleDigit) {
+							block[blockIndex] = doubleDigit;
+							blockIndex++;
+						}
+
+						block[blockIndex] = singleDigit;
+						blockIndex++;
+
+						if (fractionValue != zeroByte) {
+							const byte temperatureSeparator = 46; // .
+							block[blockIndex] = temperatureSeparator;
+							blockIndex++;
+							block[blockIndex] = fractionValue;
+							blockIndex++;
+						}
+
+						// Write new line to block
+						const byte newLine = 10; // \n
+						block[blockIndex] = newLine;
+						blockIndex++;
+
+						// Write block to stream
+						const int maxLineLength = 106;
+						if (blockSize - blockIndex >= maxLineLength) {
+							continue;
+						}
+
+						localWriter.Write(block, 0, blockIndex);
+						blockIndex = 0;
 					}
 
-					if (useDoubleDigit) {
-						block[blockIndex] = doubleDigit;
-						blockIndex++;
+					if (blockIndex != 0) {
+						localWriter.Write(block, 0, blockIndex);
 					}
-                    
-					block[blockIndex] = singleDigit;
-					blockIndex++;
-					
-					if (fractionValue == zeroByte) {
-						const byte temperatureSeparator = 46; // .
-						block[blockIndex] = temperatureSeparator;
-						blockIndex++;
-						block[blockIndex] = fractionValue;
-						blockIndex++;
-					}
-                    
-					// Write new line to block
-					const byte newLine = 10; // \n
-					block[blockIndex] = newLine;
-					blockIndex++;
-                    
-					// Write block to stream
-					const int maxLineLength = 106;
-					if (blockSize - blockIndex >= maxLineLength) {
-						continue;
-					}
-
-					writer.Write(block, 0, blockIndex);
-					blockIndex = 0;
-				}
 			}
 		}
 
