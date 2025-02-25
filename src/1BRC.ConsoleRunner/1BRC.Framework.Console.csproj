@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0F7D4CE4-A14B-4125-A79C-56C18909C4B6}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>_1BRC.Framework.ConsoleRunner</RootNamespace>
-    <AssemblyName>1BRC.Framework.ConsoleRunner</AssemblyName>
+    <RootNamespace>_1BRC.Framework.Console</RootNamespace>
+    <AssemblyName>1BRC.Framework.Console</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

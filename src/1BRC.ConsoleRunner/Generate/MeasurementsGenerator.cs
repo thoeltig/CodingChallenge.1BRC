@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace _1BRC.Framework.ConsoleRunner.Generate {
+namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
