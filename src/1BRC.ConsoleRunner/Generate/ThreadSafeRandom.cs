@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace _1BRC.ConsoleRunner.Generate {
+namespace _1BRC.Framework.ConsoleRunner.Generate {
 	internal static class ThreadSafeRandom {
 		private static readonly Random _random = new();
 		private static readonly object _lock = new();

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using _1BRC.ConsoleRunner.Generate;
+using _1BRC.Framework.ConsoleRunner.Generate;
 
-namespace _1BRC.ConsoleRunner {
+namespace _1BRC.Framework.ConsoleRunner {
 	internal class Program {
 		private const int RowCount = 1000000000;
 		private const string FileName = "measurements.txt";
@@ -19,6 +19,7 @@ namespace _1BRC.ConsoleRunner {
 			sw.Stop();
 
 			Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
+            Console.ReadKey();
 		}
 	}
 }
