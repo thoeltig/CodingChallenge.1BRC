@@ -53,7 +53,7 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 
 ||Duration|File size in GB|MBs|(new-old)/old*100%||
 |----|----|----|----|----|
-|StreamWriter.WriteLine(line as string)      			|11:03:084|10.72|16.17|base line|[Commit]()|
-|FileStream.Write(line as byte array)        			|12:01:301|16.75|23.22|42.19|[Commit]()|
-|FileStream.Write(block filled multiple lines)			|11:04:100|13.201|19.88|22.94|[Commit]()|
-|Reduced array creation & copy when combining the line	|10:00:579|13.201|21.98|35.93|[Commit]()|
+|StreamWriter.WriteLine(line as string)      			|11:03:084|10.72|16.17|base line|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/3b483cf764121015bca7112b00917f6bb85ae205/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(line as byte array)        			|12:01:301|16.75|23.22|42.19|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/b4297a488cf753ff386b65265ac879949835565c/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(block filled multiple lines)			|11:04:100|13.201|19.88|22.94|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/bd29691691d72728d57bf21dc85701c296bd425b/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Reduced array creation & copy when combining the line	|10:00:579|13.201|21.98|35.93|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/001b7d09ec64fa2b545f20d00a19b3eb690be3f5/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
