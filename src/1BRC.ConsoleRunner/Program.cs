@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using _1BRC.Framework.ConsoleRunner.Generate;
 
@@ -9,8 +8,8 @@ namespace _1BRC.Framework.ConsoleRunner {
 		private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
-			Console.WriteLine($"Generating {RowCount:N0} rows");
-			Console.WriteLine();
+			System.Console.WriteLine($"Generating {RowCount:N0} rows");
+			System.Console.WriteLine();
 			File.Delete(FileName);
 
 			var sw = new Stopwatch();
@@ -18,8 +17,8 @@ namespace _1BRC.Framework.ConsoleRunner {
 			MeasurementsGenerator.CreateFile(FileName, RowCount);
 			sw.Stop();
 
-			Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
-            Console.ReadKey();
+			System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
+			System.Console.ReadKey();
 		}
 	}
 }
