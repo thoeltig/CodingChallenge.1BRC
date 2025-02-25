@@ -10,10 +10,21 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 		public static void CreateFile(string filePath, int totalRowCount) {
 			var names = CreateRandomNames();
 
-			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)) {
+			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 44800, FileOptions.SequentialScan)) {
+				const int maxLineLength = 106;
+				const int blockSize = 102400;
+				var block = new byte[blockSize];
+				var copyCount = 0;
+
 				for (var i = 0; i < totalRowCount; i++) {
 					var line = GetLine(names);
-					writer.Write(line, 0, line.Length);
+					var lineLength = line.Length;
+					Array.Copy(line, block, lineLength);
+					copyCount += lineLength;
+
+					if (blockSize - copyCount < maxLineLength) {
+						writer.Write(block, 0, copyCount);
+					}
 				}
 			}
 		}
@@ -24,7 +35,7 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 
 			var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
 			var temperature = GetRandomTemperature();
-
+            
 			var nameLength = name.Length;
 			var temperatureLength = temperature.Length;
 			var result = new byte[nameLength + temperatureLength + 2];

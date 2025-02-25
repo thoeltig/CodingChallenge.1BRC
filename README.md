@@ -49,10 +49,10 @@ The collected informations and results can be found [here](https://github.com/th
 
 ## File generation
 The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code a bit.
-The name length will be limited to 7 bytes per name so a whole line would be 10-14 bytes long and the generated file will be 10-14GB.
+The name length will be limited to 7 bytes per name so a whole line would be 10-14 bytes long.
 
 ||Duration|File size in GB|MBs|(new-old)/old*100%||
 |----|----|----|----|----|
 |StreamWriter.WriteLine(line as string)      	|11:03:084|10.72|16.17|base line|[Commit]()|
-|FileStream.Write(line as byte array)        	|00:23:201||||[Commit]()|
+|FileStream.Write(line as byte array)        	|12:01:301|16.75|23.22|42.19|[Commit]()|
 |FileStream.Write(block filled multiple lines)	|00:21:569|||||
