@@ -47,80 +47,12 @@ After an initial test with reduced data the _FileStream_ with default settings w
 Because I wanted to understand why that was the case I took a deep dive in the documentation, code and performance tests for a couple of days.
 The collected informations and results can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/FileReadAndWritePerformanceTests.md). 
 
-## File generation V1
-The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code first and test it with a smaller amount of rows.
+## File generation
+The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code a bit.
+The name length will be limited to 7 bytes per name so a whole line would be 10-14 bytes long and the generated file will be 10-14GB.
 
-The first version uses a simple StreamWriter which writes one random line at a time.
-```csharp
-using (var writer = new StreamWriter(filePath, false, Encoding.UTF8)) {
-writer.NewLine = "\n";
-
-	for (var i = 0; i < rowCount; i++) {
-		var line = GetLine(names);
-		writer.WriteLine(line);
-	}
-}
-```
-This will be the base line with **10M rows (~550MB)** for further improvements.
-
-|                                             | Duration  |(new-old)/old*100% | Commit |
-|---------------------------------------------|-----------|-------------------|--------|
-| StreamWriter.WriteLine(line as string)      | 00:30:288 | base line	      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/f20bdce347f4ec549f1cc0eeb20785c9807db7c1/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
-| FileStream.Write(line as byte array)        | 00:23:201 |      -23,40%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a8993ae4264db8d9e07f05d7dec939078dd51183/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) |
-| FileStream.Write + 10 lines as byte array   | 00:21:569 |      -28,79%      ||
-| FileStream.Write + 100 lines as byte array  | 00:18:716 |      -38,21%      ||
-| FileStream.Write + 1k lines as byte array   | 00:16:937 |      -44,08%      | [Link](https://github.com/thoeltig/CodingChallenge.1BRC/blob/c18ad89905c30196cdde95f5c5f4e0f97c86e32e/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs)|
-| FileStream.Write + 2k lines as byte array   | 00:17:426 |      -42,26%      ||
-| FileStream.Write + 2.5k lines as byte array | 00:18:244 |      -39,76%      ||
-
-From the results it is clear that writing a byte array of multiple lines to the FileStream has the best performance. 1000 lines with random line length seems to have a slightly faster performance but might only be on my device and the optimal number will vary from one device to the next depending on the IO bottleneck and the used buffer size.
-- The buffer size of the FileStream can also be adjusted. The default is 4096 and increasing it might help. 
-- FileStream doesn't support parallel file writes but the random names and final lines can be generated in parallel.
-
-After a bit of [refactoring](https://github.com/thoeltig/CodingChallenge.1BRC/blob/2ba8b8ee1a633fadb83977bb10ce99e2bd691250/src/1BRC.ConsoleRunner/MeasurementsGenerator.cs) I was ready to run a test with a couple of combinations:
-
-| Buffer size + line count					  | Duration  |(new-old)/old*100% |
-|---------------------------------------------|-----------|-------------------|
-| 4096  + 500 								  | 00:16:416 | new base line  	  |
-| 8192  + 500 								  | 00:16:272 |       -0,88%      |
-| 16384 + 500  								  | 00:16:393 |       -0,14%      |
-| 32768 + 500  								  | 00:16:016 |       -2,44%      |
-| 65536 + 500  								  | 00:15:910 |       -3,08%      |
-| 4096  + 1000 								  | 00:15:147 |       -7,73%      |
-| 8192  + 1000 								  | 00:14:997 |       -8,64%      |
-| 16384 + 1000 								  | 00:15:019 |       -8,51%      |
-| 32768 + 1000 								  | 00:15:204 |       -7,38%      |
-| 65536 + 1000 								  | 00:15:001 |       -8,62%      |
-| 4096  + 2000 								  | 00:14:444 |      -12,01%      |
-| 8192  + 2000 								  | 00:14:523 |      -11,53%      |
-| 16384 + 2000 								  | 00:14:456 |      -11,94%      |
-| 32768 + 2000 								  | 00:14:493 |      -11,71%      |
-| 65536 + 2000 								  | 00:14:347 |      -12,60%      |
-| 4096  + 4000  							  | 00:14:011 |      -14,65%      |
-| 8192  + 4000  							  | 00:13:696 |      -16,57%      |
-| 16384 + 4000  							  | 00:13:659 |      -16,79%      |
-| **32768 + 4000**  						  |**00:13:616**|  **-17,06%**    |
-| 65536 + 4000  							  | 00:13:862 |      -15,56%      |
-| 4096  + 5000  							  | 00:14:084 |      -14,21%      |
-| 8192  + 5000  							  | 00:13:848 |      -15,64%      |
-| 16384 + 5000  							  | 00:13:825 |      -15,78%      |
-| 32768 + 5000  							  | 00:14:133 |      -13,91%      |
-| 65536 + 5000  							  | 00:13:906 |      -15,29%      |
-| 4096  + 8000  							  | 00:14:107 |      -14,06%      |
-| 8192  + 8000  							  | 00:14:133 |      -13,91%      |
-| 16384 + 8000  							  | 00:14:148 |      -13,82%      |
-| 32768 + 8000  							  | 00:14:064 |      -14,33%      |
-| 65536 + 8000  							  | 00:14:213 |      -13,42%      |
-| 4096  + 10000  							  | 00:14:805 |       -9,81%      |
-| 8192  + 10000  							  | 00:14:855 |       -9,51%      |
-| 16384 + 10000  							  | 00:14:991 |       -8,68%      |
-| 32768 + 10000  							  | 00:14:906 |       -9,20%      |
-| 65536 + 10000  							  | 00:14:901 |       -9,23%      |
-
-Test result:
-- First of all I noticed that I screwed up the time measurements in the test before because the file delete was inside the time tracking code. This is not a big adjustment but it changed the measured time slightly and that is why the whole default buffer sizes needs to be tested again with the different line count.
-- This took a while to write down but now it is clear that generating 4000 lines in parallel and writing them to file with a file buffer size of 32768 has the best performance (these values will differ depending on the hardware).
-- The problem with this result is that it is only an approximation to the correct combination because the lines have a random sizes from 3 to 106 bytes which will result in 12000 to 424000 bytes written to the file with a buffer of 32768. This is not really optimal but the best result which can be archieved with this version.
-
-
-**It took 23:13:214 to generate the final measurements file with 1B rows.**
+||Duration|File size in GB|MBs|(new-old)/old*100%||
+|----|----|----|----|----|
+|StreamWriter.WriteLine(line as string)      	|11:03:084|10.72|16.17|base line|[Commit]()|
+|FileStream.Write(line as byte array)        	|00:23:201||||[Commit]()|
+|FileStream.Write(block filled multiple lines)	|00:21:569|||||

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -11,25 +10,32 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 		public static void CreateFile(string filePath, int totalRowCount) {
 			var names = CreateRandomNames();
 
-			using (var writer = new StreamWriter(filePath, false, Encoding.UTF8)) {
-				writer.NewLine = "\n";
-
+			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None)) {
 				for (var i = 0; i < totalRowCount; i++) {
 					var line = GetLine(names);
-					writer.WriteLine(line);
+					writer.Write(line, 0, line.Length);
 				}
 			}
 		}
 
-		private static string GetLine(IReadOnlyList<string> names) {
-			const string separator = ";";
+		private static byte[] GetLine(byte[][] names) {
+			const byte separator = 59; // ;
+			const byte newLine = 10; // \n
 
 			var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
 			var temperature = GetRandomTemperature();
-			return string.Concat(name, separator, temperature);
+
+			var nameLength = name.Length;
+			var temperatureLength = temperature.Length;
+			var result = new byte[nameLength + temperatureLength + 2];
+			Array.Copy(name, result, nameLength);
+			result[nameLength] = separator;
+			Array.Copy(temperature, 0, result, nameLength + 1, temperatureLength);
+			result[nameLength - 1] = newLine;
+			return result;
 		}
 
-		private static string GetRandomTemperature() {
+		private static byte[] GetRandomTemperature() {
 			// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
 			// which will result in the new value range from -99.9 to 99.9
 			const int randomMinIncluded = 1;
@@ -40,38 +46,38 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 
 			var randomValue = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 			var temperature = Math.Round(randomValue / divider - subtractedValue, digits);
-			return temperature.ToString(CultureInfo.InvariantCulture);
+			return Encoding.UTF8.GetBytes(temperature.ToString(CultureInfo.InvariantCulture));
 		}
 
-		private static IReadOnlyList<string> CreateRandomNames() {
+		private static byte[][] CreateRandomNames() {
 			const byte arraySize = 253; // 3 bytes will be ignored
 			const byte firstIgnoreValue = 10; // \n
 			const byte secondIgnoreValue = 13; // \r
 			const byte thirdIgnoreValue = 59; // ;
 
-			var validNameChars = new char[arraySize];
+			var validNameBytes = new byte[arraySize];
 			for (int i = 0, j = 0; i <= byte.MaxValue && j < arraySize; i++) {
 				var nextByte = (byte)i;
 				if (nextByte is not (firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue)) {
-					validNameChars[j] = (char)nextByte;
+					validNameBytes[j] = nextByte;
 					j++;
 				}
 			}
 
-			var names = new string[MaxNameCount];
+			var names = new byte[MaxNameCount][];
 
 			for (var i = 0; i < MaxNameCount; i++) {
-				const int randomMinIncluded = 5; // Name needs at least 1 character
-				const int randomMaxExcluded = 9 + 1; // Name can have up to 100 characters
+				const int randomMinIncluded = 7; // Name needs at least 1 character
+				//const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
 
-				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
-				var chars = new char[nameLength];
+				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded); //, randomMaxExcluded);
+				var bytes = new byte[nameLength];
 
 				for (var j = 0; j < nameLength; j++) {
-					chars[j] = validNameChars[ThreadSafeRandom.Instance.Next(arraySize)];
+					bytes[j] = validNameBytes[ThreadSafeRandom.Instance.Next(arraySize)];
 				}
 
-				names[i] = new string(chars);
+				names[i] = bytes;
 			}
 
 			return names;
