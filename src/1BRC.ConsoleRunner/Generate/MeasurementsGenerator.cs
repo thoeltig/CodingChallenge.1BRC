@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
@@ -21,14 +22,31 @@ namespace _1BRC.Framework.Console.Generate {
 					57 // 9
 				};
 				
+				#if DEBUG
+				const int maxParallel = 1;
+				#else
+				var maxParallel = Environment.ProcessorCount;
+				#endif
+				var sliceOfRowCount = (int)Math.Ceiling(totalRowCount / (double)maxParallel);
+
+				Parallel.For(0, maxParallel, new ParallelOptions {
+					MaxDegreeOfParallelism = maxParallel
+				}, processIdx => {
 					const int blockSize = 102400;
 					var block = new byte[blockSize];
 					var blockIndex = 0;
 
-				for (var i = 0; i < totalRowCount; i++) {
+					var rowCount = sliceOfRowCount;
+					var rowCountAfterGeneration = rowCount * (processIdx + 1);
+					var diff = rowCountAfterGeneration - totalRowCount;
+					if (diff > 0) {
+						rowCount -= diff;
+					}
+
 					var random = ThreadSafeRandom.Instance;
 					var localWriter = writer;
                     
+					for (var i = 0; i < rowCount; i++) {
 						// Pick name
 						var name = names[random.Next(MaxNameCount)];
 
@@ -91,6 +109,7 @@ namespace _1BRC.Framework.Console.Generate {
 					if (blockIndex != 0) {
 						localWriter.Write(block, 0, blockIndex);
 					}
+				});
 			}
 		}
 
