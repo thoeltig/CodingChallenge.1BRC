@@ -29,87 +29,92 @@ namespace _1BRC.Framework.Console.Generate {
 				#endif
 				var sliceOfRowCount = (int)Math.Ceiling(totalRowCount / (double)maxParallel);
 
-				Parallel.For(0, maxParallel, new ParallelOptions {
-					MaxDegreeOfParallelism = maxParallel
-				}, processIdx => {
-					const int blockSize = 102400;
-					var block = new byte[blockSize];
-					var blockIndex = 0;
-
+				var tasks = new Task[maxParallel];
+				for (var i = 0; i < maxParallel; i++) {
 					var rowCount = sliceOfRowCount;
-					var rowCountAfterGeneration = rowCount * (processIdx + 1);
+					var rowCountAfterGeneration = rowCount * (i + 1);
 					var diff = rowCountAfterGeneration - totalRowCount;
 					if (diff > 0) {
 						rowCount -= diff;
 					}
+					
+					tasks[i] = GenerateLinesAsync(rowCount, writer, names, numberBytesForTemperature);
+				}
 
-					var random = ThreadSafeRandom.Instance;
-					var localWriter = writer;
+				Task.WaitAll(tasks);
+			}
+		}
+
+		private static async Task GenerateLinesAsync(int rowCount, FileStream writer, byte[][] names, byte[] numberBytesForTemperature) {
+			const int blockSize = 102400;
+			var block = new byte[blockSize];
+			var blockIndex = 0;
+
+			var random = ThreadSafeRandom.Instance;
+			var localWriter = writer;
                     
-					for (var i = 0; i < rowCount; i++) {
-						// Pick name
-						var name = names[random.Next(MaxNameCount)];
+			for (var i = 0; i < rowCount; i++) {
+				// Pick name
+				var name = names[random.Next(MaxNameCount)];
 
-						// Write name to block
-						var nameLength = name.Length;
-						Array.Copy(name, 0, block, blockIndex, nameLength);
-						blockIndex += nameLength;
+				// Write name to block
+				var nameLength = name.Length;
+				Array.Copy(name, 0, block, blockIndex, nameLength);
+				blockIndex += nameLength;
 
-						const byte lineSeparator = 59; // ;
-						block[blockIndex] = lineSeparator;
-						blockIndex++;
+				const byte lineSeparator = 59; // ;
+				block[blockIndex] = lineSeparator;
+				blockIndex++;
 
-						// Create temperature
-						// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
-						// which will result in the new value range from -99.9 to 99.9
-						const byte zeroByte = 48; // 0
-						var fractionValue = numberBytesForTemperature[random.Next(10)];
-						var singleDigit = numberBytesForTemperature[random.Next(10)];
-						var doubleDigit = numberBytesForTemperature[random.Next(10)];
-						var useDoubleDigit = doubleDigit != zeroByte;
+				// Create temperature
+				// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
+				// which will result in the new value range from -99.9 to 99.9
+				const byte zeroByte = 48; // 0
+				var fractionValue = numberBytesForTemperature[random.Next(10)];
+				var singleDigit = numberBytesForTemperature[random.Next(10)];
+				var doubleDigit = numberBytesForTemperature[random.Next(10)];
+				var useDoubleDigit = doubleDigit != zeroByte;
 
-						// Write temperature to block
-						if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
-							const byte signedSymbol = 45; // -
-							block[blockIndex] = signedSymbol;
-							blockIndex++;
-						}
+				// Write temperature to block
+				if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
+					const byte signedSymbol = 45; // -
+					block[blockIndex] = signedSymbol;
+					blockIndex++;
+				}
 
-						if (useDoubleDigit) {
-							block[blockIndex] = doubleDigit;
-							blockIndex++;
-						}
+				if (useDoubleDigit) {
+					block[blockIndex] = doubleDigit;
+					blockIndex++;
+				}
 
-						block[blockIndex] = singleDigit;
-						blockIndex++;
+				block[blockIndex] = singleDigit;
+				blockIndex++;
 
-						if (fractionValue != zeroByte) {
-							const byte temperatureSeparator = 46; // .
-							block[blockIndex] = temperatureSeparator;
-							blockIndex++;
-							block[blockIndex] = fractionValue;
-							blockIndex++;
-						}
+				if (fractionValue != zeroByte) {
+					const byte temperatureSeparator = 46; // .
+					block[blockIndex] = temperatureSeparator;
+					blockIndex++;
+					block[blockIndex] = fractionValue;
+					blockIndex++;
+				}
 
-						// Write new line to block
-						const byte newLine = 10; // \n
-						block[blockIndex] = newLine;
-						blockIndex++;
+				// Write new line to block
+				const byte newLine = 10; // \n
+				block[blockIndex] = newLine;
+				blockIndex++;
 
-						// Write block to stream
-						const int maxLineLength = 106;
-						if (blockSize - blockIndex >= maxLineLength) {
-							continue;
-						}
+				// Write block to stream
+				const int maxLineLength = 106;
+				if (blockSize - blockIndex >= maxLineLength) {
+					continue;
+				}
 
-						localWriter.Write(block, 0, blockIndex);
-						blockIndex = 0;
-					}
+				await localWriter.WriteAsync(block, 0, blockIndex).ConfigureAwait(false);
+				blockIndex = 0;
+			}
 
-					if (blockIndex != 0) {
-						localWriter.Write(block, 0, blockIndex);
-					}
-				});
+			if (blockIndex != 0) {
+				await localWriter.WriteAsync(block, 0, blockIndex).ConfigureAwait(false);
 			}
 		}
 
