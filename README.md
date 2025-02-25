@@ -53,6 +53,7 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 
 ||Duration|File size in GB|MBs|(new-old)/old*100%||
 |----|----|----|----|----|
-|StreamWriter.WriteLine(line as string)      	|11:03:084|10.72|16.17|base line|[Commit]()|
-|FileStream.Write(line as byte array)        	|12:01:301|16.75|23.22|42.19|[Commit]()|
-|FileStream.Write(block filled multiple lines)	|00:21:569|||||
+|StreamWriter.WriteLine(line as string)      			|11:03:084|10.72|16.17|base line|[Commit]()|
+|FileStream.Write(line as byte array)        			|12:01:301|16.75|23.22|42.19|[Commit]()|
+|FileStream.Write(block filled multiple lines)			|11:04:100|13.201|19.88|22.94|[Commit]()|
+|Reduced array creation & copy when combining the line	|10:00:579|13.201|21.98|35.93|[Commit]()|

@@ -11,39 +11,38 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 			var names = CreateRandomNames();
 
 			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 44800, FileOptions.SequentialScan)) {
+				const byte separator = 59; // ;
+				const byte newLine = 10; // \n
 				const int maxLineLength = 106;
 				const int blockSize = 102400;
 				var block = new byte[blockSize];
-				var copyCount = 0;
+				var blockIndex = 0;
 
 				for (var i = 0; i < totalRowCount; i++) {
-					var line = GetLine(names);
-					var lineLength = line.Length;
-					Array.Copy(line, block, lineLength);
-					copyCount += lineLength;
+					var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
+					var temperature = GetRandomTemperature();
 
-					if (blockSize - copyCount < maxLineLength) {
-						writer.Write(block, 0, copyCount);
+					var nameLength = name.Length;
+					var temperatureLength = temperature.Length;
+
+					Array.Copy(name, 0, block, blockIndex, nameLength);
+					blockIndex += nameLength;
+
+					block[blockIndex] = separator;
+					blockIndex++;
+
+					Array.Copy(temperature, 0, block, blockIndex, temperatureLength);
+					blockIndex += temperatureLength;
+
+					block[blockIndex] = newLine;
+					blockIndex++;
+
+					if (blockSize - blockIndex < maxLineLength) {
+						writer.Write(block, 0, blockIndex);
+						blockIndex = 0;
 					}
 				}
 			}
-		}
-
-		private static byte[] GetLine(byte[][] names) {
-			const byte separator = 59; // ;
-			const byte newLine = 10; // \n
-
-			var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
-			var temperature = GetRandomTemperature();
-            
-			var nameLength = name.Length;
-			var temperatureLength = temperature.Length;
-			var result = new byte[nameLength + temperatureLength + 2];
-			Array.Copy(name, result, nameLength);
-			result[nameLength] = separator;
-			Array.Copy(temperature, 0, result, nameLength + 1, temperatureLength);
-			result[nameLength - 1] = newLine;
-			return result;
 		}
 
 		private static byte[] GetRandomTemperature() {
@@ -81,7 +80,7 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 				const int randomMinIncluded = 7; // Name needs at least 1 character
 				//const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
 
-				var nameLength = ThreadSafeRandom.Instance.Next(randomMinIncluded); //, randomMaxExcluded);
+				var nameLength = randomMinIncluded; // ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 				var bytes = new byte[nameLength];
 
 				for (var j = 0; j < nameLength; j++) {
