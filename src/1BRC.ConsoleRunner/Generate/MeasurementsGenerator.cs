@@ -1,62 +1,92 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
-using System.Text;
 
 namespace _1BRC.Framework.ConsoleRunner.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
 		public static void CreateFile(string filePath, int totalRowCount) {
-			var names = CreateRandomNames();
-
 			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 44800, FileOptions.SequentialScan)) {
-				const byte separator = 59; // ;
-				const byte newLine = 10; // \n
-				const int maxLineLength = 106;
+				var names = CreateRandomNames();
+				var numberBytesForTemperature = new byte[] {
+					48, // 0
+					49, // 1
+					50, // 2
+					51, // 3
+					52, // 4
+					53, // 5
+					54, // 6
+					55, // 7
+					56, // 8
+					57 // 9
+				};
+
 				const int blockSize = 102400;
 				var block = new byte[blockSize];
 				var blockIndex = 0;
 
 				for (var i = 0; i < totalRowCount; i++) {
-					var name = names[ThreadSafeRandom.Instance.Next(MaxNameCount)];
-					var temperature = GetRandomTemperature();
+					var random = ThreadSafeRandom.Instance;
 
+					// Pick name
+					var name = names[random.Next(MaxNameCount)];
+                    
+					// Write name to block
 					var nameLength = name.Length;
-					var temperatureLength = temperature.Length;
-
 					Array.Copy(name, 0, block, blockIndex, nameLength);
 					blockIndex += nameLength;
-
-					block[blockIndex] = separator;
+                    
+					const byte lineSeparator = 59; // ;
+					block[blockIndex] = lineSeparator;
 					blockIndex++;
 
-					Array.Copy(temperature, 0, block, blockIndex, temperatureLength);
-					blockIndex += temperatureLength;
+					// Create temperature
+					// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
+					// which will result in the new value range from -99.9 to 99.9
+					const byte zeroByte = 48; // 0
+					var fractionValue = numberBytesForTemperature[random.Next(10)];
+					var singleDigit = numberBytesForTemperature[random.Next(10)];
+					var doubleDigit = numberBytesForTemperature[random.Next(10)];
+					var useDoubleDigit = doubleDigit != zeroByte;
+                    
+					// Write temperature to block
+					if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
+						const byte signedSymbol = 45; // -
+						block[blockIndex] = signedSymbol;
+						blockIndex++;
+					}
 
+					if (useDoubleDigit) {
+						block[blockIndex] = doubleDigit;
+						blockIndex++;
+					}
+                    
+					block[blockIndex] = singleDigit;
+					blockIndex++;
+					
+					if (fractionValue == zeroByte) {
+						const byte temperatureSeparator = 46; // .
+						block[blockIndex] = temperatureSeparator;
+						blockIndex++;
+						block[blockIndex] = fractionValue;
+						blockIndex++;
+					}
+                    
+					// Write new line to block
+					const byte newLine = 10; // \n
 					block[blockIndex] = newLine;
 					blockIndex++;
-
-					if (blockSize - blockIndex < maxLineLength) {
-						writer.Write(block, 0, blockIndex);
-						blockIndex = 0;
+                    
+					// Write block to stream
+					const int maxLineLength = 106;
+					if (blockSize - blockIndex >= maxLineLength) {
+						continue;
 					}
+
+					writer.Write(block, 0, blockIndex);
+					blockIndex = 0;
 				}
 			}
-		}
-
-		private static byte[] GetRandomTemperature() {
-			// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
-			// which will result in the new value range from -99.9 to 99.9
-			const int randomMinIncluded = 1;
-			const int randomMaxExcluded = 1999 + 1;
-			const double divider = 10;
-			const double subtractedValue = 100;
-			const int digits = 1;
-
-			var randomValue = ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
-			var temperature = Math.Round(randomValue / divider - subtractedValue, digits);
-			return Encoding.UTF8.GetBytes(temperature.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static byte[][] CreateRandomNames() {
@@ -68,10 +98,12 @@ namespace _1BRC.Framework.ConsoleRunner.Generate {
 			var validNameBytes = new byte[arraySize];
 			for (int i = 0, j = 0; i <= byte.MaxValue && j < arraySize; i++) {
 				var nextByte = (byte)i;
-				if (nextByte is not (firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue)) {
-					validNameBytes[j] = nextByte;
-					j++;
+				if (nextByte is firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue) {
+					continue;
 				}
+
+				validNameBytes[j] = nextByte;
+				j++;
 			}
 
 			var names = new byte[MaxNameCount][];
