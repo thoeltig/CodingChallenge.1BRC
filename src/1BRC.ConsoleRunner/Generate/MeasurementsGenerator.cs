@@ -22,6 +22,7 @@ namespace _1BRC.Framework.Console.Generate {
 					56, // 8
 					57 // 9
 				};
+				var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
 
 				#if DEBUG
 				const int maxParallel = 1;
@@ -44,18 +45,21 @@ namespace _1BRC.Framework.Console.Generate {
 						rowCount -= diff;
 					}
 
-					var random = ThreadSafeRandom.Instance;
-					var localWriter = writer;
+					var nameIndex = 0;
+					uint signedIndex = 0;
+					var numberIndex = 0;
 
 					for (var i = 0; i < rowCount; i++) {
 						// Pick name
-						var name = names[random.Next(MaxNameCount)];
+						var name = names[nameIndex];
+						nameIndex = nameIndex + 1 < MaxNameCount ? nameIndex + 1 : 0;
 
 						// Write name to block
 						var nameLength = name.Length;
 						fixed (byte* blockPtr = block) {
 							Marshal.Copy(name, 0, IntPtr.Add(new IntPtr(blockPtr), blockIndex), nameLength);
 						}
+
 						blockIndex += nameLength;
 
 						const byte lineSeparator = 59; // ;
@@ -66,13 +70,16 @@ namespace _1BRC.Framework.Console.Generate {
 						// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
 						// which will result in the new value range from -99.9 to 99.9
 						const byte zeroByte = 48; // 0
-						var fractionValue = numberBytesForTemperature[random.Next(10)];
-						var singleDigit = numberBytesForTemperature[random.Next(10)];
-						var doubleDigit = numberBytesForTemperature[random.Next(10)];
+						var fractionValue = numberBytesForTemperature[numberIndex];
+						numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
+						var singleDigit = numberBytesForTemperature[numberIndex];
+						numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
+						var doubleDigit = numberBytesForTemperature[numberIndex];
+						numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
 						var useDoubleDigit = doubleDigit != zeroByte;
 
 						// Write temperature to block
-						if ((singleDigit != zeroByte || useDoubleDigit) && random.Next(2) == 0) {
+						if ((singleDigit != zeroByte || useDoubleDigit) && ++signedIndex % 3 == 0) {
 							const byte signedSymbol = 45; // -
 							block[blockIndex] = signedSymbol;
 							blockIndex++;
@@ -105,12 +112,12 @@ namespace _1BRC.Framework.Console.Generate {
 							continue;
 						}
 
-						localWriter.Write(block, 0, blockIndex);
+						writer.Write(block, 0, blockIndex);
 						blockIndex = 0;
 					}
 
 					if (blockIndex != 0) {
-						localWriter.Write(block, 0, blockIndex);
+						writer.Write(block, 0, blockIndex);
 					}
 				});
 			}
@@ -141,9 +148,10 @@ namespace _1BRC.Framework.Console.Generate {
 
 				var nameLength = randomMinIncluded; // ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 				var bytes = new byte[nameLength];
-
+				var nameIndex = 0;
 				for (var j = 0; j < nameLength; j++) {
-					bytes[j] = validNameBytes[ThreadSafeRandom.Instance.Next(arraySize)];
+					bytes[j] = validNameBytes[nameIndex];
+					nameIndex = nameIndex + 1 < arraySize ? nameIndex + 1 : 0;
 				}
 
 				names[i] = bytes;
