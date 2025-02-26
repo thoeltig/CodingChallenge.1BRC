@@ -4,7 +4,11 @@ using _1BRC.Framework.Console.Generate;
 
 namespace _1BRC.Framework.Console {
 	internal class Program {
+		#if DEBUG
+		private const int RowCount = 10000000;
+		#else
 		private const int RowCount = 1000000000;
+		#endif
 		private const string FileName = "measurements.txt";
 
 		private static void Main(string[] args) {
