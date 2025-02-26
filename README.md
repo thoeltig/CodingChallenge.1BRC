@@ -53,10 +53,11 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 
 ||Duration|File size in GB|MBs|(new-old)/old*100%||
 |----|----|----|----|----|----|
-|StreamWriter.WriteLine(line as string)      			|11:03:084|10.720|16.17|base line|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/3b483cf764121015bca7112b00917f6bb85ae205/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|FileStream.Write(line as byte array)        			|12:01:301|16.750|23.22|42.19|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/b4297a488cf753ff386b65265ac879949835565c/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|FileStream.Write(block filled multiple lines)			|11:04:100|13.201|19.88|22.94|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/bd29691691d72728d57bf21dc85701c296bd425b/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Reduced array creation & copy when combining the line	|10:00:579|13.201|21.98|35.93|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/001b7d09ec64fa2b545f20d00a19b3eb690be3f5/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Temperature generation writes bytes directly to block	|03:17:209|11.595|58.79|263.57|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/6c6ce5dd1643036ba76aaa38970b371ed13e7e80/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Parallel execution										|03:06:660|13.195|70.69|337.17|[Commit](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Async write 											|||||[Commit]()|
+|StreamWriter.WriteLine(line as string)      			|11:03:084|10.720|16.17|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/3b483cf764121015bca7112b00917f6bb85ae205/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(line as byte array)        			|12:01:301|16.750|23.22|42.19|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/b4297a488cf753ff386b65265ac879949835565c/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(block filled multiple lines)			|11:04:100|13.201|19.88|22.94|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/bd29691691d72728d57bf21dc85701c296bd425b/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Reduced array creation & copy when combining the line	|10:00:579|13.201|21.98|35.93|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/001b7d09ec64fa2b545f20d00a19b3eb690be3f5/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Temperature generation writes bytes directly to block	|03:17:209|11.595|58.79|263.57|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/6c6ce5dd1643036ba76aaa38970b371ed13e7e80/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Parallel execution										|03:06:660|13.195|70.69|337.17|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Copy name with Marshal.Copy instead of Array.Copy		|02:49:013|13.195|78.07|382.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/e6cba3b8b72181f59cfb5feeef768ce541533255/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Replaced real random with iteration through the values	|||||[File]()|
