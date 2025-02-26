@@ -60,4 +60,7 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 |Temperature generation writes bytes directly to block	|03:17:209|11.595|58.79|263.57|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/6c6ce5dd1643036ba76aaa38970b371ed13e7e80/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Parallel execution										|03:06:660|13.195|70.69|337.17|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Copy name with Marshal.Copy instead of Array.Copy		|02:49:013|13.195|78.07|382.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/e6cba3b8b72181f59cfb5feeef768ce541533255/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Replaced real random with iteration through the values	|||||[File]()|
+|Replaced real random with iteration through the values	|02:40:766|13.033|81.07|401.36|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/1fc204e8373f380faac7089398a233f17f6c5fa8/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Native write											|||||[File]()|
+|More unsafe + pointer stuff							|||||[File]()|
+|Change block & buffer size								|||||[File]()|
