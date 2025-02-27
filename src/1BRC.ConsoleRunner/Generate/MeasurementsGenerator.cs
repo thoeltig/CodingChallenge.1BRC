@@ -8,7 +8,7 @@ namespace _1BRC.Framework.Console.Generate {
 		private const int MaxNameCount = 10000;
 
 		public static unsafe void CreateFile(string filePath, int totalRowCount) {
-			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 44800, FileOptions.SequentialScan)) {
+			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4194304, FileOptions.None)) {
 				var names = CreateRandomNames();
 				var numberBytesForTemperature = new byte[] {
 					48, // 0
@@ -23,7 +23,7 @@ namespace _1BRC.Framework.Console.Generate {
 					57 // 9
 				};
 				var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
-
+				
 				#if DEBUG
 				const int maxParallel = 1;
 				#else
@@ -34,7 +34,7 @@ namespace _1BRC.Framework.Console.Generate {
 				Parallel.For(0, maxParallel, new ParallelOptions {
 					MaxDegreeOfParallelism = maxParallel
 				}, processIdx => {
-					const int blockSize = 102400;
+					const int blockSize = 16777216;
 					var block = new byte[blockSize];
 					var blockIndex = 0;
 
