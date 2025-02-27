@@ -18,7 +18,7 @@ namespace _1BRC.Framework.Console {
 
 			var sw = new Stopwatch();
 			sw.Restart();
-			MeasurementsGenerator.CreateFile(FileName, RowCount);
+			MeasurementsGenerator.GenerateFile(FileName, RowCount);
 			sw.Stop();
 
 			System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");

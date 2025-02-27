@@ -1,109 +1,109 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
 
-		public static unsafe void CreateFile(string filePath, int totalRowCount) {
-			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 4194304, FileOptions.Asynchronous)) {
-				var names = CreateRandomNames();
-				var numberBytesForTemperature = new byte[] {
-					48, // 0
-					49, // 1
-					50, // 2
-					51, // 3
-					52, // 4
-					53, // 5
-					54, // 6
-					55, // 7
-					56, // 8
-					57 // 9
-				};
-				var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
+		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
+			var filePtr = NativeMethods.CreateFile(filePath, (uint)NativeMethods.FileGenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
 
-				#if DEBUG
-				const int maxParallel = 1;
-				#else
+			var names = CreateRandomNames();
+			var numberBytesForTemperature = new byte[] {
+				48, // 0
+				49, // 1
+				50, // 2
+				51, // 3
+				52, // 4
+				53, // 5
+				54, // 6
+				55, // 7
+				56, // 8
+				57 // 9
+			};
+			var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
+
+			#if DEBUG
+			const int maxParallel = 1;
+			#else
 				var maxParallel = Environment.ProcessorCount;
-				#endif
+			#endif
 
-				const int blockSize = 16777216;
-				var block = new byte[blockSize];
-				var sliceOfBlock = (int)Math.Ceiling(blockSize / (double)maxParallel);
+			const int blockSize = 16777216;
+			var block = new byte[blockSize];
+			var sliceOfBlock = (int)Math.Ceiling(blockSize / (double)maxParallel);
 
-				var bytePointers = new byte*[maxParallel];
-				var pointers = new IntPtr[maxParallel];
-				var handles = new GCHandle[maxParallel];
-				for (var i = 0; i < maxParallel; i++) {
-					var arr = new byte[sliceOfBlock];
-					var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
-					handles[i] = handle;
-					var address = handle.AddrOfPinnedObject();
-                    var ptr = (byte*)address.ToPointer();
-					bytePointers[i] = ptr;
-					pointers[i] = new IntPtr(ptr);
-				}
+			var bytePointers = new byte*[maxParallel];
+			var pointers = new IntPtr[maxParallel];
+			var handles = new GCHandle[maxParallel];
+			for (var i = 0; i < maxParallel; i++) {
+				var arr = new byte[sliceOfBlock];
+				var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
+				handles[i] = handle;
+				var address = handle.AddrOfPinnedObject();
+				var ptr = (byte*)address.ToPointer();
+				bytePointers[i] = ptr;
+				pointers[i] = new IntPtr(ptr);
+			}
 
-				var nameIndex = 0;
-				var numberIndex = 0;
-				var linesToCreate = totalRowCount;
-				var tasks = new Task[maxParallel];
+			var nameIndex = 0;
+			var numberIndex = 0;
+			var linesToCreate = totalRowCount;
+			var tasks = new Task[maxParallel];
 
-				fixed (byte* blockPtr = block) {
-					var ptr = new IntPtr(blockPtr);
-					while (linesToCreate > 0) {
-						for (var j = 0; j < maxParallel; j++) {
-							tasks[j] = GenerateLinesAsync(bytePointers[j], sliceOfBlock, CanCreateLine, GetName, GetNumber);
-						}
-
-						Task.WaitAll(tasks);
-
-						var blockIndex = 0;
-						for (var j = 0; j < maxParallel; j++) {
-							var length = ((Task<int>)tasks[j]).Result;
-							CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
-							blockIndex += length;
-						}
-
-						writer.WriteAsync(block, 0, blockIndex).ConfigureAwait(false);
-					}
-				}
-
-				for (var i = 0; i < maxParallel; i++) {
-					handles[i].Free();
-				}
-                
-				Array.Clear(pointers, 0, maxParallel);
-				Array.Clear(bytePointers, 0, maxParallel);
-				Array.Clear(handles, 0, maxParallel);
-                return;
-
-				bool CanCreateLine() {
-					if (linesToCreate <= 0) {
-						return false;
+			fixed (byte* blockPtr = block) {
+				var ptr = new IntPtr(blockPtr);
+				while (linesToCreate > 0) {
+					for (var j = 0; j < maxParallel; j++) {
+						tasks[j] = GenerateLinesAsync(bytePointers[j], sliceOfBlock, CanCreateLine, GetName, GetNumber);
 					}
 
-					linesToCreate--;
-					return true;
-				}
+					Task.WaitAll(tasks);
 
-				byte[] GetName() {
-					nameIndex = nameIndex + 1 < MaxNameCount ? nameIndex + 1 : 0;
-					return names[nameIndex];
-				}
+					var blockIndex = 0;
+					for (var j = 0; j < maxParallel; j++) {
+						var length = ((Task<int>)tasks[j]).Result;
+						NativeMethods.CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
+						blockIndex += length;
+					}
 
-				byte GetNumber() {
-					numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
-					return numberBytesForTemperature[numberIndex];
+					var ol = new NativeOverlapped();
+					NativeMethods.WriteFileEx(filePtr, block, (uint)blockIndex, ref ol, WriteAsyncCallback);
 				}
 			}
-		}
 
-		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-		public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+			NativeMethods.CloseHandle(filePtr);
+
+			for (var i = 0; i < maxParallel; i++) {
+				handles[i].Free();
+			}
+
+			Array.Clear(pointers, 0, maxParallel);
+			Array.Clear(bytePointers, 0, maxParallel);
+			Array.Clear(handles, 0, maxParallel);
+			return;
+
+			bool CanCreateLine() {
+				if (linesToCreate <= 0) {
+					return false;
+				}
+
+				linesToCreate--;
+				return true;
+			}
+
+			byte[] GetName() {
+				nameIndex = nameIndex + 1 < MaxNameCount ? nameIndex + 1 : 0;
+				return names[nameIndex];
+			}
+
+			byte GetNumber() {
+				numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
+				return numberBytesForTemperature[numberIndex];
+			}
+		}
 
 		private static unsafe Task<int> GenerateLinesAsync(byte* ptr, int capacity, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
 			const int maxLineLength = 106;
@@ -189,6 +189,9 @@ namespace _1BRC.Framework.Console.Generate {
 			});
 
 			return names;
+		}
+
+		private static void WriteAsyncCallback(uint dwErrorCode, uint dwNumberOfBytesTransfered, ref NativeOverlapped lpOverlapped) {
 		}
 	}
 }
