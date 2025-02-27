@@ -61,6 +61,6 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 |Parallel execution										|03:06:660|13.195|70.69|337.17|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Copy name with Marshal.Copy instead of Array.Copy		|02:49:013|13.195|78.07|382.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/e6cba3b8b72181f59cfb5feeef768ce541533255/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Replaced real random with iteration through the values	|02:40:766|13.033|81.07|401.36|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/1fc204e8373f380faac7089398a233f17f6c5fa8/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Native write											|||||[File]()|
+|Refactored code (parallel line generation & asyn write)|02:39:172|13.200|82.93|412.86|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/cf2aecdc0dbd90d8a94d291e99cb2650fa390202/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |More unsafe + pointer stuff							|||||[File]()|
 |Change block & buffer size								|||||[File]()|
