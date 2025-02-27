@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
@@ -8,7 +7,10 @@ namespace _1BRC.Framework.Console.Generate {
 		private const int MaxNameCount = 10000;
 
 		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
-			var filePtr = NativeMethods.CreateFile(filePath, (uint)NativeMethods.FileGenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			if (filePtr == (IntPtr)NativeMethods.InvalidHandleValue) {
+				return;
+			}
 
 			var names = CreateRandomNames();
 			var numberBytesForTemperature = new byte[] {
@@ -28,7 +30,7 @@ namespace _1BRC.Framework.Console.Generate {
 			#if DEBUG
 			const int maxParallel = 1;
 			#else
-				var maxParallel = Environment.ProcessorCount;
+			var maxParallel = Environment.ProcessorCount;
 			#endif
 
 			const int blockSize = 16777216;
@@ -52,7 +54,6 @@ namespace _1BRC.Framework.Console.Generate {
 			var numberIndex = 0;
 			var linesToCreate = totalRowCount;
 			var tasks = new Task[maxParallel];
-			var writeIndex = 0;
 
 			fixed (byte* blockPtr = block) {
 				var ptr = new IntPtr(blockPtr);
@@ -70,11 +71,7 @@ namespace _1BRC.Framework.Console.Generate {
 						blockIndex += length;
 					}
 
-					var ol = new NativeOverlapped {
-						OffsetLow = writeIndex
-					};
-					NativeMethods.WriteFileEx(filePtr, block, (uint)blockIndex, ref ol, WriteAsyncCallback);
-					writeIndex += blockIndex;
+					NativeMethods.WriteFile(filePtr, blockPtr, (uint)blockIndex, out _, IntPtr.Zero);
 				}
 			}
 
@@ -193,9 +190,6 @@ namespace _1BRC.Framework.Console.Generate {
 			});
 
 			return names;
-		}
-
-		private static void WriteAsyncCallback(uint dwErrorCode, uint dwNumberOfBytesTransfered, ref NativeOverlapped lpOverlapped) {
 		}
 	}
 }

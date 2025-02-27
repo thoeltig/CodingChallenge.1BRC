@@ -97,33 +97,68 @@ namespace _1BRC.Framework.Console.Generate {
 		public const int FileReadOnlyVolume = 0x00080000;
 		public const int CreateAlways = 2;
 
-		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-		public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+		//Constants for errors:
+		internal const uint ErrorFileNotFound = 2;
+		internal const uint ErrorInvalidName = 123;
+		internal const uint ErrorAccessDenied = 5;
+		internal const uint ErrorIoPending = 997;
+
+		//Constants for return value:
+		internal const int InvalidHandleValue = -1;
+
+		//Constants for dwFlagsAndAttributes:
+		internal const uint FileFlagOverlapped = 0x40000000;
+
+		//Constants for dwCreationDisposition:
+		internal const uint OpenExisting = 3;
+
+		//Constants for dwDesiredAccess:
+		internal const uint GenericRead = 0x80000000;
+		internal const uint GenericWrite = 0x40000000;
 
 		public delegate void WriteFileCompletionDelegate(
-			uint dwErrorCode,
-			uint dwNumberOfBytesTransfered,
-			ref NativeOverlapped lpOverlapped);
+			[In]uint dwErrorCode,
+			[In]uint dwNumberOfBytesTransfered,
+			[In]ref NativeOverlapped lpOverlapped);
+
+		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+		public static extern void CopyMemory([In]IntPtr dest, [In]IntPtr src, [In]uint count);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool WriteFileEx(
-			IntPtr hFile,
-			byte[] lpBuffer,
-			uint nNumberOfBytesToWrite,
-			[In]ref NativeOverlapped lpOverlapped,
-			WriteFileCompletionDelegate lpCompletionRoutine);
+		public static extern unsafe bool WriteFile(
+			[In]IntPtr handle,
+			[In]byte* lpBuffer,
+			[In]uint nNumberOfBytesToWrite,
+			[Out]out uint lpNumberOfBytesWritten,
+			[In]IntPtr lpOverlapped);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern unsafe bool WriteFileEx(
+			[In]IntPtr handle,
+			[In]byte* lpBuffer,
+			[In]uint nNumberOfBytesToWrite,
+			[In]IntPtr lpOverlapped,
+			[In]WriteFileCompletionDelegate lpCompletionRoutine);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern unsafe bool ReadFile(
+			[In]IntPtr hFile,
+			[Out]byte* lpBuffer,
+			[In]uint nNumberOfBytesToRead,
+			[Out]out uint lpNumberOfBytesRead,
+			[In]IntPtr lpOverlapped);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr CreateFile(
-			string lpFileName,
-			uint dwDesiredAccess,
-			uint dwShareMode,
-			IntPtr lpSecurityAttributes,
-			uint dwCreationDisposition,
-			uint dwFlagsAndAttributes,
-			IntPtr hTemplateFile);
+			[In]string lpFileName,
+			[In]uint dwDesiredAccess,
+			[In]uint dwShareMode,
+			[In]IntPtr lpSecurityAttributes,
+			[In]uint dwCreationDisposition,
+			[In]uint dwFlagsAndAttributes,
+			[In]IntPtr hTemplateFile);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool CloseHandle(IntPtr hObject);
+		public static extern bool CloseHandle([In]IntPtr hObject);
 	}
 }
