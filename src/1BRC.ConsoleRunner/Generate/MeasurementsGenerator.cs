@@ -52,6 +52,7 @@ namespace _1BRC.Framework.Console.Generate {
 			var numberIndex = 0;
 			var linesToCreate = totalRowCount;
 			var tasks = new Task[maxParallel];
+			var writeIndex = 0;
 
 			fixed (byte* blockPtr = block) {
 				var ptr = new IntPtr(blockPtr);
@@ -69,8 +70,11 @@ namespace _1BRC.Framework.Console.Generate {
 						blockIndex += length;
 					}
 
-					var ol = new NativeOverlapped();
+					var ol = new NativeOverlapped {
+						OffsetLow = writeIndex
+					};
 					NativeMethods.WriteFileEx(filePtr, block, (uint)blockIndex, ref ol, WriteAsyncCallback);
+					writeIndex += blockIndex;
 				}
 			}
 
