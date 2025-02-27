@@ -63,4 +63,4 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 |Replaced real random with iteration through the values	|02:40:766|13.033|81.07|401.36|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/1fc204e8373f380faac7089398a233f17f6c5fa8/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Refactored code (parallel line generation & asyn write)|02:39:172|13.200|82.93|412.86|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/cf2aecdc0dbd90d8a94d291e99cb2650fa390202/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Allocate slices, store pointers & P/invoke CopyMemory	|02:35:141|13.200|85.08|426.16|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5e74c4afe7b004d1896cb74a202f76a4f7bbb4a6/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|														|||||[File]()|
+|P/invoke CreateFile, WriteFile & CloseHandle			|02:26:106|13.200|90.34|458.69|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/adebb06dea65e0ca90efc6b950eb35d65a65d9d9/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
