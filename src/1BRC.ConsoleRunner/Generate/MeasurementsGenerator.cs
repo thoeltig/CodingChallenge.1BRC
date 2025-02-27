@@ -33,9 +33,18 @@ namespace _1BRC.Framework.Console.Generate {
 				const int blockSize = 16777216;
 				var block = new byte[blockSize];
 				var sliceOfBlock = (int)Math.Ceiling(blockSize / (double)maxParallel);
-				var slices = new byte[maxParallel][];
+
+				var bytePointers = new byte*[maxParallel];
+				var pointers = new IntPtr[maxParallel];
+				var handles = new GCHandle[maxParallel];
 				for (var i = 0; i < maxParallel; i++) {
-					slices[i] = new byte[sliceOfBlock];
+					var arr = new byte[sliceOfBlock];
+					var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
+					handles[i] = handle;
+					var address = handle.AddrOfPinnedObject();
+                    var ptr = (byte*)address.ToPointer();
+					bytePointers[i] = ptr;
+					pointers[i] = new IntPtr(ptr);
 				}
 
 				var nameIndex = 0;
@@ -47,7 +56,7 @@ namespace _1BRC.Framework.Console.Generate {
 					var ptr = new IntPtr(blockPtr);
 					while (linesToCreate > 0) {
 						for (var j = 0; j < maxParallel; j++) {
-							tasks[j] = GenerateLinesAsync(slices[j], CanCreateLine, GetName, GetNumber);
+							tasks[j] = GenerateLinesAsync(bytePointers[j], sliceOfBlock, CanCreateLine, GetName, GetNumber);
 						}
 
 						Task.WaitAll(tasks);
@@ -55,13 +64,22 @@ namespace _1BRC.Framework.Console.Generate {
 						var blockIndex = 0;
 						for (var j = 0; j < maxParallel; j++) {
 							var length = ((Task<int>)tasks[j]).Result;
-							Marshal.Copy(slices[j], 0, IntPtr.Add(ptr, blockIndex), length);
+							CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
 							blockIndex += length;
 						}
 
 						writer.WriteAsync(block, 0, blockIndex).ConfigureAwait(false);
 					}
 				}
+
+				for (var i = 0; i < maxParallel; i++) {
+					handles[i].Free();
+				}
+                
+				Array.Clear(pointers, 0, maxParallel);
+				Array.Clear(bytePointers, 0, maxParallel);
+				Array.Clear(handles, 0, maxParallel);
+                return;
 
 				bool CanCreateLine() {
 					if (linesToCreate <= 0) {
@@ -84,53 +102,53 @@ namespace _1BRC.Framework.Console.Generate {
 			}
 		}
 
-		private static unsafe Task<int> GenerateLinesAsync(byte[] array, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
+		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+		public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+
+		private static unsafe Task<int> GenerateLinesAsync(byte* ptr, int capacity, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
 			const int maxLineLength = 106;
-			var capacity = array.Length;
 			var idx = 0;
 
-			fixed (byte* ptr = array) {
-				while (canCreatedAnotherLine() && capacity - idx > maxLineLength) {
-					// Write name to block
-					var name = getName();
-					for (var i = 0; i < name.Length; i++, idx++) {
-						ptr[idx] = name[i];
-					}
-
-					const byte lineSeparator = 59; // ;
-					ptr[idx++] = lineSeparator;
-
-					// Create temperature
-					// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
-					// which will result in the new value range from -99.9 to 99.9
-					const byte zeroByte = 48; // 0
-					var fractionValue = getNumber();
-					var singleDigit = getNumber();
-					var doubleDigit = getNumber();
-					var useDoubleDigit = doubleDigit != zeroByte;
-
-					// Write temperature to block
-					if ((singleDigit != zeroByte || useDoubleDigit) && idx % 3 == 0) {
-						const byte signedSymbol = 45; // -
-						ptr[idx++] = signedSymbol;
-					}
-
-					if (useDoubleDigit) {
-						ptr[idx++] = doubleDigit;
-					}
-
-					ptr[idx++] = singleDigit;
-
-					if (fractionValue != zeroByte) {
-						const byte temperatureSeparator = 46; // .
-						ptr[idx++] = temperatureSeparator;
-						ptr[idx++] = fractionValue;
-					}
-
-					// Write new line to block
-					const byte newLine = 10; // \n
-					ptr[idx++] = newLine;
+			while (canCreatedAnotherLine() && capacity - idx > maxLineLength) {
+				// Write name to block
+				var name = getName();
+				for (var i = 0; i < name.Length; i++, idx++) {
+					ptr[idx] = name[i];
 				}
+
+				const byte lineSeparator = 59; // ;
+				ptr[idx++] = lineSeparator;
+
+				// Create temperature
+				// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
+				// which will result in the new value range from -99.9 to 99.9
+				const byte zeroByte = 48; // 0
+				var fractionValue = getNumber();
+				var singleDigit = getNumber();
+				var doubleDigit = getNumber();
+				var useDoubleDigit = doubleDigit != zeroByte;
+
+				// Write temperature to block
+				if ((singleDigit != zeroByte || useDoubleDigit) && idx % 3 == 0) {
+					const byte signedSymbol = 45; // -
+					ptr[idx++] = signedSymbol;
+				}
+
+				if (useDoubleDigit) {
+					ptr[idx++] = doubleDigit;
+				}
+
+				ptr[idx++] = singleDigit;
+
+				if (fractionValue != zeroByte) {
+					const byte temperatureSeparator = 46; // .
+					ptr[idx++] = temperatureSeparator;
+					ptr[idx++] = fractionValue;
+				}
+
+				// Write new line to block
+				const byte newLine = 10; // \n
+				ptr[idx++] = newLine;
 			}
 
 			return Task.FromResult(idx);
