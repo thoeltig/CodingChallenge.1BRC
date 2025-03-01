@@ -16,7 +16,7 @@ namespace _1BRC.Framework.Console.Generate {
 			var maxParallel = Environment.ProcessorCount;
 			#endif
 
-			const int blockSize = 33554432;
+			const int blockSize = 16777216;
 			var tasks = new Task[maxParallel];
 			var block = new byte[blockSize];
 			var names = WeatherStation.Names;
