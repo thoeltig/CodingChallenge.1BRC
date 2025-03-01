@@ -4,17 +4,23 @@ using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
-		private const int MaxNameCount = 10000;
-		private const int BlockSize = 16777216;
-		private const int MaxLineLength = 106;
-
 		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
 			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
 			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
 				return;
 			}
 
+			#if DEBUG
+			const int maxParallel = 1;
+			#else
+			var maxParallel = Environment.ProcessorCount;
+			#endif
+
+			const int blockSize = 33554432;
+			var tasks = new Task[maxParallel];
+			var block = new byte[blockSize];
 			var names = WeatherStation.Names;
+			var maxNameCount = names.Length;
 			var numberBytesForTemperature = new byte[] {
 				48, // 0
 				49, // 1
@@ -28,16 +34,7 @@ namespace _1BRC.Framework.Console.Generate {
 				57 // 9
 			};
 			var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
-
-			#if DEBUG
-			const int maxParallel = 1;
-			#else
-			var maxParallel = Environment.ProcessorCount;
-			#endif
-
 			var linesToCreate = totalRowCount;
-			var tasks = new Task[maxParallel];
-			var block = new byte[BlockSize];
 			var blockIndex = 0;
 			var nameIndex = 0;
 			var numberIndex = 0;
@@ -58,71 +55,67 @@ namespace _1BRC.Framework.Console.Generate {
 			return;
 
 			int GetBlockIndex(int lineLength) {
-				// reserve line
-				var localLinesToCreate = Interlocked.Decrement(ref linesToCreate);
-				if (localLinesToCreate < 0) {
+				var idx = Interlocked.Decrement(ref linesToCreate);
+				if (idx < 0) {
 					return -1;
 				}
 
-				// check if reserved line would fit
-				var localBlockIndex = Interlocked.Add(ref blockIndex, lineLength);
-
-				if (BlockSize - localBlockIndex >= MaxLineLength) {
-					return localBlockIndex - lineLength;
+				idx = blockIndex;
+				var newIdx = Interlocked.Add(ref blockIndex, lineLength);
+				if (blockSize - newIdx >= 0) {
+					return idx;
 				}
 
-				// free reserved line if it would not fit
+				Interlocked.Exchange(ref blockIndex, idx);
 				Interlocked.Increment(ref linesToCreate);
-				Interlocked.Add(ref blockIndex, -lineLength);
 				return -1;
 			}
 
 			byte[] GetName() {
-				var idx = Interlocked.Increment(ref nameIndex);
-				if (idx < MaxNameCount) {
-					return names[idx];
+				if (++nameIndex < maxNameCount) {
+					return names[nameIndex];
 				}
 
-				Interlocked.Exchange(ref nameIndex, 0);
+				nameIndex = 0;
 				return names[0];
 			}
 
 			byte GetNumber() {
-				var idx = Interlocked.Increment(ref numberIndex);
-				if (idx < numberBytesForTemperatureCount) {
-					return numberBytesForTemperature[idx];
+				if (++numberIndex < numberBytesForTemperatureCount) {
+					return numberBytesForTemperature[numberIndex];
 				}
 
-				Interlocked.Exchange(ref numberIndex, 0);
+				numberIndex = 0;
 				return numberBytesForTemperature[0];
 			}
 		}
 
 		private static unsafe Task GenerateLinesAsync(byte* ptr, Func<int, int> getBlockIndexFunc, Func<byte[]> getName, Func<byte> getNumber) {
-			const byte lineSeparator = 59; // ;
 			const byte zeroByte = 48; // 0
+			const byte lineSeparator = 59; // ;
 			const byte signedSymbol = 45; // -
 			const byte temperatureSeparator = 46; // .
 			const byte newLine = 10; // \n
 
-			for (var idx = 0;;) {
+			for (;;) {
 				// plan line
 				var name = getName();
+				var nameLength = name.Length;
 				var fractionValue = getNumber();
 				var singleDigit = getNumber();
 				var doubleDigit = getNumber();
 				var useDoubleDigit = doubleDigit != zeroByte;
-				var useSignedSymbol = (singleDigit != zeroByte || useDoubleDigit) && idx % 3 == 0;
+				var useSignedSymbol = (singleDigit != zeroByte || useDoubleDigit) && nameLength % 2 == 0;
 				var useFraction = fractionValue != zeroByte;
 
-				var lineLength = name.Length + (useSignedSymbol ? 2 : 1) + (useDoubleDigit ? 2 : 1) + (useFraction ? 3 : 2);
-				idx = getBlockIndexFunc(lineLength);
+				var lineLength = nameLength + (useSignedSymbol ? 2 : 1) + (useDoubleDigit ? 2 : 1) + (useFraction ? 3 : 2);
+				var idx = getBlockIndexFunc(lineLength);
 				if (idx == -1) {
 					break;
 				}
 
-				for (var i = 0; i < name.Length; i++, idx++) {
-					ptr[idx] = name[i];
+				for (var i = 0; i < nameLength; i++) {
+					ptr[idx++] = name[i];
 				}
 
 				ptr[idx++] = lineSeparator;

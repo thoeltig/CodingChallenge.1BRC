@@ -117,48 +117,48 @@ namespace _1BRC.Framework.Console.Generate {
 		internal const uint GenericWrite = 0x40000000;
 
 		public delegate void WriteFileCompletionDelegate(
-			[In]uint dwErrorCode,
-			[In]uint dwNumberOfBytesTransfered,
-			[In]ref NativeOverlapped lpOverlapped);
+			uint dwErrorCode,
+			uint dwNumberOfBytesTransfered,
+			ref NativeOverlapped lpOverlapped);
 
 		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-		public static extern void CopyMemory([In]IntPtr dest, [In]IntPtr src, [In]uint count);
+		public static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern unsafe bool WriteFile(
-			[In]IntPtr handle,
-			[In]byte* lpBuffer,
-			[In]uint nNumberOfBytesToWrite,
-			[Out]out uint lpNumberOfBytesWritten,
-			[In]IntPtr lpOverlapped);
+			IntPtr handle,
+			byte* lpBuffer,
+			uint nNumberOfBytesToWrite,
+			out uint lpNumberOfBytesWritten,
+			IntPtr lpOverlapped);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern unsafe bool WriteFileEx(
-			[In]IntPtr handle,
-			[In]byte* lpBuffer,
-			[In]uint nNumberOfBytesToWrite,
-			[In]IntPtr lpOverlapped,
-			[In]WriteFileCompletionDelegate lpCompletionRoutine);
+			IntPtr handle,
+			byte* lpBuffer,
+			uint nNumberOfBytesToWrite,
+			IntPtr lpOverlapped,
+			WriteFileCompletionDelegate lpCompletionRoutine);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern unsafe bool ReadFile(
-			[In]IntPtr hFile,
-			[Out]byte* lpBuffer,
-			[In]uint nNumberOfBytesToRead,
-			[Out]out uint lpNumberOfBytesRead,
-			[In]IntPtr lpOverlapped);
+			IntPtr hFile,
+			byte* lpBuffer,
+			uint nNumberOfBytesToRead,
+			out uint lpNumberOfBytesRead,
+			IntPtr lpOverlapped);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern IntPtr CreateFile(
-			[In]string lpFileName,
-			[In]uint dwDesiredAccess,
-			[In]uint dwShareMode,
-			[In]IntPtr lpSecurityAttributes,
-			[In]uint dwCreationDisposition,
-			[In]uint dwFlagsAndAttributes,
-			[In]IntPtr hTemplateFile);
+			string lpFileName,
+			uint dwDesiredAccess,
+			uint dwShareMode,
+			IntPtr lpSecurityAttributes,
+			uint dwCreationDisposition,
+			uint dwFlagsAndAttributes,
+			IntPtr hTemplateFile);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool CloseHandle([In]IntPtr hObject);
+		public static extern bool CloseHandle(IntPtr hObject);
 	}
 }
