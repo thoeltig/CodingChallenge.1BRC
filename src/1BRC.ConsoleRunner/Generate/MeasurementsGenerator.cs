@@ -51,7 +51,6 @@ namespace _1BRC.Framework.Console.Generate {
 			};
 			var numberBytesForTemperatureCount = numberBytesForTemperature.Length;
 			var linesToCreate = totalRowCount;
-			var blockIndex = 0;
 			var nameIndex = 0;
 			var numberIndex = 0;
 
@@ -64,6 +63,7 @@ namespace _1BRC.Framework.Console.Generate {
 
 					Task.WaitAll(tasks);
 
+					var blockIndex = 0;
 					for (var j = 0; j < maxParallel; j++) {
 						var length = ((Task<int>)tasks[j]).Result;
 						NativeMethods.CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
