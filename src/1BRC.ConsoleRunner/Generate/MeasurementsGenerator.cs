@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
 		private const int MaxNameCount = 10000;
+		private const int BlockSize = 16777216;
+		private const int MaxLineLength = 106;
 
 		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
 			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
-			if (filePtr == (IntPtr)NativeMethods.InvalidHandleValue) {
+			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
 				return;
 			}
 
@@ -33,105 +35,99 @@ namespace _1BRC.Framework.Console.Generate {
 			var maxParallel = Environment.ProcessorCount;
 			#endif
 
-			const int blockSize = 16777216;
-			var block = new byte[blockSize];
-			var sliceOfBlock = (int)Math.Ceiling(blockSize / (double)maxParallel);
-
-			var bytePointers = new byte*[maxParallel];
-			var pointers = new IntPtr[maxParallel];
-			var handles = new GCHandle[maxParallel];
-			for (var i = 0; i < maxParallel; i++) {
-				var arr = new byte[sliceOfBlock];
-				var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
-				handles[i] = handle;
-				var address = handle.AddrOfPinnedObject();
-				var ptr = (byte*)address.ToPointer();
-				bytePointers[i] = ptr;
-				pointers[i] = new IntPtr(ptr);
-			}
-
-			var nameIndex = 0;
-			var numberIndex = 0;
 			var linesToCreate = totalRowCount;
 			var tasks = new Task[maxParallel];
+			var block = new byte[BlockSize];
+			var blockIndex = 0;
+			var nameIndex = 0;
+			var numberIndex = 0;
 
 			fixed (byte* blockPtr = block) {
-				var ptr = new IntPtr(blockPtr);
 				while (linesToCreate > 0) {
 					for (var j = 0; j < maxParallel; j++) {
-						tasks[j] = GenerateLinesAsync(bytePointers[j], sliceOfBlock, CanCreateLine, GetName, GetNumber);
+						tasks[j] = GenerateLinesAsync(blockPtr, GetBlockIndex, GetName, GetNumber);
 					}
 
 					Task.WaitAll(tasks);
-
-					var blockIndex = 0;
-					for (var j = 0; j < maxParallel; j++) {
-						var length = ((Task<int>)tasks[j]).Result;
-						NativeMethods.CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
-						blockIndex += length;
-					}
-
 					NativeMethods.WriteFile(filePtr, blockPtr, (uint)blockIndex, out _, IntPtr.Zero);
+					blockIndex = 0;
 				}
 			}
 
 			NativeMethods.CloseHandle(filePtr);
-
-			for (var i = 0; i < maxParallel; i++) {
-				handles[i].Free();
-			}
-
-			Array.Clear(pointers, 0, maxParallel);
-			Array.Clear(bytePointers, 0, maxParallel);
-			Array.Clear(handles, 0, maxParallel);
 			return;
 
-			bool CanCreateLine() {
-				if (linesToCreate <= 0) {
-					return false;
+			int GetBlockIndex(int lineLength) {
+				// reserve line
+				var localLinesToCreate = Interlocked.Decrement(ref linesToCreate);
+				if (localLinesToCreate < 0) {
+					return -1;
 				}
 
-				linesToCreate--;
-				return true;
+				// check if reserved line would fit
+				var localBlockIndex = Interlocked.Add(ref blockIndex, lineLength);
+
+				if (BlockSize - localBlockIndex >= MaxLineLength) {
+					return localBlockIndex - lineLength;
+				}
+
+				// free reserved line if it would not fit
+				Interlocked.Increment(ref linesToCreate);
+				Interlocked.Add(ref blockIndex, -lineLength);
+				return -1;
 			}
 
 			byte[] GetName() {
-				nameIndex = nameIndex + 1 < MaxNameCount ? nameIndex + 1 : 0;
-				return names[nameIndex];
+				var idx = Interlocked.Increment(ref nameIndex);
+				if (idx < MaxNameCount) {
+					return names[idx];
+				}
+
+				Interlocked.Exchange(ref nameIndex, 0);
+				return names[0];
 			}
 
 			byte GetNumber() {
-				numberIndex = numberIndex + 1 < numberBytesForTemperatureCount ? numberIndex + 1 : 0;
-				return numberBytesForTemperature[numberIndex];
+				var idx = Interlocked.Increment(ref numberIndex);
+				if (idx < numberBytesForTemperatureCount) {
+					return numberBytesForTemperature[idx];
+				}
+
+				Interlocked.Exchange(ref numberIndex, 0);
+				return numberBytesForTemperature[0];
 			}
 		}
 
-		private static unsafe Task<int> GenerateLinesAsync(byte* ptr, int capacity, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
-			const int maxLineLength = 106;
-			var idx = 0;
+		private static unsafe Task GenerateLinesAsync(byte* ptr, Func<int, int> getBlockIndexFunc, Func<byte[]> getName, Func<byte> getNumber) {
+			const byte lineSeparator = 59; // ;
+			const byte zeroByte = 48; // 0
+			const byte signedSymbol = 45; // -
+			const byte temperatureSeparator = 46; // .
+			const byte newLine = 10; // \n
 
-			while (canCreatedAnotherLine() && capacity - idx > maxLineLength) {
-				// Write name to block
+			for (var idx = 0;;) {
+				// plan line
 				var name = getName();
-				for (var i = 0; i < name.Length; i++, idx++) {
-					ptr[idx] = name[i];
-				}
-
-				const byte lineSeparator = 59; // ;
-				ptr[idx++] = lineSeparator;
-
-				// Create temperature
-				// The random value range needs to be 1 to 1999 because the result will be divided by 10 and afterwards 100 is subtracted
-				// which will result in the new value range from -99.9 to 99.9
-				const byte zeroByte = 48; // 0
 				var fractionValue = getNumber();
 				var singleDigit = getNumber();
 				var doubleDigit = getNumber();
 				var useDoubleDigit = doubleDigit != zeroByte;
+				var useSignedSymbol = (singleDigit != zeroByte || useDoubleDigit) && idx % 3 == 0;
+				var useFraction = fractionValue != zeroByte;
 
-				// Write temperature to block
-				if ((singleDigit != zeroByte || useDoubleDigit) && idx % 3 == 0) {
-					const byte signedSymbol = 45; // -
+				var lineLength = name.Length + (useSignedSymbol ? 2 : 1) + (useDoubleDigit ? 2 : 1) + (useFraction ? 3 : 2);
+				idx = getBlockIndexFunc(lineLength);
+				if (idx == -1) {
+					break;
+				}
+
+				for (var i = 0; i < name.Length; i++, idx++) {
+					ptr[idx] = name[i];
+				}
+
+				ptr[idx++] = lineSeparator;
+
+				if (useSignedSymbol) {
 					ptr[idx++] = signedSymbol;
 				}
 
@@ -141,18 +137,15 @@ namespace _1BRC.Framework.Console.Generate {
 
 				ptr[idx++] = singleDigit;
 
-				if (fractionValue != zeroByte) {
-					const byte temperatureSeparator = 46; // .
+				if (useFraction) {
 					ptr[idx++] = temperatureSeparator;
 					ptr[idx++] = fractionValue;
 				}
 
-				// Write new line to block
-				const byte newLine = 10; // \n
-				ptr[idx++] = newLine;
+				ptr[idx] = newLine;
 			}
 
-			return Task.FromResult(idx);
+			return Task.CompletedTask;
 		}
 
 		private static byte[][] CreateRandomNames() {
@@ -168,11 +161,11 @@ namespace _1BRC.Framework.Console.Generate {
 					continue;
 				}
 
-				validNameBytes[j] = nextByte;
-				j++;
+				validNameBytes[j++] = nextByte;
 			}
 
 			var names = new byte[MaxNameCount][];
+			var nameIndex = 0;
 
 			Parallel.For(0, MaxNameCount, i => {
 				const int randomMinIncluded = 7; // Name needs at least 1 character
@@ -180,10 +173,14 @@ namespace _1BRC.Framework.Console.Generate {
 
 				var nameLength = randomMinIncluded; // ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
 				var bytes = new byte[nameLength];
-				var nameIndex = 0;
 				for (var j = 0; j < nameLength; j++) {
-					bytes[j] = validNameBytes[nameIndex];
-					nameIndex = nameIndex + 1 < arraySize ? nameIndex + 1 : 0;
+					var idx = Interlocked.Increment(ref nameIndex);
+					if (idx >= arraySize) {
+						Interlocked.Exchange(ref nameIndex, 0);
+						idx = 0;
+					}
+
+					bytes[j] = validNameBytes[idx];
 				}
 
 				names[i] = bytes;
