@@ -14,7 +14,7 @@ namespace _1BRC.Framework.Console.Generate {
 				return;
 			}
 
-			var names = CreateRandomNames();
+			var names = WeatherStation.Names;
 			var numberBytesForTemperature = new byte[] {
 				48, // 0
 				49, // 1
@@ -146,47 +146,6 @@ namespace _1BRC.Framework.Console.Generate {
 			}
 
 			return Task.CompletedTask;
-		}
-
-		private static byte[][] CreateRandomNames() {
-			const byte arraySize = 253; // 3 bytes will be ignored
-			const byte firstIgnoreValue = 10; // \n
-			const byte secondIgnoreValue = 13; // \r
-			const byte thirdIgnoreValue = 59; // ;
-
-			var validNameBytes = new byte[arraySize];
-			for (int i = 0, j = 0; i <= byte.MaxValue && j < arraySize; i++) {
-				var nextByte = (byte)i;
-				if (nextByte is firstIgnoreValue or secondIgnoreValue or thirdIgnoreValue) {
-					continue;
-				}
-
-				validNameBytes[j++] = nextByte;
-			}
-
-			var names = new byte[MaxNameCount][];
-			var nameIndex = 0;
-
-			Parallel.For(0, MaxNameCount, i => {
-				const int randomMinIncluded = 7; // Name needs at least 1 character
-				//const int randomMaxExcluded = 100 + 1; // Name can have up to 100 characters
-
-				var nameLength = randomMinIncluded; // ThreadSafeRandom.Instance.Next(randomMinIncluded, randomMaxExcluded);
-				var bytes = new byte[nameLength];
-				for (var j = 0; j < nameLength; j++) {
-					var idx = Interlocked.Increment(ref nameIndex);
-					if (idx >= arraySize) {
-						Interlocked.Exchange(ref nameIndex, 0);
-						idx = 0;
-					}
-
-					bytes[j] = validNameBytes[idx];
-				}
-
-				names[i] = bytes;
-			});
-
-			return names;
 		}
 	}
 }

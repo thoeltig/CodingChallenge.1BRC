@@ -48,6 +48,7 @@
     <Compile Include="..\1BRC.Net5.ConsoleRunner\Test\ResultTableGenerator.cs">
       <Link>Test\ResultTableGenerator.cs</Link>
     </Compile>
+    <Compile Include="Generate\WeatherStation.cs" />
     <Compile Include="Generate\MeasurementsGenerator.cs" />
     <Compile Include="Generate\NativeMethods.cs" />
     <Compile Include="Test\FileReadAndWrite.cs" />
