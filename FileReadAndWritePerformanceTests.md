@@ -12,9 +12,12 @@ There are a couple of classes that could be used to read & write data to & from 
 
 ## Setup
 Old notebook
-- Intel Core i5-4200U - 2.3 GHz
+- Intel Core i5-4200U - max. 2.3 GHz
 - DDR3 - 8GB RAM - 1600 MHz
 - Toshiba MQ01ABF050 - Read 100 MB/s Write 96 MB/s
+Visual Studio 2019 (Version 16.11.44)
+- .NET Framework 4.7.2
+- .NET 5 (Core)
 
 
 ## First test: Comparison of the different classes 
@@ -494,10 +497,3 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 > The process to find the optimal combination is extremly time consuming and it is not realistic to run this on every device the read / write code should run on.
 > A quick test with 5-100% of the L1 cache size showed that a result close to the optimal can be archieved if a buffer size of 25-50% and a block size of 60-80% of the L1 cache size is choosen.
 > The _FileOptions_ are still _FileOptions.SequentialScan_ for write and _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ for read.
-
-> [!TIP]
-> Additional informations on the topic:
-> - [Win32.CreateFileA](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)
-> - [Win32.ReadFile](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile)
-> - [Caching behaviour](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#caching-behavior)
-> - [File buffering And _FILE_FLAG_NO_BUFFERING_ requierments](https://learn.microsoft.com/en-us/windows/win32/fileio/file-buffering)

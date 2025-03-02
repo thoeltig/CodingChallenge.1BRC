@@ -29,9 +29,12 @@ After the news of this challenge spread many people built their own solutions us
 
 ## Setup
 Old notebook
-- Intel Core i5-4200U - 2.3 GHz
+- Intel Core i5-4200U - max. 2.3 GHz
 - DDR3 - 8GB RAM - 1600 MHz
 - Toshiba MQ01ABF050 - Read 100 MB/s Write 96 MB/s
+Visual Studio 2019 (Version 16.11.44)
+- .NET Framework 4.7.2
+- .NET 5 (Core)
 
 ## Writing & reading a file
 There are a couple of classes that could be used to read & write data to & from a file:
@@ -41,28 +44,42 @@ There are a couple of classes that could be used to read & write data to & from 
 - _File.ReadAllText_
 - _StreamWriter_
 - _StreamReader_
+- _BinaryWriter_
+- _BinaryReader_
 - _FileStream_
+- _Memory mapped files_
+- _P/invoke native methods_
 
 After an initial test with reduced data the _FileStream_ with default settings was the clear winner. 
 Because I wanted to understand why that was the case I took a deep dive in the documentation, code and performance tests for a couple of days.
 The collected informations and results can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/FileReadAndWritePerformanceTests.md). 
 
-## File generation
+## Generating the measurements file
 The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code a bit.
-The name length will be limited to 7 bytes per name so a whole line would be 10-14 bytes long.
 
-||Duration|File size in GB|MBs|(new-old)/old*100%||
+||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
-|StreamWriter.WriteLine(line as string)      					|11:03:084|10.720|16.17|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/3b483cf764121015bca7112b00917f6bb85ae205/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|FileStream.Write(line as byte array)        					|12:01:301|16.750|23.22|42.19|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/b4297a488cf753ff386b65265ac879949835565c/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|FileStream.Write(block filled multiple lines)					|11:04:100|13.201|19.88|22.94|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/bd29691691d72728d57bf21dc85701c296bd425b/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Reduced array creation & copy when combining the line			|10:00:579|13.201|21.98|35.93|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/001b7d09ec64fa2b545f20d00a19b3eb690be3f5/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Temperature generation writes bytes directly to block			|03:17:209|11.595|58.79|263.57|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/6c6ce5dd1643036ba76aaa38970b371ed13e7e80/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Parallel execution												|03:06:660|13.195|70.69|337.17|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Copy name with Marshal.Copy instead of Array.Copy				|02:49:013|13.195|78.07|382.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/e6cba3b8b72181f59cfb5feeef768ce541533255/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Replaced real random with iteration through the values			|02:40:766|13.033|81.07|401.36|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/1fc204e8373f380faac7089398a233f17f6c5fa8/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Refactored code (parallel line generation & asyn write)		|02:39:172|13.200|82.93|412.86|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/cf2aecdc0dbd90d8a94d291e99cb2650fa390202/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Allocate slices, store pointers & P/invoke CopyMemory			|02:35:141|13.200|85.08|426.16|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5e74c4afe7b004d1896cb74a202f76a4f7bbb4a6/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|P/invoke CreateFile, WriteFile & CloseHandle					|02:26:106|13.200|90.34|458.69|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/adebb06dea65e0ca90efc6b950eb35d65a65d9d9/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Removed slices, write directly to block, added fixed 10k names	|02:52:751|15.157|87.74|442.61|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/d8f8124afe4b02e85a29bd325b0f073a493e536d/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
-|Copied current code to .NET 5 and changed it to use managed	|02:46:481|14.882|89.39|452.81|[File]()|
+|StreamWriter.WriteLine(line as string) in .NET Framework (name length 7)	|11:03:084|10.720|16.17|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/3b483cf764121015bca7112b00917f6bb85ae205/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(line as byte array)        								|12:01:301|16.750|23.22|42.19|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/b4297a488cf753ff386b65265ac879949835565c/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|FileStream.Write(block filled multiple lines)								|11:04:100|13.201|19.88|22.94|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/bd29691691d72728d57bf21dc85701c296bd425b/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Reduced array creation & copy when combining the line						|10:00:579|13.201|21.98|35.93|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/001b7d09ec64fa2b545f20d00a19b3eb690be3f5/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Temperature generation writes bytes directly to block						|03:17:209|11.595|58.79|263.57|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/6c6ce5dd1643036ba76aaa38970b371ed13e7e80/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Parallel execution															|03:06:660|13.195|70.69|337.17|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/11ca4ff1f15286995bb39a7700c93c52d4c27628/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Copy name with Marshal.Copy instead of Array.Copy							|02:49:013|13.195|78.07|382.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/e6cba3b8b72181f59cfb5feeef768ce541533255/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Replaced real random with iteration through the values						|02:40:766|13.033|81.07|401.36|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/1fc204e8373f380faac7089398a233f17f6c5fa8/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Refactored code (parallel line generation & asyn write)					|02:39:172|13.200|82.93|412.86|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/cf2aecdc0dbd90d8a94d291e99cb2650fa390202/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Allocate slices, store pointers & P/invoke CopyMemory						|02:35:141|13.200|85.08|426.16|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5e74c4afe7b004d1896cb74a202f76a4f7bbb4a6/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|P/invoke CreateFile, WriteFile & CloseHandle								|02:26:106|13.200|90.34|458.69|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/adebb06dea65e0ca90efc6b950eb35d65a65d9d9/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Removed slices & write directly to block (added fixed [10k names of list](https://github.com/gunnarmorling/1brc/blob/main/data/weather_stations.csv))|02:52:751|15.157|87.74|442.61|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/d8f8124afe4b02e85a29bd325b0f073a493e536d/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Copied current code to .NET 5, changed to safe version & use spans			|02:46:481|14.882|89.39|452.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/ec8edc4674b064f3fed544ac6532a51413c5cb70/src/1BRC.Net5.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+
+After a lot of tests and refactoring the final .NET Framework version with unsafe code and the .NET 5 version with safe code both reached about 90% of the possible write speed. With the spans instead of byte arrays the safe code performance similar to the unsafe code which normally would have been faster in comparison. 
+Maybe with a bit of tweaking a couple more seconds could be shaved of the result but right now it is only 10 seconds off of the maximum write speed which might only be theoretical possible.
+I might have to test this with a better device with more I/O speed in the future but for now it is enough. Also upgrading to newer versions of .NET will have a better performance.
+
+## Reading the file
+Now I can finally start with the actual challenge but I will do it with a step by step refactoring again.
+
+||Duration|File size in GB|MB/s|Improvement in %||
+|----|----|----|----|----|----|
+|StreamWriter.ReadLine(line as string) in .NET Framework||||base line|[File]()|
