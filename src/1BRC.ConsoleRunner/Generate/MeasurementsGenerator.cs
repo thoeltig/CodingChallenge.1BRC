@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
@@ -63,14 +62,14 @@ namespace _1BRC.Framework.Console.Generate {
 
 					Task.WaitAll(tasks);
 
-					var blockIndex = 0;
+					uint blockIndex = 0;
 					for (var j = 0; j < maxParallel; j++) {
-						var length = ((Task<int>)tasks[j]).Result;
-						NativeMethods.CopyMemory(IntPtr.Add(ptr, blockIndex), pointers[j], (uint)length);
+						var length = ((Task<uint>)tasks[j]).Result;
+						NativeMethods.CopyMemory(IntPtr.Add(ptr, (int)blockIndex), pointers[j], length);
 						blockIndex += length;
 					}
 
-					NativeMethods.WriteFile(filePtr, blockPtr, (uint)blockIndex, out _, IntPtr.Zero);
+					NativeMethods.WriteFile(filePtr, blockPtr, blockIndex, out _, IntPtr.Zero);
 				}
 			}
 
@@ -85,11 +84,12 @@ namespace _1BRC.Framework.Console.Generate {
 			Array.Clear(handles, 0, maxParallel);
 			return;
 
-			bool CanCreateLine() => Interlocked.Decrement(ref linesToCreate) >= 0;
+			bool CanCreateLine() => --linesToCreate > 0;
 
 			byte[] GetName() {
-				if (++nameIndex < maxNameCount) {
-					return names[nameIndex];
+				var idx = ++nameIndex;
+				if (idx < maxNameCount) {
+					return names[idx];
 				}
 
 				nameIndex = 0;
@@ -97,8 +97,9 @@ namespace _1BRC.Framework.Console.Generate {
 			}
 
 			byte GetNumber() {
-				if (++numberIndex < numberBytesForTemperatureCount) {
-					return numberBytesForTemperature[numberIndex];
+				var idx = ++numberIndex;
+				if (idx < numberBytesForTemperatureCount) {
+					return numberBytesForTemperature[idx];
 				}
 
 				numberIndex = 0;
@@ -106,11 +107,11 @@ namespace _1BRC.Framework.Console.Generate {
 			}
 		}
 
-		private static unsafe Task<int> GenerateLinesAsync(byte* ptr, int capacity, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
+		private static unsafe Task<uint> GenerateLinesAsync(byte* ptr, int capacity, Func<bool> canCreatedAnotherLine, Func<byte[]> getName, Func<byte> getNumber) {
 			const int maxLineLength = 106;
-			var idx = 0;
+			uint idx = 0;
 
-			while (canCreatedAnotherLine() && capacity - idx > maxLineLength) {
+			while (canCreatedAnotherLine() && capacity - idx >= maxLineLength) {
 				// Write name to block
 				var name = getName();
 				for (var i = 0; i < name.Length; i++, idx++) {
