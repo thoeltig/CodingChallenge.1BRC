@@ -1,18 +1,28 @@
-﻿using System;
-using System.Diagnostics;
-using _1BRC.Net5.ConsoleRunner.Test;
+﻿using System.Diagnostics;
+using System.IO;
+using _1BRC.Net5.ConsoleRunner.Generate;
 
 namespace _1BRC.Net5.ConsoleRunner {
 	internal class Program {
+		#if DEBUG
+		private const int RowCount = 10000000;
+		#else
+		private const int RowCount = 1000000000;
+		#endif
+		private const string FileName = "measurements.txt";
+
 		private static void Main(string[] args) {
-			Console.WriteLine("File write test started");
+			System.Console.WriteLine($"Generating {RowCount:N0} rows");
+			System.Console.WriteLine();
+			File.Delete(FileName);
+
 			var sw = new Stopwatch();
-			sw.Start();
-			var tester = new FileReadAndWrite();
-			tester.ExecuteTest(Console.WriteLine);
+			sw.Restart();
+			MeasurementsGenerator.GenerateFile(FileName, RowCount);
 			sw.Stop();
-			Console.WriteLine($"File write test done! Took {sw.Elapsed:mm':'ss':'fff} to finish!");
-			Console.ReadKey();
+
+			System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
+			System.Console.ReadKey();
 		}
 	}
 }
