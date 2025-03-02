@@ -65,3 +65,4 @@ The name length will be limited to 7 bytes per name so a whole line would be 10-
 |Allocate slices, store pointers & P/invoke CopyMemory			|02:35:141|13.200|85.08|426.16|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5e74c4afe7b004d1896cb74a202f76a4f7bbb4a6/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |P/invoke CreateFile, WriteFile & CloseHandle					|02:26:106|13.200|90.34|458.69|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/adebb06dea65e0ca90efc6b950eb35d65a65d9d9/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Removed slices, write directly to block, added fixed 10k names	|02:52:751|15.157|87.74|442.61|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/d8f8124afe4b02e85a29bd325b0f073a493e536d/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
+|Copied current code to .NET 5 and changed it to use managed	|02:46:481|14.882|89.39|452.81|[File]()|
