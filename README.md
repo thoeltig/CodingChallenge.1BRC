@@ -83,6 +83,7 @@ Now I can finally start with the actual challenge but I will do it with a step b
 ||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
 |StreamWriter.ReadLine(line as string) in .NET Framework	|08:14:673|14.882|30.08|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/84c6189a7a9fcc46de65b1786343b7bcced70d3f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|FileStream.ReadByte 										|08:04:929|14.882|30.69|2.03||
-|Parse temperature to int instead of double					|		  |		 |		|||
-|															|		  |		 |		|||
+|FileStream.ReadByte 										|08:04:929|14.882|30.69|2.03|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/71e718a4a780223e19d973555acaaa3d56d58d6f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Parse temperature to int instead of double					|07:41:859|14.882|32.22|7.11|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/424d65b8baa35ee8fcc1e810c4312e7ca2114ef8/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Faster int parse											|		  |		 |		|	|[File]()|
+|Faster dictionary look up									|		  |		 |		|	|[File]()|
