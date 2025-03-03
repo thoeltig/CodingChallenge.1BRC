@@ -27,7 +27,7 @@ namespace _1BRC.Framework.Console {
 			}
 
 			IReadOnlyDictionary<string, TemperatureContainer> result = null;
-			for (var i = 0; i < 6; i++) {
+			for (var i = 0; i < 4; i++) {
 				System.Console.WriteLine();
 				System.Console.WriteLine("Reading file");
 

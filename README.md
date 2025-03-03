@@ -82,4 +82,7 @@ Now I can finally start with the actual challenge but I will do it with a step b
 
 ||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
-|StreamWriter.ReadLine(line as string) in .NET Framework||||base line|[File]()|
+|StreamWriter.ReadLine(line as string) in .NET Framework	|08:14:673|14.882|30.08|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/84c6189a7a9fcc46de65b1786343b7bcced70d3f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|FileStream.ReadByte 										|		  |		 |		|		|	|
+|Parse int instead of double								|		  |		 |		|		|	|
+|															|		  |		 |		|		|	|

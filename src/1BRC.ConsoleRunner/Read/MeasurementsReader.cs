@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -9,18 +8,42 @@ namespace _1BRC.Framework.Console.Read {
 		public static IReadOnlyDictionary<string, TemperatureContainer> ReadFile(string measurementsFilePath) {
 			var dic = new Dictionary<string, TemperatureContainer>();
 
-			using (var reader = new StreamReader(measurementsFilePath, Encoding.UTF8)) {
-				while (reader.ReadLine() is { } line) {
-					var parts = line.Split(new[] {
-						';'
-					}, StringSplitOptions.RemoveEmptyEntries);
+			using (var stream = new FileStream(measurementsFilePath, FileMode.Open, FileAccess.Read, FileShare.None, 262144, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
+				const byte lineSeparator = 59; // ;
+				const byte zeroByte = 48; // 0
+				const byte signedSymbol = 45; // -
+				const byte temperatureSeparator = 46; // .
+				const byte newLine = 10; // \n
 
-					var key = parts[0];
-					var temperature = double.TryParse(parts[1], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var temp) ? temp : 0.0;
-					if (dic.TryGetValue(key, out var container)) {
-						container.Update(temperature);
-					} else {
-						dic.Add(key, new TemperatureContainer(temperature));
+				var line = new byte[106];
+				var idx = 0;
+				var nameLength = 0;
+
+				int readByte;
+				while ((readByte = stream.ReadByte()) != -1) {
+					var value = (byte)readByte;
+					line[idx++] = value;
+
+					switch (value) {
+						case lineSeparator: {
+							nameLength = idx;
+							break;
+						}
+						case newLine: {
+							var key = Encoding.UTF8.GetString(line, 0, nameLength - 1);
+							var numberIdx = nameLength;
+							var temperatureString = Encoding.UTF8.GetString(line, numberIdx, idx - numberIdx -1);
+							var temperature = double.TryParse(temperatureString, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var temp) ? temp : 0.0;
+							if (dic.TryGetValue(key, out var container)) {
+								container.Update(temperature);
+							} else {
+								dic.Add(key, new TemperatureContainer(temperature));
+							}
+
+							idx = 0;
+							nameLength = 0;
+							break;
+						}
 					}
 				}
 			}
@@ -28,7 +51,7 @@ namespace _1BRC.Framework.Console.Read {
 			return dic;
 		}
 	}
-    
+
 	internal class TemperatureContainer {
 		public double Min { get; private set; }
 
