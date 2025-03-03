@@ -53,6 +53,8 @@
     </Compile>
     <Compile Include="Generate\MeasurementsGenerator.cs" />
     <Compile Include="Generate\NativeMethods.cs" />
+    <Compile Include="Read\MeasurementsReader.cs" />
+    <Compile Include="Read\TemperatureContainer.cs" />
     <Compile Include="Test\FileReadAndWrite.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
