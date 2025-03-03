@@ -42,27 +42,23 @@ namespace _1BRC.Framework.Console.Read {
 								nameLength++;
 							}
 
-							int temperature;
-							var hasThreeValues = idx - 1 - nameLength == 3;
-							if (hasThreeValues) {
-								temperature = (line[nameLength] - 48) * 100;
-								temperature += (line[nameLength + 1] - 48) * 10;
-								temperature += line[nameLength + 2] - 48;
-							} else {
-								temperature = (line[nameLength] - 48) * 10;
-								temperature += line[nameLength + 1] - 48;
-							}
+							var temperature = idx - 1 - nameLength == 3 ? 
+								(line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48 : 
+								(line[nameLength] - 48) * 10 + line[nameLength + 1] - 48;
 
 							switch (flag) {
-								case IntParseFlag.Signed | IntParseFlag.HasDot:
+								case IntParseFlag.Signed | IntParseFlag.HasDot: {
 									temperature *= -1;
 									break;
-								case IntParseFlag.Signed:
+								}
+								case IntParseFlag.Signed: {
 									temperature *= -10;
 									break;
-								case IntParseFlag.None:
+								}
+								case IntParseFlag.None: {
 									temperature *= 10;
 									break;
+								}
 							}
 
 							if (dic.TryGetValue(key, out var container)) {
@@ -72,7 +68,6 @@ namespace _1BRC.Framework.Console.Read {
 							}
 
 							idx = 0;
-							nameLength = 0;
 							flag = IntParseFlag.None;
 							break;
 						}
