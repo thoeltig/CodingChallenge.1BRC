@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -9,7 +10,6 @@ namespace _1BRC.Framework.Console.Read {
 
 			using (var stream = new FileStream(measurementsFilePath, FileMode.Open, FileAccess.Read, FileShare.None, 262144, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
 				const byte lineSeparator = 59; // ;
-				const byte zeroByte = 48; // 0
 				const byte signedSymbol = 45; // -
 				const byte temperatureSeparator = 46; // .
 				const byte newLine = 10; // \n
@@ -17,7 +17,7 @@ namespace _1BRC.Framework.Console.Read {
 				var line = new byte[106];
 				var idx = 0;
 				var nameLength = 0;
-				var foundDot = false;
+				var flag = IntParseFlag.None;
 
 				int readByte;
 				while ((readByte = stream.ReadByte()) != -1) {
@@ -30,21 +30,41 @@ namespace _1BRC.Framework.Console.Read {
 							break;
 						}
 						case temperatureSeparator: {
-							foundDot = true;
+							flag |= IntParseFlag.HasDot;
 							idx--;
 							break;
 						}
 						case newLine: {
 							var key = Encoding.UTF8.GetString(line, 0, nameLength - 1);
-							var numberIdx = nameLength;
-							var numberLength = idx - numberIdx - 1;
-							if (foundDot == false) {
-								line[idx - 1] = zeroByte;
-								numberLength = idx - numberIdx;
+
+							if (line[nameLength] == signedSymbol) {
+								flag |= IntParseFlag.Signed;
+								nameLength++;
 							}
 
-							var temperatureString = Encoding.UTF8.GetString(line, numberIdx, numberLength);
-							var temperature = int.TryParse(temperatureString, out var temp) ? temp : 0;
+							int temperature;
+							var hasThreeValues = idx - 1 - nameLength == 3;
+							if (hasThreeValues) {
+								temperature = (line[nameLength] - 48) * 100;
+								temperature += (line[nameLength + 1] - 48) * 10;
+								temperature += line[nameLength + 2] - 48;
+							} else {
+								temperature = (line[nameLength] - 48) * 10;
+								temperature += line[nameLength + 1] - 48;
+							}
+
+							switch (flag) {
+								case IntParseFlag.Signed | IntParseFlag.HasDot:
+									temperature *= -1;
+									break;
+								case IntParseFlag.Signed:
+									temperature *= -10;
+									break;
+								case IntParseFlag.None:
+									temperature *= 10;
+									break;
+							}
+
 							if (dic.TryGetValue(key, out var container)) {
 								container.Update(temperature);
 							} else {
@@ -53,7 +73,7 @@ namespace _1BRC.Framework.Console.Read {
 
 							idx = 0;
 							nameLength = 0;
-							foundDot = false;
+							flag = IntParseFlag.None;
 							break;
 						}
 					}
@@ -61,6 +81,13 @@ namespace _1BRC.Framework.Console.Read {
 			}
 
 			return dic;
+		}
+
+        [Flags]
+        private enum IntParseFlag : byte {
+			None = 0,
+            Signed = 1,
+            HasDot = 2
 		}
 	}
 
