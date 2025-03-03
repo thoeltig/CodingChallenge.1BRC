@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -18,6 +17,7 @@ namespace _1BRC.Framework.Console.Read {
 				var line = new byte[106];
 				var idx = 0;
 				var nameLength = 0;
+				var foundDot = false;
 
 				int readByte;
 				while ((readByte = stream.ReadByte()) != -1) {
@@ -29,11 +29,22 @@ namespace _1BRC.Framework.Console.Read {
 							nameLength = idx;
 							break;
 						}
+						case temperatureSeparator: {
+							foundDot = true;
+							idx--;
+							break;
+						}
 						case newLine: {
 							var key = Encoding.UTF8.GetString(line, 0, nameLength - 1);
 							var numberIdx = nameLength;
-							var temperatureString = Encoding.UTF8.GetString(line, numberIdx, idx - numberIdx -1);
-							var temperature = double.TryParse(temperatureString, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var temp) ? temp : 0.0;
+							var numberLength = idx - numberIdx - 1;
+							if (foundDot == false) {
+								line[idx - 1] = zeroByte;
+								numberLength = idx - numberIdx;
+							}
+
+							var temperatureString = Encoding.UTF8.GetString(line, numberIdx, numberLength);
+							var temperature = int.TryParse(temperatureString, out var temp) ? temp : 0;
 							if (dic.TryGetValue(key, out var container)) {
 								container.Update(temperature);
 							} else {
@@ -42,6 +53,7 @@ namespace _1BRC.Framework.Console.Read {
 
 							idx = 0;
 							nameLength = 0;
+							foundDot = false;
 							break;
 						}
 					}
@@ -53,25 +65,33 @@ namespace _1BRC.Framework.Console.Read {
 	}
 
 	internal class TemperatureContainer {
-		public double Min { get; private set; }
+		private const double Divider = 10.0;
+		private int _count;
+		private int _min;
+		private int _max;
+		private int _sum;
 
-		public double Average { get; private set; }
+		public double Min => _min / Divider;
 
-		public double Max { get; private set; }
+		public double Average => _sum / Divider / _count;
 
-		public TemperatureContainer(double temperature) {
-			Average = temperature;
-			Min = temperature;
-			Max = temperature;
+		public double Max => _max / Divider;
+
+		public TemperatureContainer(int temperature) {
+			_sum = temperature;
+			_min = temperature;
+			_max = temperature;
+			_count = 1;
 		}
 
-		public void Update(double temperature) {
-			Average = (Average + temperature) / 2.0;
+		public void Update(int temperature) {
+			_sum += temperature;
+			_count++;
 
-			if (temperature < Min) {
-				Min = temperature;
-			} else if (temperature > Max) {
-				Max = temperature;
+			if (temperature < _min) {
+				_min = temperature;
+			} else if (temperature > _max) {
+				_max = temperature;
 			}
 		}
 	}
