@@ -82,12 +82,12 @@ Now I can finally start with the actual challenge but I will do it with a step b
 
 ||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
-|StreamWriter.ReadLine(line as string) in .NET Framework	|08:14:673|14.882|30.08|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/84c6189a7a9fcc46de65b1786343b7bcced70d3f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|FileStream.ReadByte (single byte) 							|08:04:929|14.882|30.69|2.03|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/71e718a4a780223e19d973555acaaa3d56d58d6f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|Parse temperature to int instead of double					|07:41:859|14.882|32.22|7.11|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/424d65b8baa35ee8fcc1e810c4312e7ca2114ef8/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|Faster int parse											|04:42:568|14.882|52.67|75.10|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/0581fde0d45666aa4c621b72e1b4d899c04b5ffc/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|Faster dictionary look up									|03:10:418|14.882|78.15|159.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5f0ca080c4d90c9951b913ebf25a46510acf2212/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|FileStream.Read (byte array)								|02:48:808|14.882|88.16|193.08|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/56a481291480f1e19a7a5059c2506560e84c5fc6/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|MemoryMappedFile											|		|		|		|	|[File]()|
-|P/invoke ReadFile & CloseHandle							|		|		|		|	|[File]()|
-|Parallel execution											|		|		|		|	|[File]()|
+|StreamWriter.ReadLine(line as string) in .NET Framework			|08:14:673|14.882|30.08|base line|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/84c6189a7a9fcc46de65b1786343b7bcced70d3f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|FileStream.ReadByte (single byte) 									|08:04:929|14.882|30.69|2.03|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/71e718a4a780223e19d973555acaaa3d56d58d6f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Parse temperature to int instead of double							|07:41:859|14.882|32.22|7.11|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/424d65b8baa35ee8fcc1e810c4312e7ca2114ef8/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Faster int parse													|04:42:568|14.882|52.67|75.10|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/0581fde0d45666aa4c621b72e1b4d899c04b5ffc/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Faster dictionary look up											|03:10:418|14.882|78.15|159.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5f0ca080c4d90c9951b913ebf25a46510acf2212/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|FileStream.Read (byte array)										|02:48:808|14.882|88.16|193.08|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/56a481291480f1e19a7a5059c2506560e84c5fc6/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|P/invoke ReadFile & CloseHandle									|02:48:665|14.882|88.23|193.32|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/930bd4974a37a8141b9c2e3a979823d97beb8455/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|Parallel execution													|		|		|		|	|[File]()|
+|Copied current code to .NET 5, changed to safe version & use spans	|		|		|		|	|[File]()|
