@@ -5,8 +5,8 @@ using System.Text;
 
 namespace _1BRC.Framework.Console.Read {
 	internal static class MeasurementsReader {
-		public static IReadOnlyDictionary<string, TemperatureContainer> ReadFile(string measurementsFilePath) {
-			var dic = new Dictionary<string, TemperatureContainer>();
+		public static IReadOnlyCollection<TemperatureContainer> ReadFile(string measurementsFilePath) {
+			var dic = new Dictionary<uint, TemperatureContainer>();
 
 			using (var stream = new FileStream(measurementsFilePath, FileMode.Open, FileAccess.Read, FileShare.None, 262144, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
 				const byte lineSeparator = 59; // ;
@@ -38,7 +38,13 @@ namespace _1BRC.Framework.Console.Read {
 							break;
 						}
 						case newLine: {
-							var key = Encoding.UTF8.GetString(line, 0, nameLength);
+							// get key with hash logic
+							var key = 2166136261;
+							unchecked {
+								for (var i = 0; i < nameLength; i++) {
+									key = (key * 16777619) ^ line[i];
+								}
+							}
 
 							// parse int -> double or single digit with or without fraction
 							switch (flag) {
@@ -75,7 +81,7 @@ namespace _1BRC.Framework.Console.Read {
 							if (dic.TryGetValue(key, out var container)) {
 								container.Update(temperature);
 							} else {
-								dic.Add(key, new TemperatureContainer(temperature));
+								dic.Add(key, new TemperatureContainer(Encoding.UTF8.GetString(line, 0, nameLength), temperature));
 							}
 
 							idx = 0;
@@ -89,7 +95,7 @@ namespace _1BRC.Framework.Console.Read {
 				}
 			}
 
-			return dic;
+			return dic.Values;
 		}
 
 		[Flags]
@@ -107,13 +113,16 @@ namespace _1BRC.Framework.Console.Read {
 		private int _max;
 		private int _sum;
 
+		public string Name { get; }
+
 		public double Min => _min / Divider;
 
 		public double Average => _sum / Divider / _count;
 
 		public double Max => _max / Divider;
 
-		public TemperatureContainer(int temperature) {
+		public TemperatureContainer(string name, int temperature) {
+			Name = name;
 			_sum = temperature;
 			_min = temperature;
 			_max = temperature;

@@ -26,7 +26,7 @@ namespace _1BRC.Framework.Console {
 				System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
 			}
 
-			IReadOnlyDictionary<string, TemperatureContainer> result = null;
+			IReadOnlyCollection<TemperatureContainer> result = null;
 			for (var i = 0; i < 4; i++) {
 				System.Console.WriteLine();
 				System.Console.WriteLine("Reading file");
@@ -35,8 +35,9 @@ namespace _1BRC.Framework.Console {
 				sw.Start();
 				result = MeasurementsReader.ReadFile(MeasurementsFileName);
 				sw.Stop();
-
+                
 				System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
+				System.Console.WriteLine($"Stations: {result.Count}");
 			}
 
 			if (result != null) {
@@ -46,8 +47,8 @@ namespace _1BRC.Framework.Console {
 					writer.WriteLine("name | min | average | max");
 					writer.WriteLine();
 
-					foreach (var keyVal in result) {
-						writer.WriteLine(string.Concat(keyVal.Key, separator, keyVal.Value.Min, separator, keyVal.Value.Average, separator, keyVal.Value.Max));
+					foreach (var container in result) {
+						writer.WriteLine(string.Concat(container.Name, separator, container.Min, separator, container.Average, separator, container.Max));
 					}
 				}
 
