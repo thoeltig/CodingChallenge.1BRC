@@ -1,11 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
 		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
-			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, NativeMethods.FileShareNone, IntPtr.Zero, NativeMethods.CreateAlways, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, FileShare.None, IntPtr.Zero, FileMode.OpenOrCreate, NativeMethods.FileAttributeNormal, IntPtr.Zero);
 			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
 				return;
 			}
