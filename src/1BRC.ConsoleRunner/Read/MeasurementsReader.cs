@@ -2,30 +2,34 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using _1BRC.Framework.Console.Generate;
 
 namespace _1BRC.Framework.Console.Read {
 	internal static class MeasurementsReader {
-		public static IReadOnlyCollection<TemperatureContainer> ReadFile(string measurementsFilePath) {
+		public static unsafe IReadOnlyCollection<TemperatureContainer> ReadFile(string filePath) {
+			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericRead, FileShare.None, IntPtr.Zero, FileMode.Open, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
+				return Array.Empty<TemperatureContainer>();
+			}
+
+			const byte lineSeparator = 59; // ;
+			const byte signedSymbol = 45; // -
+			const byte temperatureSeparator = 46; // .
+			const byte newLine = 10; // \n
+
 			var dic = new Dictionary<uint, TemperatureContainer>();
+			var line = new byte[106];
+			var idx = 0;
+			var nameLength = 0;
+			var flag = IntParseFlag.None;
+			var temperature = 0;
+			const int bufferSize = 262144;
+			var block = new byte[bufferSize];
 
-			using (var stream = new FileStream(measurementsFilePath, FileMode.Open, FileAccess.Read, FileShare.None, 262144, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
-				const byte lineSeparator = 59; // ;
-				const byte signedSymbol = 45; // -
-				const byte temperatureSeparator = 46; // .
-				const byte newLine = 10; // \n
-
-				var line = new byte[106];
-				var idx = 0;
-				var nameLength = 0;
-				var flag = IntParseFlag.None;
-				var temperature = 0;
-				const int bufferSize = 262144;
-				var buffer = new byte[bufferSize];
-
-				int readBytes;
-				while ((readBytes = stream.Read(buffer, 0, bufferSize)) != 0) {
+			fixed (byte* blockPtr = block) {
+				while (NativeMethods.ReadFile(filePtr, blockPtr, bufferSize, out var readBytes, IntPtr.Zero) != 0 && readBytes != 0) {
 					for (var bufferIdx = 0; bufferIdx < readBytes; bufferIdx++) {
-						var value = buffer[bufferIdx];
+						var value = blockPtr[bufferIdx];
 
 						switch (value) {
 							case lineSeparator: {
@@ -101,6 +105,7 @@ namespace _1BRC.Framework.Console.Read {
 				}
 			}
 
+			NativeMethods.CloseHandle(filePtr);
 			return dic.Values;
 		}
 
