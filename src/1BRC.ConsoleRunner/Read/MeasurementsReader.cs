@@ -18,11 +18,11 @@ namespace _1BRC.Framework.Console.Read {
 				var idx = 0;
 				var nameLength = 0;
 				var flag = IntParseFlag.None;
+				var temperature = 0;
 
 				int readByte;
 				while ((readByte = stream.ReadByte()) != -1) {
 					var value = (byte)readByte;
-					line[idx++] = value;
 
 					switch (value) {
 						case lineSeparator: {
@@ -31,32 +31,43 @@ namespace _1BRC.Framework.Console.Read {
 						}
 						case temperatureSeparator: {
 							flag |= IntParseFlag.HasDot;
-							idx--;
+							break;
+						}
+						case signedSymbol: {
+							flag |= IntParseFlag.Signed;
 							break;
 						}
 						case newLine: {
-							var key = Encoding.UTF8.GetString(line, 0, nameLength - 1);
+							var key = Encoding.UTF8.GetString(line, 0, nameLength);
 
-							if (line[nameLength] == signedSymbol) {
-								flag |= IntParseFlag.Signed;
-								nameLength++;
-							}
-
-							var temperature = idx - 1 - nameLength == 3 ? 
-								(line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48 : 
-								(line[nameLength] - 48) * 10 + line[nameLength + 1] - 48;
-
+							// parse int -> double or single digit with or without fraction
 							switch (flag) {
 								case IntParseFlag.Signed | IntParseFlag.HasDot: {
-									temperature *= -1;
+									temperature = -((idx - nameLength) switch {
+										3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
+										_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
+									});
+									break;
+								}
+								case IntParseFlag.HasDot: {
+									temperature = (idx - nameLength) switch {
+										3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
+										_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
+									};
 									break;
 								}
 								case IntParseFlag.Signed: {
-									temperature *= -10;
+									temperature = -10 * ((idx - nameLength) switch {
+										2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
+										_ => line[nameLength] - 48
+									});
 									break;
 								}
 								case IntParseFlag.None: {
-									temperature *= 10;
+									temperature = 10 * ((idx - nameLength) switch {
+										2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
+										_ => line[nameLength] - 48
+									});
 									break;
 								}
 							}
@@ -71,6 +82,9 @@ namespace _1BRC.Framework.Console.Read {
 							flag = IntParseFlag.None;
 							break;
 						}
+						default:
+							line[idx++] = value;
+							break;
 					}
 				}
 			}
@@ -78,11 +92,11 @@ namespace _1BRC.Framework.Console.Read {
 			return dic;
 		}
 
-        [Flags]
-        private enum IntParseFlag : byte {
+		[Flags]
+		private enum IntParseFlag : byte {
 			None = 0,
-            Signed = 1,
-            HasDot = 2
+			Signed = 1,
+			HasDot = 2
 		}
 	}
 
