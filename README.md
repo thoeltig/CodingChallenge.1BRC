@@ -86,4 +86,5 @@ Now I can finally start with the actual challenge but I will do it with a step b
 |FileStream.ReadByte 										|08:04:929|14.882|30.69|2.03|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/71e718a4a780223e19d973555acaaa3d56d58d6f/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |Parse temperature to int instead of double					|07:41:859|14.882|32.22|7.11|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/424d65b8baa35ee8fcc1e810c4312e7ca2114ef8/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |Faster int parse											|04:42:568|14.882|52.67|75.10|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/0581fde0d45666aa4c621b72e1b4d899c04b5ffc/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|Faster dictionary look up									|		  |		 |		|	|[File]()|
+|Faster dictionary look up									|03:10:418|14.882|78.15|159.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5f0ca080c4d90c9951b913ebf25a46510acf2212/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
+|															|		|		|		|	|[File]()|
