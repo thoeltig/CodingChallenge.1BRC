@@ -19,79 +19,85 @@ namespace _1BRC.Framework.Console.Read {
 				var nameLength = 0;
 				var flag = IntParseFlag.None;
 				var temperature = 0;
+				const int bufferSize = 262144;
+				var buffer = new byte[bufferSize];
 
-				int readByte;
-				while ((readByte = stream.ReadByte()) != -1) {
-					var value = (byte)readByte;
+				int readBytes;
+				while ((readBytes = stream.Read(buffer, 0, bufferSize)) != 0) {
+					for (var bufferIdx = 0; bufferIdx < readBytes; bufferIdx++) {
+						var value = buffer[bufferIdx];
 
-					switch (value) {
-						case lineSeparator: {
-							nameLength = idx;
-							break;
-						}
-						case temperatureSeparator: {
-							flag |= IntParseFlag.HasDot;
-							break;
-						}
-						case signedSymbol: {
-							flag |= IntParseFlag.Signed;
-							break;
-						}
-						case newLine: {
-							// get key with hash logic
-							var key = 2166136261;
-							unchecked {
-								for (var i = 0; i < nameLength; i++) {
-									key = (key * 16777619) ^ line[i];
-								}
+						switch (value) {
+							case lineSeparator: {
+								nameLength = idx;
+								break;
 							}
-
-							// parse int -> double or single digit with or without fraction
-							switch (flag) {
-								case IntParseFlag.Signed | IntParseFlag.HasDot: {
-									temperature = -((idx - nameLength) switch {
-										3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
-										_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
-									});
-									break;
-								}
-								case IntParseFlag.HasDot: {
-									temperature = (idx - nameLength) switch {
-										3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
-										_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
-									};
-									break;
-								}
-								case IntParseFlag.Signed: {
-									temperature = -10 * ((idx - nameLength) switch {
-										2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
-										_ => line[nameLength] - 48
-									});
-									break;
-								}
-								case IntParseFlag.None: {
-									temperature = 10 * ((idx - nameLength) switch {
-										2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
-										_ => line[nameLength] - 48
-									});
-									break;
-								}
+							case temperatureSeparator: {
+								flag |= IntParseFlag.HasDot;
+								break;
 							}
-
-							if (dic.TryGetValue(key, out var container)) {
-								container.Update(temperature);
-							} else {
-								dic.Add(key, new TemperatureContainer(Encoding.UTF8.GetString(line, 0, nameLength), temperature));
+							case signedSymbol: {
+								flag |= IntParseFlag.Signed;
+								break;
 							}
+							case newLine: {
+								// get key with hash logic
+								var key = 2166136261;
+								unchecked {
+									for (var i = 0; i < nameLength; i++) {
+										key = (key * 16777619) ^ line[i];
+									}
+								}
 
-							idx = 0;
-							flag = IntParseFlag.None;
-							break;
+								// parse int -> double or single digit with or without fraction
+								switch (flag) {
+									case IntParseFlag.Signed | IntParseFlag.HasDot: {
+										temperature = -((idx - nameLength) switch {
+											3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
+											_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
+										});
+										break;
+									}
+									case IntParseFlag.HasDot: {
+										temperature = (idx - nameLength) switch {
+											3 => (line[nameLength] - 48) * 100 + (line[nameLength + 1] - 48) * 10 + line[nameLength + 2] - 48,
+											_ => (line[nameLength] - 48) * 10 + (line[nameLength + 1] - 48)
+										};
+										break;
+									}
+									case IntParseFlag.Signed: {
+										temperature = -10 * ((idx - nameLength) switch {
+											2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
+											_ => line[nameLength] - 48
+										});
+										break;
+									}
+									case IntParseFlag.None: {
+										temperature = 10 * ((idx - nameLength) switch {
+											2 => (line[nameLength] - 48) * 10 + line[nameLength + 1] - 48,
+											_ => line[nameLength] - 48
+										});
+										break;
+									}
+								}
+
+								if (dic.TryGetValue(key, out var container)) {
+									container.Update(temperature);
+								} else {
+									dic.Add(key, new TemperatureContainer(Encoding.UTF8.GetString(line, 0, nameLength), temperature));
+								}
+
+								idx = 0;
+								flag = IntParseFlag.None;
+								break;
+							}
+							default: {
+								line[idx++] = value;
+								break;
+							}
 						}
-						default:
-							line[idx++] = value;
-							break;
 					}
+
 				}
 			}
 
