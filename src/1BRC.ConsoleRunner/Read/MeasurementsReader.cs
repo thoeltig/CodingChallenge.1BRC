@@ -21,11 +21,11 @@ namespace _1BRC.Framework.Console.Read {
 			#endif
 
 			const int blockSize = 262144;
-			var count = maxParallel * 3;
+			var count = maxParallel * 2;
 			var tasks = new Task[maxParallel];
 			var bytePointers = new byte*[count];
 			var handles = new GCHandle[count];
-			for (var i = 0; i < count; i += 3) {
+			for (var i = 0; i < count; i += 2) {
 				var arr = new byte[blockSize];
 				var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
 				handles[i] = handle;
@@ -35,11 +35,6 @@ namespace _1BRC.Framework.Console.Read {
 				handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
 				handles[i + 1] = handle;
 				bytePointers[i + 1] = (byte*)handle.AddrOfPinnedObject().ToPointer();
-
-				arr = new byte[212];
-				handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
-				handles[i + 2] = handle;
-				bytePointers[i + 2] = (byte*)handle.AddrOfPinnedObject().ToPointer();
 			}
 
 			var offset = 0;
@@ -48,10 +43,10 @@ namespace _1BRC.Framework.Console.Read {
 
 			do {
 				for (var i = 0; i < maxParallel; i++) {
-					var ptr = bytePointers[i * 3];
+					var ptr = bytePointers[i * 2];
 					if (NativeMethods.ReadFile(filePtr, ptr + offset, blockSize - offset, out var readBytes, IntPtr.Zero) != 0 && readBytes != 0) {
 						isRunning = readBytes == blockSize - offset;
-						tasks[i] = ReadLinesAsync(isRunning, dic, ptr, readBytes + offset, bytePointers[i * 3 + 1], bytePointers[i * 3 + 2]);
+						tasks[i] = ReadLinesAsync(isRunning, dic, ptr, readBytes + offset, bytePointers[i * 2 + 1]);
 						offset = 0;
 					} else {
 						tasks[i] = Task.FromResult(0);
@@ -60,14 +55,14 @@ namespace _1BRC.Framework.Console.Read {
 
 				Task.WaitAll(tasks);
 
-				offset = 0;
-				for (var i = 0; i < maxParallel; i++) {
+				offset = tasks[0] is Task<int> t ? t.Result : 0;
+				for (var i = 1; i < maxParallel; i++) {
 					if (tasks[i] is not Task<int> resultTask || resultTask.Result == 0) {
 						continue;
 					}
 
 					var length = resultTask.Result;
-					NativeMethods.CopyMemory(bytePointers[0] + offset, bytePointers[i * 3 + 2], (uint)length);
+					NativeMethods.CopyMemory(bytePointers[0] + offset, bytePointers[i * 2], (uint)length);
 					offset += length;
 				}
 			} while (isRunning);
@@ -84,7 +79,7 @@ namespace _1BRC.Framework.Console.Read {
 			return dic.Values;
 		}
 
-		private static unsafe Task<int> ReadLinesAsync(bool ignoreStartAndEndPart, Dictionary<uint, TemperatureContainer> dic, byte* blockPtr, int readBytes, byte* linePtr, byte* remainingPtr) {
+		private static unsafe Task<int> ReadLinesAsync(bool ignoreStartAndEndPart, Dictionary<uint, TemperatureContainer> dic, byte* blockPtr, int readBytes, byte* linePtr) {
 			const byte lineSeparator = 59; // ;
 			const byte signedSymbol = 45; // -
 			const byte temperatureSeparator = 46; // .
@@ -190,13 +185,9 @@ namespace _1BRC.Framework.Console.Read {
 			if (lastIdx != 0) {
 				lastCount = readBytes - lastIdx;
 			}
-			
-			if (firstIdx != 0) {
-				NativeMethods.CopyMemory(remainingPtr, blockPtr, (uint)firstIdx);
-			}
 
 			if (lastCount != 0) {
-				NativeMethods.CopyMemory(remainingPtr + firstIdx, blockPtr + lastIdx, (uint)lastCount);
+				NativeMethods.CopyMemory(blockPtr + firstIdx, blockPtr + lastIdx, (uint)lastCount);
 			}
 
 			return Task.FromResult(firstIdx + lastCount);
@@ -214,7 +205,7 @@ namespace _1BRC.Framework.Console.Read {
 		private const double Divider = 10.0;
 
 		#region
-        
+
 		private int _min;
 		private int _sum;
 		private int _max;
@@ -237,7 +228,7 @@ namespace _1BRC.Framework.Console.Read {
 		public double Average => _sum / Divider / _count;
 
 		public double Max => _max / Divider;
-		
+
 		public void Update(int temperature) {
 			_sum += temperature;
 			_count++;
