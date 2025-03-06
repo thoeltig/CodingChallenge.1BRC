@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,11 +21,11 @@ namespace _1BRC.Framework.Console.Read {
 			#endif
 
 			const int blockSize = 262144;
-			var count = maxParallel * 2;
+			var count = maxParallel * 3;
 			var tasks = new Task[maxParallel];
 			var bytePointers = new byte*[count];
 			var handles = new GCHandle[count];
-			for (var i = 0; i < count; i += 2) {
+			for (var i = 0; i < count; i += 3) {
 				var arr = new byte[blockSize];
 				var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
 				handles[i] = handle;
@@ -36,32 +35,42 @@ namespace _1BRC.Framework.Console.Read {
 				handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
 				handles[i + 1] = handle;
 				bytePointers[i + 1] = (byte*)handle.AddrOfPinnedObject().ToPointer();
+
+				arr = new byte[212];
+				handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
+				handles[i + 2] = handle;
+				bytePointers[i + 2] = (byte*)handle.AddrOfPinnedObject().ToPointer();
 			}
 
-			var number = 0;
-			var readBytes = 0;
+			var offset = 0;
+			var isRunning = true;
 			var dic = new Dictionary<uint, TemperatureContainer>();
-			var list = new List<RemainingContainer>();
 
 			do {
-				for (var j = 0; j < maxParallel; j++, number++) {
-					var ptr = bytePointers[j * 2];
-					if (NativeMethods.ReadFile(filePtr, ptr, blockSize, out readBytes, IntPtr.Zero) != 0 && readBytes != 0) {
-						tasks[j] = ReadLinesAsync(number, dic, ptr, readBytes, bytePointers[j * 2 + 1], list);
+				for (var i = 0; i < maxParallel; i++) {
+					var ptr = bytePointers[i * 3];
+					if (NativeMethods.ReadFile(filePtr, ptr + offset, blockSize - offset, out var readBytes, IntPtr.Zero) != 0 && readBytes != 0) {
+						isRunning = readBytes == blockSize - offset;
+						tasks[i] = ReadLinesAsync(isRunning, dic, ptr, readBytes + offset, bytePointers[i * 3 + 1], bytePointers[i * 3 + 2]);
+						offset = 0;
 					} else {
-						tasks[j] = Task.CompletedTask;
+						tasks[i] = Task.FromResult(0);
 					}
 				}
 
 				Task.WaitAll(tasks);
-			} while (readBytes != 0);
 
-			if (list.Count != 0) {
-				var remainingArray = list.OrderBy(x => x.Index).SelectMany(x => x.StartAndEndLineParts).ToArray();
-				fixed (byte* remainingPtr = remainingArray) {
-					Task.WaitAll(ReadLinesAsync(-1, dic, remainingPtr, remainingArray.Length, bytePointers[1], list));
+				offset = 0;
+				for (var i = 0; i < maxParallel; i++) {
+					if (tasks[i] is not Task<int> resultTask || resultTask.Result == 0) {
+						continue;
+					}
+
+					var length = resultTask.Result;
+					NativeMethods.CopyMemory(bytePointers[0] + offset, bytePointers[i * 3 + 2], (uint)length);
+					offset += length;
 				}
-			}
+			} while (isRunning);
 
 			NativeMethods.CloseHandle(filePtr);
 
@@ -75,7 +84,7 @@ namespace _1BRC.Framework.Console.Read {
 			return dic.Values;
 		}
 
-		private static unsafe Task ReadLinesAsync(int number, Dictionary<uint, TemperatureContainer> dic, byte* blockPtr, int readBytes, byte* linePtr, List<RemainingContainer> list) {
+		private static unsafe Task<int> ReadLinesAsync(bool ignoreStartAndEndPart, Dictionary<uint, TemperatureContainer> dic, byte* blockPtr, int readBytes, byte* linePtr, byte* remainingPtr) {
 			const byte lineSeparator = 59; // ;
 			const byte signedSymbol = 45; // -
 			const byte temperatureSeparator = 46; // .
@@ -87,9 +96,8 @@ namespace _1BRC.Framework.Console.Read {
 			var temperature = 0;
 			int? firstLineEndIdx = null;
 			int? lastLineEndIdx = null;
-			var bufferIdx = 0;
 
-			for (; bufferIdx < readBytes; bufferIdx++) {
+			for (var bufferIdx = 0; bufferIdx < readBytes; bufferIdx++) {
 				var value = blockPtr[bufferIdx];
 
 				switch (value) {
@@ -106,7 +114,7 @@ namespace _1BRC.Framework.Console.Read {
 						break;
 					}
 					case newLine: {
-						if (firstLineEndIdx.HasValue == false && number != -1) {
+						if (firstLineEndIdx.HasValue == false && ignoreStartAndEndPart) {
 							firstLineEndIdx = bufferIdx;
 							idx = 0;
 							flag = IntParseFlag.None;
@@ -174,31 +182,24 @@ namespace _1BRC.Framework.Console.Read {
 
 			var firstIdx = firstLineEndIdx ?? 0;
 			var lastIdx = lastLineEndIdx ?? 0;
-			if (number == -1 || (firstIdx == 0 && lastIdx == 0)) {
-				return Task.CompletedTask;
+			if (ignoreStartAndEndPart == false || (firstIdx == 0 && lastIdx == 0)) {
+				return Task.FromResult(0);
 			}
 
 			var lastCount = 0;
-			byte[] remaining;
 			if (lastIdx != 0) {
 				lastCount = readBytes - lastIdx;
-				remaining = new byte[firstIdx + lastCount];
-			} else {
-				remaining = new byte[firstIdx];
 			}
 
-			fixed (byte* remainingPtr = remaining) {
-				if (firstIdx != 0) {
-					NativeMethods.CopyMemory(remainingPtr, blockPtr, (uint)firstIdx);
-				}
-
-				if (lastCount != 0) {
-					NativeMethods.CopyMemory(remainingPtr + firstIdx, blockPtr + lastIdx, (uint)lastCount);
-				}
+			if (firstIdx != 0) {
+				NativeMethods.CopyMemory(remainingPtr, blockPtr, (uint)firstIdx);
 			}
 
-			list.Add(new RemainingContainer(number, remaining));
-			return Task.CompletedTask;
+			if (lastCount != 0) {
+				NativeMethods.CopyMemory(remainingPtr + firstIdx, blockPtr + lastIdx, (uint)lastCount);
+			}
+
+			return Task.FromResult(firstIdx + lastCount);
 		}
 
 		[Flags]
@@ -215,7 +216,6 @@ namespace _1BRC.Framework.Console.Read {
 		#region
 
 		private int _count;
-		private int _max;
 		private int _min;
 		private int _sum;
 
@@ -225,7 +225,7 @@ namespace _1BRC.Framework.Console.Read {
 			Name = name;
 			_sum = temperature;
 			_min = temperature;
-			_max = temperature;
+			Count = temperature;
 			_count = 1;
 		}
 
@@ -235,7 +235,9 @@ namespace _1BRC.Framework.Console.Read {
 
 		public double Average => _sum / Divider / _count;
 
-		public double Max => _max / Divider;
+		public double Max => Count / Divider;
+
+		public int Count { get; private set; }
 
 		public void Update(int temperature) {
 			_sum += temperature;
@@ -243,20 +245,9 @@ namespace _1BRC.Framework.Console.Read {
 
 			if (temperature < _min) {
 				_min = temperature;
-			} else if (temperature > _max) {
-				_max = temperature;
+			} else if (temperature > Count) {
+				Count = temperature;
 			}
 		}
-	}
-
-	internal class RemainingContainer {
-		public RemainingContainer(int index, byte[] startAndEndLineParts) {
-			Index = index;
-			StartAndEndLineParts = startAndEndLineParts;
-		}
-
-		public int Index { get; }
-
-		public byte[] StartAndEndLineParts { get; }
 	}
 }
