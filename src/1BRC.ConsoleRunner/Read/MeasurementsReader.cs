@@ -22,7 +22,7 @@ namespace _1BRC.Framework.Console.Read {
 			#endif
 
 			const int blockSize = 262144;
-			const int count = maxParallel * 2;
+			var count = maxParallel * 2;
 			var tasks = new Task[maxParallel];
 			var bytePointers = new byte*[count];
 			var handles = new GCHandle[count];
@@ -51,9 +51,9 @@ namespace _1BRC.Framework.Console.Read {
 					} else {
 						tasks[j] = Task.CompletedTask;
 					}
-
-					Task.WaitAll(tasks);
 				}
+
+				Task.WaitAll(tasks);
 			} while (readBytes != 0);
 
 			if (list.Count != 0) {
