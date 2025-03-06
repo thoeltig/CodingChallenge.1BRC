@@ -190,7 +190,7 @@ namespace _1BRC.Framework.Console.Read {
 			if (lastIdx != 0) {
 				lastCount = readBytes - lastIdx;
 			}
-
+			
 			if (firstIdx != 0) {
 				NativeMethods.CopyMemory(remainingPtr, blockPtr, (uint)firstIdx);
 			}
@@ -214,10 +214,11 @@ namespace _1BRC.Framework.Console.Read {
 		private const double Divider = 10.0;
 
 		#region
-
-		private int _count;
+        
 		private int _min;
 		private int _sum;
+		private int _max;
+		private int _count;
 
 		#endregion
 
@@ -225,7 +226,7 @@ namespace _1BRC.Framework.Console.Read {
 			Name = name;
 			_sum = temperature;
 			_min = temperature;
-			Count = temperature;
+			_max = temperature;
 			_count = 1;
 		}
 
@@ -235,18 +236,16 @@ namespace _1BRC.Framework.Console.Read {
 
 		public double Average => _sum / Divider / _count;
 
-		public double Max => Count / Divider;
-
-		public int Count { get; private set; }
-
+		public double Max => _max / Divider;
+		
 		public void Update(int temperature) {
 			_sum += temperature;
 			_count++;
 
 			if (temperature < _min) {
 				_min = temperature;
-			} else if (temperature > Count) {
-				Count = temperature;
+			} else if (temperature > _count) {
+				_max = temperature;
 			}
 		}
 	}
