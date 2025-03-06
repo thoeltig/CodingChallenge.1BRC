@@ -8,9 +8,12 @@ namespace _1BRC.Framework.Console.Generate {
 		internal const int InvalidHandleValue = -1;
 		internal const int GenericRead = -2147483648;
 		internal const int GenericWrite = 1073741824;
-
+        
 		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
 		internal static extern void CopyMemory(IntPtr dest, IntPtr src, uint count);
+        
+		[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
+		internal static extern unsafe void CopyMemory(byte* dest, byte* src, uint count);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		internal static extern unsafe int WriteFile(

@@ -29,8 +29,7 @@ namespace _1BRC.Framework.Console.Generate {
 				var arr = new byte[sliceOfBlock];
 				var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
 				handles[i] = handle;
-				var address = handle.AddrOfPinnedObject();
-				var ptr = (byte*)address.ToPointer();
+				var ptr = (byte*)handle.AddrOfPinnedObject().ToPointer();
 				bytePointers[i] = ptr;
 				pointers[i] = new IntPtr(ptr);
 			}
@@ -80,9 +79,9 @@ namespace _1BRC.Framework.Console.Generate {
 				handles[i].Free();
 			}
 
-			Array.Clear(pointers, 0, maxParallel);
-			Array.Clear(bytePointers, 0, maxParallel);
-			Array.Clear(handles, 0, maxParallel);
+			Array.Clear(pointers, 0, pointers.Length);
+			Array.Clear(bytePointers, 0, bytePointers.Length);
+			Array.Clear(handles, 0, handles.Length);
 			return;
 
 			bool CanCreateLine() => --linesToCreate > 0;

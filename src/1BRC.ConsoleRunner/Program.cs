@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using _1BRC.Framework.Console.Generate;
 using _1BRC.Framework.Console.Read;
 
@@ -38,8 +37,6 @@ namespace _1BRC.Framework.Console {
 				sw.Stop();
                 
 				System.Console.WriteLine($"Time: {sw.Elapsed:mm':'ss':'fff}");
-				System.Console.WriteLine($"Stations: {result.Count}");
-				System.Console.WriteLine($"Lines: {result.Sum(x=>x.Count)}");
 			}
 
 			if (result != null) {
