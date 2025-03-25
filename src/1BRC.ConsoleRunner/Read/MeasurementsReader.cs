@@ -9,7 +9,7 @@ using _1BRC.Framework.Console.Generate;
 namespace _1BRC.Framework.Console.Read {
 	internal static class MeasurementsReader {
 		public static unsafe IReadOnlyCollection<TemperatureContainer> ReadFile(string filePath) {
-			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericRead, FileShare.None, IntPtr.Zero, FileMode.Open, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericRead, FileShare.None, IntPtr.Zero, FileMode.Open, NativeMethods.FileFlagSequentialScan | NativeMethods.FileFlagWriteThrough, IntPtr.Zero);
 			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
 				return Array.Empty<TemperatureContainer>();
 			}

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {
 		public static unsafe void GenerateFile(string filePath, int totalRowCount) {
-			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, FileShare.None, IntPtr.Zero, FileMode.OpenOrCreate, NativeMethods.FileAttributeNormal, IntPtr.Zero);
+			var filePtr = NativeMethods.CreateFile(filePath, NativeMethods.GenericWrite, FileShare.None, IntPtr.Zero, FileMode.OpenOrCreate, NativeMethods.FileFlagSequentialScan, IntPtr.Zero);
 			if (filePtr.ToInt32() == NativeMethods.InvalidHandleValue) {
 				return;
 			}
