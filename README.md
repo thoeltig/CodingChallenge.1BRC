@@ -89,5 +89,5 @@ Now I can finally start with the actual challenge but I will do it with a step b
 |Faster dictionary look up											|03:10:418|14.882|78.15|159.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/5f0ca080c4d90c9951b913ebf25a46510acf2212/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |FileStream.Read (byte array)										|02:48:808|14.882|88.16|193.08|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/56a481291480f1e19a7a5059c2506560e84c5fc6/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |P/invoke ReadFile & CloseHandle									|02:48:665|14.882|88.23|193.32|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/930bd4974a37a8141b9c2e3a979823d97beb8455/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
-|Parallel execution													|		|		|		|	|[File]()|
+|Parallel execution													|02:45:487|14.882|89.93|198.97|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a82118f8aa14a1a02a081a2382119350190aa9be/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |Copied current code to .NET 5, changed to safe version & use spans	|		|		|		|	|[File]()|
