@@ -32,7 +32,7 @@ Old notebook
 - Intel Core i5-4200U - max. 2.3 GHz
 - DDR3 - 8GB RAM - 1600 MHz
 - Toshiba MQ01ABF050 - Read 100 MB/s Write 96 MB/s
-Visual Studio 2019 (Version 16.11.44)
+- Visual Studio 2019 (Version 16.11.44)
 - .NET Framework 4.7.2
 - .NET 5 (Core)
 
@@ -73,7 +73,7 @@ The logic to generate the rows for the measurements isn't too complicated but wr
 |Removed slices & write directly to block (added fixed [10k names of list](https://github.com/gunnarmorling/1brc/blob/main/data/weather_stations.csv))|02:52:751|15.157|87.74|442.61|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/d8f8124afe4b02e85a29bd325b0f073a493e536d/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Copied current code to .NET 5, changed to safe version & use spans			|02:46:481|14.882|89.39|452.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/ec8edc4674b064f3fed544ac6532a51413c5cb70/src/1BRC.Net5.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 
-After a lot of tests and refactoring the final .NET Framework version with unsafe code and the .NET 5 version with safe code both reached about 90% of the possible write speed. With the spans instead of byte arrays the safe code performance similar to the unsafe code which normally would have been faster in comparison. 
+After a lot of tests and refactoring the final .NET Framework version with unsafe code and the .NET 5 version with safe code both reached about 90% of the possible write speed.
 Maybe with a bit of tweaking a couple more seconds could be shaved of the result but right now it is only 10 seconds off of the maximum write speed which might only be theoretical possible.
 I might have to test this with a better device with more I/O speed in the future but for now it is enough. Also upgrading to newer versions of .NET will have a better performance.
 
