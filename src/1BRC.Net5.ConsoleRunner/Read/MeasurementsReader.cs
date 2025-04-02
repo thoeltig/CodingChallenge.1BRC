@@ -16,8 +16,8 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			const int blockSize = 131016;
 			const int lineSize = 106;
 			var tasks = new Task[maxParallel];
-			var blockSizes = new byte[blockSize * maxParallel];
-			var lines = new byte[lineSize * maxParallel];
+			var blockSizes = new byte[blockSize * maxParallel].AsSpan();
+			var lines = new byte[lineSize * maxParallel].AsSpan();
 
 			var offset = 0;
 			var isRunning = true;
@@ -25,11 +25,11 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			using (var reader = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None, 8192, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
 				do {
 					for (var i = 0; i < maxParallel; i++) {
-						var ptr = blockSizes.AsSpan(i * blockSize + offset, blockSize - offset);
+						var ptr = blockSizes.Slice(i * blockSize + offset, blockSize - offset);
 						int readBytes;
 						if ((readBytes = reader.Read(ptr)) != 0) {
 							isRunning = readBytes == blockSize - offset;
-							tasks[i] = ReadLinesAsync(isRunning, dic, blockSizes.AsSpan(i * blockSize, readBytes + offset), readBytes + offset, lines.AsSpan(i * lineSize, lineSize));
+							tasks[i] = ReadLinesAsync(isRunning, dic, blockSizes.Slice(i * blockSize, readBytes + offset), readBytes + offset, lines.Slice(i * lineSize, lineSize));
 							offset = 0;
 						} else {
 							tasks[i] = Task.FromResult(0);
@@ -39,21 +39,19 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 					Task.WaitAll(tasks);
 
 					offset = tasks[0] is Task<int> t ? t.Result : 0;
-					var firstBlock = blockSizes.AsSpan(0, blockSize);
+					var firstBlock = blockSizes.Slice(0, blockSize);
 					for (var i = 1; i < maxParallel; i++) {
 						if (tasks[i] is not Task<int> resultTask || resultTask.Result == 0) {
 							continue;
 						}
 
 						var length = resultTask.Result;
-						blockSizes.AsSpan(i * blockSize, length).CopyTo(firstBlock.Slice(offset, length));
+						blockSizes.Slice(i * blockSize, length).CopyTo(firstBlock.Slice(offset, length));
 						offset += length;
 					}
 				} while (isRunning);
 			}
 
-			Array.Clear(blockSizes, 0, blockSizes.Length);
-			Array.Clear(lines, 0, lines.Length);
 			Array.Clear(tasks, 0, tasks.Length);
 			return dic.Values;
 		}
