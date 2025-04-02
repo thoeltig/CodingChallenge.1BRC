@@ -13,7 +13,7 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			var maxParallel = Environment.ProcessorCount;
 			#endif
 
-			const int blockSize = 131072;
+			const int blockSize = 131016;
 			const int lineSize = 106;
 			var tasks = new Task[maxParallel];
 			var blockSizes = new byte[blockSize * maxParallel];

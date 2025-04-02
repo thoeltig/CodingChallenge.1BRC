@@ -11,7 +11,6 @@ namespace _1BRC.Net5.ConsoleRunner {
 		#else
 		private const int RowCount = 1000000000;
 		#endif
-		private const int MaxReadSpeed = 100 * 1000 * 1000;
 		private const string MeasurementsFileName = "measurements.txt";
 		private const string ResultFileName = "result.txt";
 
