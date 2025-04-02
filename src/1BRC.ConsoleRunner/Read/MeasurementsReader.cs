@@ -235,7 +235,7 @@ namespace _1BRC.Framework.Console.Read {
 
 			if (temperature < _min) {
 				_min = temperature;
-			} else if (temperature > _count) {
+			} else if (temperature > _max) {
 				_max = temperature;
 			}
 		}
