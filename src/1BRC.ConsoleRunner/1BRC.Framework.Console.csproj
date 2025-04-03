@@ -45,6 +45,15 @@
     <Compile Include="..\1BRC.Net5.ConsoleRunner\Generate\WeatherStation.cs">
       <Link>Generate\WeatherStation.cs</Link>
     </Compile>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\Read\FirstAndLastPart.cs">
+      <Link>Read\FirstAndLastPart.cs</Link>
+    </Compile>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\Read\IntParseFlag.cs">
+      <Link>Read\IntParseFlag.cs</Link>
+    </Compile>
+    <Compile Include="..\1BRC.Net5.ConsoleRunner\Read\TemperatureContainer.cs">
+      <Link>Read\TemperatureContainer.cs</Link>
+    </Compile>
     <Compile Include="..\1BRC.Net5.ConsoleRunner\Test\BaseFileReadWriteTest.cs">
       <Link>Test\BaseFileReadWriteTest.cs</Link>
     </Compile>

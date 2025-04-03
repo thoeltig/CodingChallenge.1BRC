@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using _1BRC.Framework.Console.Generate;
+using _1BRC.Net5.ConsoleRunner.Read;
 
 namespace _1BRC.Framework.Console.Read {
 	internal static class MeasurementsReader {
@@ -191,53 +192,6 @@ namespace _1BRC.Framework.Console.Read {
 			}
 
 			return Task.FromResult(firstIdx + lastCount);
-		}
-
-		[Flags]
-		private enum IntParseFlag : byte {
-			None = 0,
-			Signed = 1,
-			HasDot = 2
-		}
-	}
-
-	internal class TemperatureContainer {
-		private const double Divider = 10.0;
-
-		#region
-
-		private int _min;
-		private int _sum;
-		private int _max;
-		private int _count;
-
-		#endregion
-
-		public TemperatureContainer(string name, int temperature) {
-			Name = name;
-			_sum = temperature;
-			_min = temperature;
-			_max = temperature;
-			_count = 1;
-		}
-
-		public string Name { get; }
-
-		public double Min => _min / Divider;
-
-		public double Average => _sum / Divider / _count;
-
-		public double Max => _max / Divider;
-
-		public void Update(int temperature) {
-			_sum += temperature;
-			_count++;
-
-			if (temperature < _min) {
-				_min = temperature;
-			} else if (temperature > _max) {
-				_max = temperature;
-			}
 		}
 	}
 }
