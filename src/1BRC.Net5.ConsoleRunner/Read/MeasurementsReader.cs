@@ -15,39 +15,44 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 
 			const int blockSize = 131016;
 			const int lineSize = 106;
-			var tasks = new Task[maxParallel];
-			var blockSizes = new byte[blockSize * maxParallel].AsSpan();
+			var tasks = new Task<FirstAndLastPart>[maxParallel];
+			var allBlocks = new byte[blockSize * maxParallel].AsSpan();
 			var lines = new byte[lineSize * maxParallel].AsSpan();
 
 			var offset = 0;
 			var isRunning = true;
+			var defaultPartsTask = Task.FromResult((FirstAndLastPart)default);
 			var dic = new Dictionary<uint, TemperatureContainer>();
 			using (var reader = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.None, 8192, FileOptions.SequentialScan | FileOptions.WriteThrough)) {
 				do {
 					for (var i = 0; i < maxParallel; i++) {
-						var ptr = blockSizes.Slice(i * blockSize + offset, blockSize - offset);
+						var block = allBlocks.Slice(i * blockSize + offset, blockSize - offset);
 						int readBytes;
-						if ((readBytes = reader.Read(ptr)) != 0) {
+						if ((readBytes = reader.Read(block)) != 0) {
 							isRunning = readBytes == blockSize - offset;
-							tasks[i] = ReadLinesAsync(isRunning, dic, blockSizes.Slice(i * blockSize, readBytes + offset), readBytes + offset, lines.Slice(i * lineSize, lineSize));
+							tasks[i] = ReadLinesAsync(isRunning, dic, allBlocks.Slice(i * blockSize, readBytes + offset), readBytes + offset, lines.Slice(i * lineSize, lineSize));
 							offset = 0;
 						} else {
-							tasks[i] = Task.FromResult(0);
+							tasks[i] = defaultPartsTask;
 						}
 					}
 
 					Task.WaitAll(tasks);
 
-					offset = tasks[0] is Task<int> t ? t.Result : 0;
-					var firstBlock = blockSizes.Slice(0, blockSize);
-					for (var i = 1; i < maxParallel; i++) {
-						if (tasks[i] is not Task<int> resultTask || resultTask.Result == 0) {
-							continue;
+					offset = 0;
+					for (var i = 0; i < maxParallel; i++) {
+						var parts = tasks[i].Result;
+						var blockStartIdx = i * blockSize;
+
+						if (parts.FirstPartCount != 0) {
+							allBlocks.Slice(blockStartIdx, parts.FirstPartCount).CopyTo(allBlocks.Slice(offset, parts.FirstPartCount));
+							offset += parts.FirstPartCount;
 						}
 
-						var length = resultTask.Result;
-						blockSizes.Slice(i * blockSize, length).CopyTo(firstBlock.Slice(offset, length));
-						offset += length;
+						if (parts.LastPartCount != 0) {
+							allBlocks.Slice(blockStartIdx + parts.LastPartIndex, parts.LastPartCount).CopyTo(allBlocks.Slice(offset, parts.LastPartCount));
+							offset += parts.LastPartCount;
+						}
 					}
 				} while (isRunning);
 			}
@@ -56,7 +61,7 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			return dic.Values;
 		}
 
-		private static Task<int> ReadLinesAsync(bool ignoreStartAndEndPart, Dictionary<uint, TemperatureContainer> dic, Span<byte> blockPtr, int readBytes, Span<byte> linePtr) {
+		private static Task<FirstAndLastPart> ReadLinesAsync(bool ignoreStartAndEndPart, Dictionary<uint, TemperatureContainer> dic, ReadOnlySpan<byte> block, int readBytes, Span<byte> linePtr) {
 			const byte lineSeparator = 59; // ;
 			const byte signedSymbol = 45; // -
 			const byte temperatureSeparator = 46; // .
@@ -67,10 +72,10 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			var flag = IntParseFlag.None;
 			var temperature = 0;
 			int? firstLineEndIdx = null;
-			int? lastLineEndIdx = null;
+			int? lastLineStartIdx = null;
 
 			for (var bufferIdx = 0; bufferIdx < readBytes; bufferIdx++) {
-				var value = blockPtr[bufferIdx];
+				var value = block[bufferIdx];
 
 				switch (value) {
 					case lineSeparator: {
@@ -93,7 +98,7 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 							continue;
 						}
 
-						lastLineEndIdx = bufferIdx;
+						lastLineStartIdx = bufferIdx;
 
 						// get key with hash logic
 						var key = 2166136261;
@@ -152,22 +157,7 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 				}
 			}
 
-			var firstIdx = firstLineEndIdx ?? 0;
-			var lastIdx = lastLineEndIdx ?? 0;
-			if (ignoreStartAndEndPart == false || (firstIdx == 0 && lastIdx == 0)) {
-				return Task.FromResult(0);
-			}
-
-			var lastCount = 0;
-			if (lastIdx != 0) {
-				lastCount = readBytes - lastIdx;
-			}
-
-			if (lastCount != 0) {
-				blockPtr.Slice(lastIdx, lastCount).CopyTo(blockPtr.Slice(firstIdx, lastCount));
-			}
-
-			return Task.FromResult(firstIdx + lastCount);
+			return Task.FromResult(new FirstAndLastPart(firstLineEndIdx, lastLineStartIdx, readBytes));
 		}
 
 		[Flags]
@@ -176,6 +166,26 @@ namespace _1BRC.Net5.ConsoleRunner.Read {
 			None = 0,
 			Signed = 1,
 			HasDot = 2
+		}
+	}
+
+	internal struct FirstAndLastPart {
+		public int FirstPartCount { get; }
+
+		public int LastPartIndex { get; }
+
+		public int LastPartCount { get; }
+
+		public FirstAndLastPart(int? firstPartCount, int? lastPartIndex, int count)
+			: this() {
+			if (firstPartCount.HasValue) {
+				FirstPartCount = firstPartCount.Value;
+			}
+
+			if (lastPartIndex.HasValue) {
+				LastPartIndex = lastPartIndex.Value;
+				LastPartCount = count - lastPartIndex.Value;
+			}
 		}
 	}
 
