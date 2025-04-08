@@ -51,11 +51,13 @@ There are a couple of classes that could be used to read & write data to & from 
 - _P/invoke native methods_
 
 After an initial test with reduced data the _FileStream_ with default settings was the clear winner. 
-Because I wanted to understand why that was the case I took a deep dive in the documentation, code and performance tests for a couple of days.
+Because I wanted to understand why that was the case I took a deep dive in the documentation, code and performanced tests for a couple of days.
 The collected informations and results can be found [here](https://github.com/thoeltig/CodingChallenge.1BRC/blob/develop/FileReadAndWritePerformanceTests.md). 
 
+
+The logic to generate and read the measurements file is not complicated but it might take a lot of time depending on the implementation. The following tables show a step by step refactoring of the generating and reading code and highlight the performance improvements achieved by them.
+
 ## Generating the measurements file
-The logic to generate the rows for the measurements isn't too complicated but writing the file might take a lot of time. So before generating the final measurements file with 1B rows (~12GB) it would be best to improve the code a bit.
 
 ||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
@@ -73,12 +75,7 @@ The logic to generate the rows for the measurements isn't too complicated but wr
 |Removed slices & write directly to block (added fixed [10k names of list](https://github.com/gunnarmorling/1brc/blob/main/data/weather_stations.csv))|02:52:751|15.157|87.74|442.61|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/d8f8124afe4b02e85a29bd325b0f073a493e536d/src/1BRC.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 |Copied current code to .NET 5, changed to safe version & use spans			|02:46:481|14.882|89.39|452.81|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/ec8edc4674b064f3fed544ac6532a51413c5cb70/src/1BRC.Net5.ConsoleRunner/Generate/MeasurementsGenerator.cs)|
 
-After a lot of tests and refactoring the final .NET Framework version with unsafe code and the .NET 5 version with safe code both reached about 90% of the possible write speed.
-Maybe with a bit of tweaking a couple more seconds could be shaved of the result but right now it is only 10 seconds off of the maximum write speed which might only be theoretical possible.
-I might have to test this with a better device with more I/O speed in the future but for now it is enough. Also upgrading to newer versions of .NET will have a better performance.
-
 ## Reading the file
-Now I can finally start with the actual challenge but I will do it with a step by step refactoring again.
 
 ||Duration|File size in GB|MB/s|Improvement in %||
 |----|----|----|----|----|----|
@@ -91,3 +88,11 @@ Now I can finally start with the actual challenge but I will do it with a step b
 |P/invoke ReadFile & CloseHandle									|02:48:665|14.882|88.23|193.32|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/930bd4974a37a8141b9c2e3a979823d97beb8455/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |Parallel execution													|02:45:487|14.882|89.93|198.97|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/a82118f8aa14a1a02a081a2382119350190aa9be/src/1BRC.ConsoleRunner/Read/MeasurementsReader.cs)|
 |Copied current code to .NET 5, changed to safe version & use spans	|02:52:967|15.157|87.63|191.32|[File](https://github.com/thoeltig/CodingChallenge.1BRC/blob/272ab456dbd98092b9ae3fab05fadc56c0b647cc/src/1BRC.Net5.ConsoleRunner/Read/MeasurementsReader.cs)|
+
+## Conclusion
+
+After a lot of tests and refactoring the final .NET Framework version with unsafe code and the .NET 5 version with safe code both reached close to 90% of the possible write & read speed.
+Maybe with a bit of tweaking a couple more seconds could be shaved of the result but right now it is only off by about 10 seconds of the maximum write & read speed which might only be theoretically possible.
+I might have to test this with a better device with more I/O speed in the future but for now it is enough. Also upgrading to newer versions of .NET will have a better performance.
+
+It was a fun challenge and I enjoyed learning a bit more about different ways and pitfalls when reading & writing files.
