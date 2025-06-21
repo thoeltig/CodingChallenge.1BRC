@@ -1,4 +1,4 @@
-﻿namespace _1BRC.Net9.ConsoleRunner.Read {
+﻿namespace _1BRC.ConsoleRunner.Read {
 	internal struct FirstAndLastPart {
 		public int FirstPartCount { get; }
 

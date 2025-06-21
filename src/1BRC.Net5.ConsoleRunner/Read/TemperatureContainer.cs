@@ -1,4 +1,4 @@
-﻿namespace _1BRC.Net9.ConsoleRunner.Read {
+﻿namespace _1BRC.ConsoleRunner.Read {
 	internal class TemperatureContainer {
 		private const double Divider = 10.0;
 

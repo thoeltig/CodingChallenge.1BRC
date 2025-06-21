@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using _1BRC.Net9.ConsoleRunner.Generate;
-using _1BRC.Net9.ConsoleRunner.Read;
+using _1BRC.ConsoleRunner.Generate;
+using _1BRC.ConsoleRunner.Read;
 
-namespace _1BRC.Net9.ConsoleRunner {
+namespace _1BRC.ConsoleRunner {
 	internal class Program {
 		#if DEBUG
 		private const int RowCount = 10000000;
