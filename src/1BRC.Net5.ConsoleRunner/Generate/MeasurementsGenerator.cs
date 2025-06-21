@@ -2,9 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using _1BRC.Framework.Console.Generate;
 
-namespace _1BRC.Net5.ConsoleRunner.Generate {
+namespace _1BRC.Net9.ConsoleRunner.Generate {
 	internal class MeasurementsGenerator {
 		public static void GenerateFile(string filePath, int totalRowCount) {
 			using (var writer = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 262144, FileOptions.SequentialScan)) {

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using _1BRC.Net9.ConsoleRunner.Generate;
 
 namespace _1BRC.Framework.Console.Generate {
 	internal class MeasurementsGenerator {

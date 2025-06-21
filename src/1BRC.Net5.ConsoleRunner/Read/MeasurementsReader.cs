@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _1BRC.Net5.ConsoleRunner.Read {
+namespace _1BRC.Net9.ConsoleRunner.Read {
 	internal static class MeasurementsReader {
 		public static IReadOnlyCollection<TemperatureContainer> ReadFile(string filePath) {
 			#if DEBUG

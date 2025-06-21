@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 
-namespace _1BRC.Framework.Console.Generate {
+namespace _1BRC.Net9.ConsoleRunner.Generate {
 	internal class WeatherStation {
 		private static readonly string[] _nameAsStrings = {
 			"Tokyo",

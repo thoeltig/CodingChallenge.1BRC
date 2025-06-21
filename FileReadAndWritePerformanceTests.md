@@ -497,3 +497,39 @@ The test will use the _FileStream_ to write & read 30 MB to & from a file:
 > The process to find the optimal combination is extremly time consuming and it is not realistic to run this on every device the read / write code should run on.
 > A quick test with 5-100% of the L1 cache size showed that a result close to the optimal can be archieved if a buffer size of 25-50% and a block size of 60-80% of the L1 cache size is choosen.
 > The _FileOptions_ are still _FileOptions.SequentialScan_ for write and _FileOptions.SequentialScan_ + _FileOptions.WriteThrough_ for read.
+
+## Sixth test: Newer Laptop
+
+Setup
+- 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+- DDR5 - 48GB RAM - 3200 MHz
+- 1TB WD_BLACK SN850 NVMe SSD - Read 7000 MB/s Write 5300 MB/s
+- Visual Studio 2022 (Version 17.14.6)
+
+### Write
+
+||Note|Duration|Improvement in %|File size in GB|MB/s||
+|----|-----|-----|
+|.NET Framework 4.7.2 - Previous test run on old device|02:52:751|0||15.157|0|
+|.NET Framework 4.7.2 - No code change just run on better device|00:41:685|0|14.882|0|
+|Upgrade to .NET Framework 4.8|00:40:855|0|14.882|0|
+
+||Note|Duration|Improvement in %|File size in GB|MB/s||
+|----|-----|-----|
+|.NET 5 (Core) - Previous test run on old device|02:46:481|0|15.157|0|
+|.NET 5 (Core) - No code change just run on better device|00:35:851|0|15.157|0|
+|Upgrade to .NET 9|00:27:513|0|15.157|0|
+
+### Read
+
+||Note|Duration|Improvement in %|File size in GB|MB/s||
+|----|-----|-----|
+|.NET Framework 4.7.2 - Previous test run on old device|02:45:487|0|14.882|0|
+|.NET Framework 4.7.2 - No code change just run on better device|01:25:525|0|14.882|0|
+|Upgrade to .NET Framework 4.8|01:27:648|0|14.882|0|
+
+||Note|Duration|Improvement in %|File size in GB|MB/s||
+|----|-----|-----|
+|.NET 5 (Core) - Previous test run on old device|02:52:967|0|15.157|0|
+|.NET 5 (Core) - No code change just run on better device|01:28:348|0|15.157|0|
+|Upgrade to .NET 9|01:30:330|0|15.157|0|

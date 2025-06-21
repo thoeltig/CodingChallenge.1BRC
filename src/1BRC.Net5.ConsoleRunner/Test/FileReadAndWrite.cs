@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 
-namespace _1BRC.Net5.ConsoleRunner.Test {
+namespace _1BRC.Net9.ConsoleRunner.Test {
 	internal class FileReadAndWrite : BaseFileReadWriteTest {
 		public FileReadAndWrite()
-			: base(".NET 5") {
+			: base(".NET 9") {
 		}
 
 		protected override void InternalExecuteTest(Action<string> progressCallback, byte[] fileContentBytes, ResultTableGenerator writeTableGenerator, ResultTableGenerator readTableGenerator) {

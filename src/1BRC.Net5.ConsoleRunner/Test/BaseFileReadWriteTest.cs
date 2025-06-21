@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace _1BRC.Net5.ConsoleRunner.Test {
+namespace _1BRC.Net9.ConsoleRunner.Test {
 	internal abstract class BaseFileReadWriteTest {
 		private const int TestRunCount = 12;
 		protected const int FileSizeToWrite = 512 * 58594; // 30000128

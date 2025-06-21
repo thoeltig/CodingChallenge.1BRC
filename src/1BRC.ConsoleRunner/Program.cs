@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using _1BRC.Framework.Console.Generate;
 using _1BRC.Framework.Console.Read;
-using _1BRC.Net5.ConsoleRunner.Read;
+using _1BRC.Net9.ConsoleRunner.Read;
 
 namespace _1BRC.Framework.Console {
 	internal class Program {
